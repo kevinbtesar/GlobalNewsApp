@@ -1,0 +1,36 @@
+{
+    "platforms": {},
+    "plugins": {
+        "react": "source:rnv",
+        "react-art": "source:rnv",
+        "react-dom": "source:rnv",
+        "react-native": "source:rnv",
+        "@react-native-community/cli-platform-ios": "source:rnv",
+        "@react-native-community/cli": "source:rnv",
+        "react-native-tvos": "source:rnv",
+        "react-native-web": "source:rnv",
+        "next": "source:rnv"
+    },
+    "extendsTemplate": "renative.json",
+    "projectName": "global_news_rn",
+    "workspaceID": "rnv",
+    "defaults": {
+        "title": "Global News",
+        "id": "com.rtkmedia.global_news_rn",
+        "supportedPlatforms": [
+            "ios",
+            "android",
+            "firetv",
+            "web",
+            "tvos"
+        ]
+    },
+    "engines": {},
+    "templates": {
+        "renative-template-hello-world": {
+            "version": "0.35.4"
+        }
+    },
+    "currentTemplate": "renative-template-hello-world",
+    "isMonorepo": false
+}
