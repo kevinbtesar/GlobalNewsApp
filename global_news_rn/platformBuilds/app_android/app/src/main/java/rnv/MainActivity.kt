@@ -21,7 +21,7 @@ class MainActivity : ReactActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(null)
         
-CastContext.getSharedInstance(this)
+//CastContext.getSharedInstance(this)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

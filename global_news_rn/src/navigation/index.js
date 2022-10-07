@@ -8,40 +8,37 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 // import { CastButton } from 'react-native-google-cast';
 import { isFactorDesktop } from 'renative';
 import ScreenHome from '../components/screenHome';
-import ScreenMyPage from '../components/screenMyPage';
+// import ScreenMyPage from '../components/screenMyPage';
 import ScreenModal from '../components/screenModal';
 import Menu, { DrawerButton } from '../components/menu';
 import { ThemeContext } from '../config';
-
-
 import { NewsByCategory, Categories, Article, Favorites } from '../screens';
 import Colors from '../utils/Colors';
 import Fonts from '../utils/Fonts';
 import { Header } from '../components';
 import { SCREENS } from '../utils/Enums';
 
-
-
 const Stack = createStackNavigator();
 const ModalStack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
-
-const stackScreenOptions = () => ({
-    title: 'News Categories',
-    headerStyle: {
-      backgroundColor: Colors.yellow,
-    },
-    headerTintColor: '#fff',
-    headerTitleStyle: {
-      fontFamily: Fonts.Walk,
-      alignSelf: 'center'
-    },
-    headerRight: () => <Header side='right' />
-  })
-
 const StackNavigator = ({ navigation }) => {
     const { theme } = useContext(ThemeContext);
+
+    const stackScreenOptions = () => ({
+        title: 'News Categories',
+        headerStyle: {
+            backgroundColor: Colors.yellow,
+        },
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+            fontFamily: Fonts.Walk,
+            alignSelf: 'center'
+        },
+        headerLeft: () => <DrawerButton navigation={navigation} />,
+        headerRight: () => <Header side='right' />
+    })
+
 
     return (
         <Stack.Navigator
@@ -54,26 +51,36 @@ const StackNavigator = ({ navigation }) => {
             <Stack.Screen
                 name="home"
                 component={ScreenHome}
-                options={{
-                    headerLeft: () => <DrawerButton navigation={navigation} />,
-                    headerRight: () => {
-                        // if (!isFactorDesktop) {
-                        //     return (
-                        //         <CastButton style={{
-                        //             width: theme.static.iconSize, height: theme.static.iconSize, tintColor: theme.static.color3
-                        //         }}
-                        //         />
-                        //     );
-                        // }
-                    }
-                }}
+                // options={{
+                //     headerLeft: () => <DrawerButton navigation={navigation} />,
+                // headerRight: () => {
+                // if (!isFactorDesktop) {
+                //     return (
+                //         <CastButton style={{
+                //             width: theme.static.iconSize, height: theme.static.iconSize, tintColor: theme.static.color3
+                //         }}
+                //         />
+                //     );
+                // }
+                // }
+                // }}
+                
+                options={(props) => stackScreenOptions()}
             />
 
-            
             {/* <Stack.Screen name="my-page" component={ScreenMyPage} /> */}
 
-            <Stack.Screen name={SCREENS.NEWS_BY_CATEGORY} component={NewsByCategory}
-                options={(props) => stackScreenOptions()} />
+            <Stack.Screen
+                name={SCREENS.NEWS_BY_CATEGORY}
+                component={NewsByCategory}
+                options={(props) => stackScreenOptions()}
+            />
+
+            <Stack.Screen
+                name={SCREENS.ARTICLE}
+                component={Article}
+                options={(props) => stackScreenOptions()}
+            />
 
         </Stack.Navigator>
     );

@@ -20,7 +20,7 @@ import org.reactnative.maskedview.RNCMaskedViewPackage
 import com.reactnativecommunity.viewpager.RNCViewPagerPackage
 import com.th3rdwave.safeareacontext.SafeAreaContextPackage
 import com.swmansion.rnscreens.RNScreensPackage
-import com.reactnative.googlecast.GoogleCastPackage
+//import com.reactnative.googlecast.GoogleCastPackage
 
 
 /**
@@ -42,7 +42,7 @@ RNCMaskedViewPackage(),
 RNCViewPagerPackage(),
 SafeAreaContextPackage(),
 RNScreensPackage(),
-GoogleCastPackage()
+//GoogleCastPackage()
             )
         }
 

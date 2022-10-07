@@ -8,7 +8,7 @@ project(':react-native-community-masked-view').projectDir = new File('D:/workbri
 project(':react-native-community-viewpager').projectDir = new File('D:/workbridge/mProjects/GlobalNewsApp/global_news_rn/node_modules/@react-native-community/viewpager/android')
 project(':react-native-safe-area-context').projectDir = new File('D:/workbridge/mProjects/GlobalNewsApp/global_news_rn/node_modules/react-native-safe-area-context/android')
 project(':react-native-screens').projectDir = new File('D:/workbridge/mProjects/GlobalNewsApp/global_news_rn/node_modules/react-native-screens/android')
-project(':react-native-google-cast').projectDir = new File('D:/workbridge/mProjects/GlobalNewsApp/global_news_rn/node_modules/react-native-google-cast/android')
+//project(':react-native-google-cast').projectDir = new File('D:/workbridge/mProjects/GlobalNewsApp/global_news_rn/node_modules/react-native-google-cast/android')
 
 
 // ReNative: To allow dynamic plugins via flavours autolinking has to be disabled
