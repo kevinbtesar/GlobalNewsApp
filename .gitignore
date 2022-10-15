@@ -91,7 +91,6 @@ ReactAndroid/src/main/gen
 .gradle
 local.properties
 *.iml
-android/
 
 # Node
 node_modules
