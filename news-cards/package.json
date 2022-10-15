@@ -9,25 +9,27 @@
     "ios12pro": "export ENVFILE=.env.dev && react-native run-ios --simulator='iPhone 12 Pro'",
     "start": "react-native start",
     "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "check-dependencies": "rnx-dep-check",
+    "fix-dependencies": "rnx-dep-check --write"
   },
   "dependencies": {
-    "@react-native-community/async-storage": "^1.12.1",
-    "@react-native-community/masked-view": "^0.1.11",
-    "@react-navigation/native": "^5.9.4",
-    "@react-navigation/stack": "^5.14.5",
+    "@react-native-async-storage/async-storage": "^1.17.10",
+    "@react-native-masked-view/masked-view": "^0.2.8",
+    "@react-navigation/native": "^6.0.8",
+    "@react-navigation/stack": "^6.2.0",
     "moment": "^2.29.1",
-    "react": "17.0.1",
-    "react-native": "0.64.2",
+    "react": "18.1.0",
+    "react-native": "^0.70.0",
     "react-native-fbsdk": "^3.0.0",
-    "react-native-gesture-handler": "^1.10.3",
+    "react-native-gesture-handler": "^2.6.0",
     "react-native-linear-gradient": "^2.5.6",
-    "react-native-modal": "^12.0.2",
+    "react-native-modal": "^13.0.0",
     "react-native-paper": "^4.9.1",
     "react-native-pose": "^0.9.1",
-    "react-native-reanimated": "^2.2.0",
-    "react-native-safe-area-context": "^3.2.0",
-    "react-native-screens": "^3.4.0",
+    "react-native-reanimated": "^2.10.0",
+    "react-native-safe-area-context": "^4.4.1",
+    "react-native-screens": "^3.14.1",
     "react-native-vector-icons": "^8.1.0",
     "react-redux": "^7.2.4",
     "redux": "^4.1.0",
@@ -39,11 +41,12 @@
     "@babel/core": "^7.12.9",
     "@babel/runtime": "^7.12.5",
     "@react-native-community/eslint-config": "^2.0.0",
+    "@rnx-kit/dep-check": "^1.13.1",
     "babel-jest": "^26.6.3",
     "eslint": "7.14.0",
     "jest": "^26.6.3",
-    "metro-react-native-babel-preset": "^0.64.0",
-    "react-test-renderer": "17.0.1"
+    "metro-react-native-babel-preset": "^0.72.1",
+    "react-test-renderer": "18.1.0"
   },
   "jest": {
     "preset": "react-native"
@@ -51,6 +54,26 @@
   "rnpm": {
     "assets": [
       "./assets/fonts/"
+    ]
+  },
+  "rnx-kit": {
+    "reactNativeVersion": "^0.70.3",
+    "kitType": "app",
+    "capabilities": [
+      "animation",
+      "babel-preset-react-native",
+      "core",
+      "core-android",
+      "core-ios",
+      "gestures",
+      "jest",
+      "modal",
+      "navigation/native",
+      "navigation/stack",
+      "react",
+      "react-test-renderer",
+      "safe-area",
+      "screens"
     ]
   }
 }
