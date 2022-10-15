@@ -147,7 +147,7 @@ sdks/hermes
 sdks/hermesc
 
 # Visual studio
-
+.vscode
 .vs
 
 # Android memory profiler files
