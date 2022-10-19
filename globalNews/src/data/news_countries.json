@@ -4,7 +4,8 @@
         "name": "United States",
         "symbol": "us",
         "icon": "🇺🇸",
-        "language": "en"
+        "language": "en",
+        "category": "general"
     },
     {
         "id": "il",

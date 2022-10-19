@@ -4,12 +4,15 @@ import { isUserConnectedSelector, getUserDataSelector } from '../../store/userSt
 import { useDispatch, useSelector } from 'react-redux';
 import Colors from '../../utils/Colors';
 import { loginModalVisible } from '../../store/userStore/userStore.actions';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Octicons from 'react-native-vector-icons/Octicons';
+import Icon from 'react-native-vector-icons/Ionicons';  
+import { white } from 'react-native-paper/lib/typescript/styles/colors';
 
 const Header = (props) => {
     const dispatch = useDispatch();
     const isUserConnected = useSelector(isUserConnectedSelector);
     const userData = useSelector(getUserDataSelector);
+    const { navigation } = props;
 
     if (props.side == 'right') {
         return (
@@ -23,20 +26,31 @@ const Header = (props) => {
                 </View> :
                 (
                     <TouchableOpacity style={styles.rightSideContainer} onPress={() => dispatch(loginModalVisible(true))}>
-                        <MaterialCommunityIcons name="login" color={Colors.white} size={25} />
-                        <Text style={styles.text}>{'Login'}</Text>
+                        <Octicons name="gear" color={Colors.white} size={25} />
+                        <Text style={styles.text}>{'Settings'}</Text>
                     </TouchableOpacity>
                 )
         )
     } else {
-        if (!isUserConnected) {
-            return <View />
-        }
+        // if (!isUserConnected) {
+        //     return <View />
+        // }
+        // return (
+        //     <TouchableOpacity style={styles.leftSideContainer} onPress={() => dispatch(loginModalVisible(true))}>
+        //         <MaterialCommunityIcons name="logout" color={Colors.white} size={25} />
+        //         <Text style={styles.text}>{'Logout'}</Text>
+        //     </TouchableOpacity>
+        // )
         return (
-            <TouchableOpacity style={styles.leftSideContainer} onPress={() => dispatch(loginModalVisible(true))}>
-                <MaterialCommunityIcons name="logout" color={Colors.white} size={25} />
-                <Text style={styles.text}>{'Logout'}</Text>
-            </TouchableOpacity>
+            <Icon  
+                style={{ 
+                    paddingLeft: 10,
+                    color: 'white',
+                }}  
+                onPress={() => navigation.toggleDrawer()}  
+                name="md-menu"  
+                size={30}  
+            />  
         )
     }
 }

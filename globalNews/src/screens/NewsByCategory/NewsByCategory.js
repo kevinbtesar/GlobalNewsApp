@@ -23,16 +23,15 @@ class NewsByCategory extends Component {
     }
 
     componentDidMount() {
-        // this.getNewsByCategory();
-        this.mGetNewsByCategory();
+        this.getNewsByCategory();
     }
 
     async getNewsByCategory() {
         try {
             const { route } = this.props;
-            const { category } = route.params;
+            const { category } = route.params ?? '';
             const { country, sortType } = this.state;
-            const news = await Api.GetNews({ categories: category, languages: country.language, countries: country.symbol, sort: sortType.type });
+            const news = await Api.GetNews({ category: category, languages: country.language, countries: country.symbol, sort: sortType.type });
             if (news.error) {
                 throw new Error(news.error.message);
             }
@@ -44,24 +43,6 @@ class NewsByCategory extends Component {
     }
 
 
-    async mGetNewsByCategory() {
-        try {
-            const { route } = this.props;
-            // const { category } = route.params;
-            const { category } = {
-                'category': 'general'
-            };
-            const { country, sortType } = this.state;
-            const news = await Api.GetNews({ categories: category, languages: country.language, countries: country.symbol, sort: sortType.type });
-            if (news.error) {
-                throw new Error(news.error.message);
-            }
-            this.setState({ news: news.data, isLoading: false, error: false });
-        }
-        catch (error) {
-            this.setState({ news: [], isLoading: false, error: error.toString() });
-        }
-    }
 
     selectPicker = (item) => {
         const pickerType = this.state.isModalVisible // if true - is type of picker
@@ -92,14 +73,14 @@ class NewsByCategory extends Component {
         const { news, isLoading, isModalVisible, country, sortType, error } = this.state
         return (
             <>
-                <View style={styles.pickersLine}>
+                {/* <View style={styles.pickersLine}>
                     <TouchableOpacity style={styles.pickerButton} onPress={() => this.setState({ isModalVisible: NEWS_PICKER_TYPE.COUNTRIES })}>
                         <Text style={styles.pickerText}>{`${country.icon} ${country.name}`}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.pickerButton} onPress={() => this.setState({ isModalVisible: NEWS_PICKER_TYPE.SORT })}>
                         <Text style={styles.pickerText}>{`${sortType.icon} ${sortType.name}`}</Text>
                     </TouchableOpacity>
-                </View>
+                </View> */}
 
                 {!isLoading ? news.length ?
                     <NewsCardList news={news} navigation={this.props.navigation} />
