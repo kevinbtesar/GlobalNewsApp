@@ -7,6 +7,7 @@ import Colors from '../utils/Colors';
 import Fonts from '../utils/Fonts';
 import { Header } from '../components';
 import { SCREENS } from '../utils/Enums';
+import { useTheme } from 'react-native-paper';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -26,9 +27,11 @@ const stackScreenOptions = (props) => ({
 })
 
 function NewsStackNavigator() {
+  const theme = useTheme();
+  
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerBackTitleVisible: false }}>
+    <NavigationContainer theme={theme}>
+      <Stack.Navigator screenOptions={{ headerBackTitleVisible: false }} >
         {/* <Stack.Screen name={SCREENS.CATEGORIES} component={Categories}
           options={(props) => ({ ...stackScreenOptions(), headerLeft: () => <Header side='left' /> })} />
         <Stack.Screen name={SCREENS.NEWS_BY_CATEGORY} component={NewsByCategory}
@@ -54,6 +57,12 @@ function RootDrawer() {
   return (
     <Drawer.Navigator>
       <Drawer.Screen name={SCREENS.HOME} component={NewsByCategory}
+        options={(props) => stackScreenOptions(props)} />
+      <Drawer.Screen name={SCREENS.FAVORITES} component={NewsByCategory}
+        options={(props) => stackScreenOptions(props)} />
+      <Drawer.Screen name={SCREENS.SETTINGS} component={NewsByCategory}
+        options={(props) => stackScreenOptions(props)} />
+      <Drawer.Screen name={SCREENS.NOTIFICATIONS} component={NewsByCategory}
         options={(props) => stackScreenOptions(props)} />
             
       <Drawer.Screen name={SCREENS.ARTICLE} component={Article}

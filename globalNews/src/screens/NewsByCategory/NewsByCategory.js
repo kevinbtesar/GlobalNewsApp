@@ -35,7 +35,7 @@ class NewsByCategory extends Component {
             if (news.error) {
                 throw new Error(news.error.message);
             }
-            this.setState({ news: news.data, isLoading: false, error: false });
+            this.setState({ news: news.articleResults.data.children, isLoading: false, error: false });
         }
         catch (error) {
             this.setState({ news: [], isLoading: false, error: error.toString() });

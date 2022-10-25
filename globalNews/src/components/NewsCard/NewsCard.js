@@ -10,28 +10,30 @@ const noImageAvailable = 'https://www.bengi.nl/wp-content/uploads/2014/10/no-ima
 
 const NewsCard = (props) => {
     const { article, navigation } = props
-    const { title, image, source, published_at, } = props.article
+    const { title, thumbnail, domain, created_utc, } = props.article.data
 
-    return (
-        <Card style={styles.cardContainer}>
-            <TouchableRipple
-                onPress={() => navigation.navigate('Article', { title, ...props })}
-                rippleColor={Colors.black_opacity}
-            >
-                <>
-                    <Image source={{ uri: image || noImageAvailable, cache: "force-cache" }} opacity={0.85} style={styles.image} />
-                    {/* <FavoriteIcon article={article} /> */}
-                    <Card.Content>
-                        <Headline style={styles.title} numberOfLines={3}>{title}</Headline>
-                        <View style={styles.sourceAndDate}>
-                            <Caption >{moment(published_at).format("MM.DD.YYYY")}</Caption>
-                            <Caption numberOfLines={1} style={styles.sourceText}>{source}</Caption>
-                        </View>
-                    </Card.Content>
-                </>
-            </TouchableRipple>
-        </Card>
-    )
+    if(thumbnail != 'self'){
+        return (
+            <Card style={styles.cardContainer}>
+                <TouchableRipple
+                    onPress={() => navigation.navigate('Article', { title, ...props })}
+                    rippleColor={Colors.black_opacity}
+                >
+                    <>
+                        <Image source={{ uri: thumbnail || noImageAvailable, cache: "force-cache" }} opacity={0.85} style={styles.image} />
+                        {/* <FavoriteIcon article={article} /> */}
+                        <Card.Content>
+                            <Headline style={styles.title} numberOfLines={3}>{title}</Headline>
+                            <View style={styles.sourceAndDate}>
+                                <Caption >{moment(moment.unix(created_utc)).format("MM.DD.YYYY")}</Caption>
+                                <Caption numberOfLines={1} style={styles.sourceText}>{domain}</Caption>
+                            </View>
+                        </Card.Content>
+                    </>
+                </TouchableRipple>
+            </Card>
+        )
+    }
 };
 
 const styles = StyleSheet.create({

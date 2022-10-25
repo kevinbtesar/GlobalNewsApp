@@ -1,10 +1,11 @@
 import { Rest } from "./Rest"
-import { URLS, KEYS } from './Enums';
+import { URLS, KEYS, RTD_API } from './Enums';
 
 
 class Api {
     constructor() {
-        this.newsUrl = `${URLS.NEWS}?access_key=${KEYS.NEWS_URL_ACCESS_KEYS}`
+        // this.newsUrl = `${URLS.NEWS}?access_key=${KEYS.NEWS_URL_ACCESS_KEYS}`
+        this.newsUrl = `${RTD_API.GET_GLOBALNEWS_ARTICLES}`
     }
     GetNews(params) {
         return Rest(this.newsUrl, params)
