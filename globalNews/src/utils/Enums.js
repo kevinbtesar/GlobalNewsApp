@@ -5,7 +5,7 @@ export const RTD_API = {
     GET_GLOBALNEWS_ARTICLES: 'https://rtddigitalmedia.com/api/getArticles/GlobalNews/general'
 }
 export const LOCAL_RTD_API = {
-    GET_GLOBALNEWS_ARTICLES: 'https://local.rtddigitalmedia.com/api/getArticles/GlobalNews/general'
+    GET_GLOBALNEWS_ARTICLES: 'http://192.168.0.53/rtddigitalmedia.com/public/api/getArticles/GlobalNews/general'
 }
 
 export const KEYS = {

@@ -6,9 +6,18 @@ export const Rest = (url, params) => {
     if (params) {
         apiUrl = withQuery(url, params)
     }
-    return fetch(apiUrl)
+    return fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          }
+          
+    })
+
         .then(res => res.json())
         .then((data) => {
+            console.log(JSON.stringify(data))
             return data
         })
         .catch(console.log)
