@@ -54,7 +54,7 @@ const App = () => {
         <PersistGate loading={<View />} persistor={persistor}>
           {ready ?
             <PreferencesContext.Provider value={preferences}>
-              <PaperProvider theme={CombinedDarkTheme}>
+              <PaperProvider theme={theme}>
                 <NewsStackNavigator />
               </PaperProvider>
             </PreferencesContext.Provider>

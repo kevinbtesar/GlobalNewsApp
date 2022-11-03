@@ -4,9 +4,16 @@ export const URLS = {
 export const RTD_API = {
     GET_GLOBALNEWS_ARTICLES: 'https://rtddigitalmedia.com/api/getArticles/GlobalNews/general'
 }
-export const LOCAL_RTD_API = {
+export const XAMPP_RTD_API = {
     GET_GLOBALNEWS_ARTICLES: 'http://192.168.0.53/rtddigitalmedia.com/public/api/getArticles/GlobalNews/general'
 }
+export const ARTISAN_RTD_API = {
+    GET_GLOBALNEWS_ARTICLES: 'http://192.168.0.53:8000/api/getArticles/GlobalNews/general'
+}
+export const LOCAL_LOGIN_URL = {
+    GET_GLOBALNEWS_ARTICLES: 'http://192.168.0.53/rtddigitalmedia.com/public/api/login'
+}
+
 
 export const KEYS = {
     // NEWS_URL_ACCESS_KEYS: 'e6d5ad2f0b29c5ef72304040d9545c73'
@@ -39,5 +46,8 @@ export const SORT_NEWS = {
     DATE: 'published_desc',
 }
 
-
+export const TEXT_STRINGS = {
+    LOGIN_HEADER: 'To use Favorites you must log in first',
+    LOGIN_MANUALLY: 'Or login/register manually',
+}
 

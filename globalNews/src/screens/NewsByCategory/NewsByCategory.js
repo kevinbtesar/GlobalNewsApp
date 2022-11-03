@@ -8,6 +8,7 @@ import Modal from 'react-native-modal';
 import { NewsCountriesData, NewsSortTypesData } from '../../data';
 import { connect } from 'react-redux';
 import Fonts from '../../utils/Fonts';
+import { TEXT_STRINGS } from '../../utils/Enums';
 
 class NewsByCategory extends Component {
     constructor(props) {
@@ -35,7 +36,8 @@ class NewsByCategory extends Component {
             if (news.error) {
                 throw new Error(news.error.message);
             }
-            this.setState({ news: news.articleResults.data.children, isLoading: false, error: false });
+            nwArr = Object.keys(news['articles']).map(k => news['articles'][k]),
+            this.setState({ news: nwArr, isLoading: false, error: false });
         }
         catch (error) {
             this.setState({ news: [], isLoading: false, error: error.toString() });
@@ -82,7 +84,7 @@ class NewsByCategory extends Component {
                     </TouchableOpacity>
                 </View> */}
 
-                {!isLoading ? news.length ?
+                {!isLoading ? Object.keys(news).length ?
                     <NewsCardList news={news} navigation={this.props.navigation} />
                     :
                     <NoResults text={error || null} />
@@ -112,7 +114,7 @@ class NewsByCategory extends Component {
                     </View>
                 </Modal>
 
-                <Login message={'To use Favorites you must log in first'} />
+                <Login message={TEXT_STRINGS.LOGIN_HEADER} />
             </>
         )
     }

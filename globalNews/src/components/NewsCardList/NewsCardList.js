@@ -12,7 +12,9 @@ const NewsCardList = (props) => {
             data={props.news}
             initialNumToRender={5}
             keyExtractor={(item, index) => index.toString()}
-            renderItem={renderNewsCardItem} />
+            renderItem={renderNewsCardItem}
+            removeClippedSubviews={true}
+        />
     )
 };
 

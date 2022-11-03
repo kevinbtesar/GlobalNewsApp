@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import { LoginManager, GraphRequest, GraphRequestManager, AccessToken } from 'react-native-fbsdk';
 import { useDispatch, useSelector } from 'react-redux';
-import { TouchableOpacity, StyleSheet, Text, View } from 'react-native';
+import Modal from 'react-native-modal';
+import { TouchableOpacity, StyleSheet, Text, View, TextInput, Button, Alert } from 'react-native';
+
 import { Loader } from '..';
 import Colors from '../../utils/Colors';
 import Fonts from '../../utils/Fonts';
 import { loginModalVisible, loginUser, logoutUser } from '../../store/userStore/userStore.actions';
 import { isLoginModalVisibleSelector, isUserConnectedSelector } from '../../store/userStore/userStore.selectors';
-import Modal from 'react-native-modal';
+import { TEXT_STRINGS } from '../../utils/Enums';
+import { Api } from '../../utils/Api';
 
 const Login = (props) => {
     const dispatch = useDispatch();
     const isModalVisible = useSelector(isLoginModalVisibleSelector);
     const isUserConnected = useSelector(isUserConnectedSelector);
-
     const [loginState, setLoginState] = useState(null)
 
     const onCloseModal = () => {
@@ -64,6 +66,15 @@ const Login = (props) => {
         }
     };
 
+    const loginManualButton = async () => {
+        setLoginState('loading')
+        const login = await Api.loginManual({ category: category, languages: country.language, countries: country.symbol, sort: sortType.type });
+        if (news.error) {
+            throw new Error(news.error.message);
+        }
+        this.setState({ news: news.articleResults.data.children, isLoading: false, error: false });
+    }
+
     const ModalContent = () => {
         if (isUserConnected && !loginState) {
             return (
@@ -89,9 +100,24 @@ const Login = (props) => {
                     </View>
 
                     {!loginState ?
-                        <TouchableOpacity style={styles.facebookLoginButton} onPress={() => facebookButton(props)}>
-                            <Text style={styles.facebookLoginButtonText}>{'Login with Facebook'}</Text>
-                        </TouchableOpacity>
+                        <View>
+                            <TouchableOpacity style={styles.facebookLoginButton} onPress={() => facebookButton(props)}>
+                                <Text style={styles.facebookLoginButtonText}>{'Login with Facebook'}</Text>
+                            </TouchableOpacity>
+                            <Text style={styles.modalHolderHeader}>{TEXT_STRINGS.LOGIN_MANUALLY}</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Email"
+                            />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Password"
+                            />
+                            <Button
+                                title='Login/Register'
+                                onPress={() => loginManualButton(props)}
+                            />
+                        </View>
                         :
                         loginState == 'loading' ? <View style={styles.loginStateText}><Loader /></View> : <Text style={styles.loginStateText}>{loginState}</Text>
                     }
@@ -196,6 +222,12 @@ const styles = StyleSheet.create({
     },
     logoutButtonText: {
         fontSize: 20,
+    },
+    input: {
+        height: 40,
+        margin: 12,
+        borderWidth: 1,
+        padding: 10,
     },
 });
 

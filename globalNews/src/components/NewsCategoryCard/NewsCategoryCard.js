@@ -1,11 +1,11 @@
-import React, { Component } from 'react'
+import React, { Component, memo } from 'react'
 import { StyleSheet, View, Image } from "react-native";
 import { Card, Title, TouchableRipple } from 'react-native-paper';
 import Colors from '../../utils/Colors';
 import Fonts from '../../utils/Fonts';
 import { capitalizeFirstLetter } from '../../utils/Tools';
 
-export default class NewsCategoryCard extends Component {
+export default class NewsCategoryCard extends React.PureComponent {
 
 
     render() {

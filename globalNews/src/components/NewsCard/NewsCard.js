@@ -10,9 +10,9 @@ const noImageAvailable = 'https://www.bengi.nl/wp-content/uploads/2014/10/no-ima
 
 const NewsCard = (props) => {
     const { article, navigation } = props
-    const { title, thumbnail, domain, created_utc, } = props.article.data
+    const { title, /*thumbnail*/image, domain, created_utc, } = article
 
-    if(thumbnail != 'self'){
+    if(image){
         return (
             <Card style={styles.cardContainer}>
                 <TouchableRipple
@@ -20,7 +20,7 @@ const NewsCard = (props) => {
                     rippleColor={Colors.black_opacity}
                 >
                     <>
-                        <Image source={{ uri: thumbnail || noImageAvailable, cache: "force-cache" }} opacity={0.85} style={styles.image} />
+                        <Image source={{ uri: image || noImageAvailable, cache: "force-cache" }} opacity={0.85} style={styles.image} />
                         {/* <FavoriteIcon article={article} /> */}
                         <Card.Content>
                             <Headline style={styles.title} numberOfLines={3}>{title}</Headline>

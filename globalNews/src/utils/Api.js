@@ -1,14 +1,18 @@
-import { Rest } from "./Rest"
-import { URLS, KEYS, RTD_API, LOCAL_RTD_API } from './Enums';
+import { fetchArticlesRest } from "./Rest"
+import { URLS, KEYS, RTD_API, ARTISAN_RTD_API, XAMPP_RTD_API, LOCAL_LOGIN_URL } from './Enums';
 
 
 class Api {
     constructor() {
         // this.newsUrl = `${URLS.NEWS}?access_key=${KEYS.NEWS_URL_ACCESS_KEYS}`
-        this.newsUrl = `${LOCAL_RTD_API.GET_GLOBALNEWS_ARTICLES}`
+        this.newsUrl = `${XAMPP_RTD_API.GET_GLOBALNEWS_ARTICLES}`
+        this.loginUrl = `${LOCAL_LOGIN_URL}`
     }
     GetNews(params) {
-        return Rest(this.newsUrl, params)
+        return fetchArticlesRest(this.newsUrl, params)
+    }
+    loginManual(params) {
+        return loginManualRest(this.loginUrl, params)
     }
 }
 

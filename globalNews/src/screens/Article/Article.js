@@ -6,7 +6,7 @@ import moment from 'moment';
 import { FavoriteIcon, Login } from '../../components';
 import { capitalizeFirstLetter } from '../../utils/Tools';
 import Fonts from '../../utils/Fonts';
-
+import { TEXT_STRINGS } from '../../utils/Enums';
 
 const Article = (props) => {
     const { route } = props
@@ -15,7 +15,11 @@ const Article = (props) => {
     return (
         <>
             <View style={styles.cardContainer}>
-                <ScrollView style={styles.container}>
+                {/* 
+
+                <ScrollView /> removed for list performance issue
+
+                <ScrollView style={styles.container}> */}
                     <Card.Content>
                         <View style={styles.titleLine}>
                             <Title style={styles.title} >{title}</Title>
@@ -30,9 +34,9 @@ const Article = (props) => {
                         {image ? <Card.Cover source={{ uri: image }} style={styles.image} /> : <React.Fragment />}
                         {description ? <Subheading style={styles.description}>{description}</Subheading> : <React.Fragment />}
                     </Card.Content>
-                </ScrollView>
+                {/* </ScrollView> */}
             </View>
-            <Login message={'To use Favorites you must log in first'} />
+            <Login message={TEXT_STRINGS.LOGIN_HEADER} />
         </>
     )
 }
