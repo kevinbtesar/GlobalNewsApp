@@ -3,6 +3,11 @@ import { LoginManager, GraphRequest, GraphRequestManager, AccessToken } from 're
 import { useDispatch, useSelector } from 'react-redux';
 import Modal from 'react-native-modal';
 import { TouchableOpacity, StyleSheet, Text, View, TextInput, Button, Alert } from 'react-native';
+import {
+    GoogleSignin,
+    statusCodes,
+} from '@react-native-google-signin/google-signin';
+
 
 import { Loader } from '..';
 import Colors from '../../utils/Colors';
@@ -104,6 +109,26 @@ const Login = (props) => {
                             <TouchableOpacity style={styles.facebookLoginButton} onPress={() => facebookButton(props)}>
                                 <Text style={styles.facebookLoginButtonText}>{'Login with Facebook'}</Text>
                             </TouchableOpacity>
+
+                            <Button title={'Sign in with Google'} onPress={() => {
+                                GoogleSignin.configure({
+                                    androidClientId: '43023367729-5cl1gmc0nt5iucn24ls93sg10bf6slq2.apps.googleusercontent.com',
+                                    iosClientId: '43023367729-h888o3pfeutvs4n63vqrqgb2h38fivsd.apps.googleusercontent.com',
+                                });
+                                GoogleSignin.hasPlayServices().then((hasPlayService) => {
+                                    if (hasPlayService) {
+                                        GoogleSignin.signIn().then((userInfo) => {
+                                            console.log(JSON.stringify(userInfo))
+                                        }).catch((e) => {
+                                            console.log("ERROR IS: " + JSON.stringify(e));
+                                        })
+                                    }
+                                }).catch((e) => {
+                                    console.log("ERROR IS: " + JSON.stringify(e));
+                                })
+                            }} />
+
+
                             <Text style={styles.modalHolderHeader}>{TEXT_STRINGS.LOGIN_MANUALLY}</Text>
                             <TextInput
                                 style={styles.input}

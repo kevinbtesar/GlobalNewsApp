@@ -1,5 +1,5 @@
 import React from 'react'
-import { ScrollView, StyleSheet, View } from "react-native";
+import { /*ScrollView,*/ StyleSheet, View } from "react-native";
 import { Card, Title, Subheading, Caption } from 'react-native-paper';
 import Colors from '../../utils/Colors';
 import moment from 'moment';
