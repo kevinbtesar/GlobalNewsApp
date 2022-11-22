@@ -7,7 +7,8 @@ export default {
     off_white: '#e8eddf',
     pink: '#f5cac3',
     grey_green: '#84a59d',
-    dark_grey: '#ddd',
+    light_grey: '#ddd',
+    dark_grey: '#5A5A5A',
     light_green: '#faf9f9',
     dark_pink: '#f28482',
 }

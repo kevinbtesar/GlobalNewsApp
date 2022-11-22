@@ -1,31 +1,16 @@
-export const URLS = {
-    NEWS: 'http://api.mediastack.com/v1/news'
-}
-export const RTD_API = {
-    GET_GLOBALNEWS_ARTICLES: 'https://rtddigitalmedia.com/api/getArticles/GlobalNews/general'
-}
-export const XAMPP_RTD_API = {
-    GET_GLOBALNEWS_ARTICLES: 'http://192.168.0.53/rtddigitalmedia.com/public/api/getArticles/GlobalNews/general'
-}
-export const ARTISAN_RTD_API = {
-    GET_GLOBALNEWS_ARTICLES: 'http://192.168.0.53:8000/api/getArticles/GlobalNews/general'
-}
-export const LOCAL_LOGIN_URL = {
-    GET_GLOBALNEWS_ARTICLES: 'http://192.168.0.53/rtddigitalmedia.com/public/api/login'
-}
 
 
-export const KEYS = {
-    // NEWS_URL_ACCESS_KEYS: 'e6d5ad2f0b29c5ef72304040d9545c73'
-    NEWS_URL_ACCESS_KEYS: '8ec7c90609361aaebc8a9d18be158649'
+export const RTD_SERVER = {
+    LOCAL: 'http://192.168.0.53/rtddigitalmedia.com/public/api',
+    REMOTE: 'https://rtddigitalmedia.com/api',
+    ARTISAN: 'http://192.168.0.53:8000/api'
 }
+export const GET_ARTICLES = '/getArticles'
+export const USER_AUTH = '/userAuth'
+export const FAVORITES = '/favorites'
 
-// export const SCREENS = {
-//     CATEGORIES: 'Categories',
-//     NEWS_BY_CATEGORY: 'NewsByCategory',
-//     FAVORITES: 'Favorites',
-//     ARTICLE: 'Article',
-// }
+
+
 export const SCREENS = {
     HOME: 'Home',
     SETTINGS: 'Settings',
@@ -47,7 +32,7 @@ export const SORT_NEWS = {
 }
 
 export const TEXT_STRINGS = {
-    LOGIN_HEADER: 'To use Favorites you must log in first',
+    LOGIN_HEADER: 'To use Favorites you must login first',
     LOGIN_MANUALLY: 'Or login/register manually',
 }
 

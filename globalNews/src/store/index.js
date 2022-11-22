@@ -2,9 +2,8 @@ import { persistStore, persistReducer } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import thunk from 'redux-thunk';
 import rootReducer from './reducers';
-import logger from 'redux-logger'
-
-import { configureStore } from '@reduxjs/toolkit'
+import { createLogger } from 'redux-logger';
+import { configureStore } from '@reduxjs/toolkit';
 
 const persistConfig = {
     key: 'root',
@@ -13,6 +12,15 @@ const persistConfig = {
     blacklist: ['app']
 
 };
+
+
+let logger = undefined
+if (process.env.NODE_ENV === `development`) {
+    logger = createLogger({
+        level:'log', //: 'log' | 'console' | 'warn' | 'error' | 'info', // console's level 
+    });
+}
+  
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 

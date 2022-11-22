@@ -1,8 +1,9 @@
-export const fetchArticlesRest = (url, params) => {
+export const getRest = (url, params) => {
   let apiUrl = url;
   if (params) {
     apiUrl = withQuery(url, params);
   }
+  // console.log(`${apiUrl}`)
   return fetch(apiUrl, {
     method: "GET",
     headers: {
@@ -18,72 +19,41 @@ export const fetchArticlesRest = (url, params) => {
     .catch(error => {
       console.log("error: " + error);
     });
-}
+};
 
 
-export const loginManualRest = (url, params) => {
-  let apiUrl = url;
-  if (params) {
-    apiUrl = withQuery(url, params);
-  }
-  return fetch(apiUrl, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      'Content-Type': 'application/json'
-    }
-  })
-    .then(res => res.json())
-    .then(data => {
-      /*console.log(JSON.stringify(data));*/
-      return data;
-    })
-    .catch(error => {
-      console.log("error: " + error);
+export const postRest = async (url, params) => {
+
+  console.log(JSON.stringify(params))
+  
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json;charset=utf-8',
+        'Authorization': `Bearer ${params.accessToken ?? ''}`,
+      },
+
+      body: JSON.stringify({
+        email: params.email ?? '',
+        password: params.password ?? '',
+        articleId: params.articleId ?? '',
+        action: params.action ?? '',
+        userAuth: params.userAuth ?? '',
+      }),
+
     });
-}
+   
+    const data = await res.json();
+    // console.log(JSON.stringify(data));
 
+    return data;
+  } catch (error) {
+    console.log("error: " + error);
+  }
+};
 
-/**
- * Left in for debugging
- */
-
-// export const Rest = async (url, body = null, method = 'GET') => {
-//   let config = {
-//     method,
-//   };
-//   try {
-//     const response = await fetch(url, config);
-//     if (!response.ok) {
-//       throw new Error(response.statusText);
-//     }
-//     // return response;
-//     return await response.json();
-//   } catch (error) {
-//     console.log('error: ' + error);
-//     throw error;
-//   }
-// };
-
-
-// .then(response => {
-//     const contentType = response.headers.get("content-type");
-//     if (contentType && contentType.indexOf("application/json") !== -1) {
-//       return response.json().then(data => {
-//         console.log('here');
-//         return data;
-//         // The response was a JSON object
-//         // Process your data as a JavaScript object
-//       });
-//     } else {
-//       return response.text().then(text => {
-//         console.log('error text: ' + text)
-//         // The response wasn't a JSON object
-//         // Process your text as a String
-//       });
-//     }
-// });
-// };
 
 const withQuery = (url, params) => {
   let query = Object.keys(params)
@@ -93,3 +63,5 @@ const withQuery = (url, params) => {
   url += (url.indexOf("?") === -1 ? "?" : "&") + query;
   return url;
 };
+
+

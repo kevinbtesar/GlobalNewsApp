@@ -41,14 +41,8 @@ const Header = (props) => {
                 )
         )
     } else {
-        // if (!isUserConnected) {
-        // return <View />
-        // }
+
         return (
-            // <TouchableOpacity style={styles.leftSideContainer} onPress={() => dispatch(loginModalVisible(true))}>
-            //     <MaterialCommunityIcons name="logout" color={Colors.white} size={25} />
-            //     <Text style={styles.text}>{'Logout'}</Text>
-            // </TouchableOpacity>
 
             <Icon
                 style={{ paddingLeft: 10 }}

@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import { FlatList, StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import DeviceInfo from 'react-native-device-info';
+
 import Api from '../../utils/Api';
 import { Loader, NoResults, NewsCardList, Login } from '../../components';
 import { NEWS_PICKER_TYPE } from '../../utils/Enums';
@@ -32,12 +34,13 @@ class NewsByCategory extends Component {
             const { route } = this.props;
             const { category } = route.params ?? '';
             const { country, sortType } = this.state;
-            const news = await Api.GetNews({ category: category, languages: country.language, countries: country.symbol, sort: sortType.type });
+            const news = await Api.getArticles({ category: 'general', languages: country.language, countries: country.symbol, sort: sortType.type, appName: DeviceInfo.getApplicationName() });
             if (news.error) {
                 throw new Error(news.error.message);
             }
-            nwArr = Object.keys(news['articles']).map(k => news['articles'][k]),
-            this.setState({ news: nwArr, isLoading: false, error: false });
+            newsArray = Object.keys(news['articles']).map(k => news['articles'][k]),
+            this.setState({ news: newsArray, isLoading: false, error: false });
+            // this.setState({  isLoading: false, error: false });
         }
         catch (error) {
             this.setState({ news: [], isLoading: false, error: error.toString() });
@@ -75,6 +78,7 @@ class NewsByCategory extends Component {
         const { news, isLoading, isModalVisible, country, sortType, error } = this.state
         return (
             <>
+            
                 {/* <View style={styles.pickersLine}>
                     <TouchableOpacity style={styles.pickerButton} onPress={() => this.setState({ isModalVisible: NEWS_PICKER_TYPE.COUNTRIES })}>
                         <Text style={styles.pickerText}>{`${country.icon} ${country.name}`}</Text>
@@ -115,6 +119,7 @@ class NewsByCategory extends Component {
                 </Modal>
 
                 <Login message={TEXT_STRINGS.LOGIN_HEADER} />
+
             </>
         )
     }

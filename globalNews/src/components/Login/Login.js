@@ -5,6 +5,7 @@ import Modal from 'react-native-modal';
 import { TouchableOpacity, StyleSheet, Text, View, TextInput, Button, Alert } from 'react-native';
 import {
     GoogleSignin,
+    GoogleSigninButton,
     statusCodes,
 } from '@react-native-google-signin/google-signin';
 
@@ -15,7 +16,9 @@ import Fonts from '../../utils/Fonts';
 import { loginModalVisible, loginUser, logoutUser } from '../../store/userStore/userStore.actions';
 import { isLoginModalVisibleSelector, isUserConnectedSelector } from '../../store/userStore/userStore.selectors';
 import { TEXT_STRINGS } from '../../utils/Enums';
-import { Api } from '../../utils/Api';
+import Api from '../../utils/Api';
+
+
 
 const Login = (props) => {
     const dispatch = useDispatch();
@@ -37,48 +40,104 @@ const Login = (props) => {
 
     const facebookButton = async () => {
         setLoginState('loading')
-        const result = await LoginManager.logInWithPermissions([
-            'public_profile',
-            'email',
-        ]);
-        if (result.isCancelled) {
-            setLoginState(null)
-        } else {
-            const data = await AccessToken.getCurrentAccessToken();
-            const responseInfoCallback = (error, res) => {
-                console.log("[Facebook response]", res)
-                if (error) {
-                    setLoginState('An error occurred, please try again later 😔')
-                    console.log('[Facebook Error]' + error.toString());
-                } else {
-                    dispatch(loginUser({ accessToken: data.accessToken, name: res.name, image: res.picture.data.url }))
-                    setLoginState("You've logged in successfully! 👏")
-                }
-            };
-            const infoRequest = new GraphRequest(
-                '/me',
-                {
-                    accessToken: data.accessToken,
-                    parameters: {
-                        fields: {
-                            string: 'email,name,picture',
+        try {
+            const result = await LoginManager.logInWithPermissions([
+                'public_profile',
+                'email',
+            ]);
+            if (result.isCancelled) {
+                setLoginState(null)
+            } else {
+                try {
+                    const data = await AccessToken.getCurrentAccessToken();
+                    const responseInfoCallback = async (error, res) => {
+                        // console.log("[Facebook response]", JSON.stringify(res))
+                        if (error) {
+                            setLoginState('An error occurred, please try again later 😔')
+                            throw new Error("facebookButton ERROR: " + JSON.stringify(error));
+
+                        } else {
+                            try {
+                                const login = await Api.userAuth({ email: res.email, userAuth: 'true' });
+                                // console.log("login", JSON.stringify(login))
+
+                                if (login.success) {
+                                    dispatch(loginUser({ accessToken: data.accessToken, name: res.name, image: res.picture.data.url }))
+                                    setLoginState("You've logged in successfully! 👏")
+                                } else {
+                                    throw new Error("facebookButton ERROR: " + JSON.stringify(login.error));
+                                }
+                            } catch (err) {
+                                throw new Error("facebookButton ERROR: " + JSON.stringify(err));
+                            }
+                        }
+                    };
+                    const infoRequest = new GraphRequest(
+                        '/me',
+                        {
+                            accessToken: data.accessToken,
+                            parameters: {
+                                fields: {
+                                    string: 'email,name,picture',
+                                },
+                            },
                         },
-                    },
-                },
-                responseInfoCallback,
-            );
-            new GraphRequestManager().addRequest(infoRequest).start();
+                        responseInfoCallback,
+                    );
+                    new GraphRequestManager().addRequest(infoRequest).start();
+                } catch (err) {
+                    throw new Error("facebookButton ERROR: " + JSON.stringify(err));
+                }
+            }
+
+        } catch (err) {
+            console.log('[Facebook Error]' + err);
         }
     };
 
-    const loginManualButton = async () => {
+
+    const googleButton = async () => {
+        GoogleSignin.configure({
+            androidClientId: '260894939219-623mta5qv66n16kde1gf77pqpofs3906.apps.googleusercontent.com',
+            iosClientId: '43023367729-h888o3pfeutvs4n63vqrqgb2h38fivsd.apps.googleusercontent.com',
+        })
+
         setLoginState('loading')
-        const login = await Api.loginManual({ category: category, languages: country.language, countries: country.symbol, sort: sortType.type });
-        if (news.error) {
-            throw new Error(news.error.message);
+
+        try {
+            await GoogleSignin.hasPlayServices()
+            const userInfo = await GoogleSignin.signIn();
+            const login = await Api.userAuth({ email: userInfo.user.email, userAuth: 'true' });
+            // console.log(login);
+
+            if (login.success) {
+                dispatch(loginUser({ accessToken: login.api_token, name: userInfo.user.name, image: userInfo.user.photo }))
+                setLoginState("You've logged in successfully! 👏")
+            } else {
+                throw new Error("googleButton() -> Api.rtdServerLoginWithGrant ERROR: " + JSON.stringify(login.error));
+            }
+        } catch(err){
+            console.log('googleButton Error: ' + JSON.stringify(err))
         }
-        this.setState({ news: news.articleResults.data.children, isLoading: false, error: false });
     }
+
+
+    // const loginManualButton = async () => 
+    // {
+    //     setLoginState('loading')
+    //     try {
+    //         const login = await Api.userAuth({ email: this.email, password: this.password, userAuth: 'false' });
+    //         if (login.success) {
+    //             dispatch(loginUser({ accessToken: login.api_token, name: login.user.name, image: '', }))
+    //             setLoginState("You've logged in successfully! 👏")
+    //         } else {
+    //             throw new Error(login);
+    //         }
+    //     } catch (err) {
+    //         console.log('loginManualButton Error: ' + JSON.stringify(err))
+    //     }
+
+    // }
 
     const ModalContent = () => {
         if (isUserConnected && !loginState) {
@@ -106,42 +165,36 @@ const Login = (props) => {
 
                     {!loginState ?
                         <View>
-                            <TouchableOpacity style={styles.facebookLoginButton} onPress={() => facebookButton(props)}>
+                            <TouchableOpacity style={styles.facebookLoginButton} onPress={() => facebookButton()}>
                                 <Text style={styles.facebookLoginButtonText}>{'Login with Facebook'}</Text>
                             </TouchableOpacity>
 
-                            <Button title={'Sign in with Google'} onPress={() => {
-                                GoogleSignin.configure({
-                                    androidClientId: '43023367729-5cl1gmc0nt5iucn24ls93sg10bf6slq2.apps.googleusercontent.com',
-                                    iosClientId: '43023367729-h888o3pfeutvs4n63vqrqgb2h38fivsd.apps.googleusercontent.com',
-                                });
-                                GoogleSignin.hasPlayServices().then((hasPlayService) => {
-                                    if (hasPlayService) {
-                                        GoogleSignin.signIn().then((userInfo) => {
-                                            console.log(JSON.stringify(userInfo))
-                                        }).catch((e) => {
-                                            console.log("ERROR IS: " + JSON.stringify(e));
-                                        })
-                                    }
-                                }).catch((e) => {
-                                    console.log("ERROR IS: " + JSON.stringify(e));
-                                })
-                            }} />
+                            <GoogleSigninButton
+                                style={styles.googleSigninButton}
+                                size={GoogleSigninButton.Size.Wide}
+                                color={GoogleSigninButton.Color.Dark}
+                                title={'Sign in with Google'} onPress={() => googleButton()}
+                            />
 
+                            {/* <Text style={styles.modalHolderHeader}>{TEXT_STRINGS.LOGIN_MANUALLY}</Text> */}
 
-                            <Text style={styles.modalHolderHeader}>{TEXT_STRINGS.LOGIN_MANUALLY}</Text>
-                            <TextInput
+                            {/* <TextInput
                                 style={styles.input}
                                 placeholder="Email"
+                                onChangeText={(text) => this.email = text}
+                                value="test5@test.com"
                             />
                             <TextInput
                                 style={styles.input}
+                                secureTextEntry={true}
                                 placeholder="Password"
+                                onChangeText={(text) => this.password = text}
+                                value="326tesar"
                             />
                             <Button
                                 title='Login/Register'
-                                onPress={() => loginManualButton(props)}
-                            />
+                                onPress={loginManualButton}
+                            /> */}
                         </View>
                         :
                         loginState == 'loading' ? <View style={styles.loginStateText}><Loader /></View> : <Text style={styles.loginStateText}>{loginState}</Text>
@@ -182,7 +235,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: Colors.grey_green,
         padding: 15,
-        marginTop: '8%'
+        marginTop: '5%'
     },
     modalHeaderTitle: {
         fontWeight: '500',
@@ -195,12 +248,12 @@ const styles = StyleSheet.create({
         position: 'absolute',
         alignItems: 'center',
         borderRadius: 4,
-        top: 10,
+        top: 2,
         left: 0,
         width: 42,
         height: 42,
         backgroundColor: Colors.off_white,
-        zIndex: 9
+        zIndex: 0
     },
     modalCloseIcon: {
         color: Colors.grey_green,
@@ -210,12 +263,20 @@ const styles = StyleSheet.create({
         backgroundColor: '#4267B2',
         borderRadius: 4,
         margin: 5,
+        marginTop: 25,
         width: 220,
         height: 50,
         justifyContent: 'center',
         paddingHorizontal: 10,
-        marginVertical: '10%',
+
         alignSelf: 'center'
+    },
+    googleSigninButton: {
+        alignSelf: 'center',
+        borderRadius: 4,
+        height: 50,
+        width: 230,
+        marginBottom: 25,
     },
     facebookLoginButtonText: {
         color: '#FFF',

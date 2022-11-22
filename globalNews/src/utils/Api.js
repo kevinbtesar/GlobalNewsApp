@@ -1,19 +1,30 @@
-import { fetchArticlesRest } from "./Rest"
-import { URLS, KEYS, RTD_API, ARTISAN_RTD_API, XAMPP_RTD_API, LOCAL_LOGIN_URL } from './Enums';
+import { getRest, postRest } from "./Rest"
+import {  
+    GET_ARTICLES,
+    RTD_SERVER,
+    USER_AUTH,
+    FAVORITES,
+} from './Enums';
 
 
 class Api {
     constructor() {
-        // this.newsUrl = `${URLS.NEWS}?access_key=${KEYS.NEWS_URL_ACCESS_KEYS}`
-        this.newsUrl = `${XAMPP_RTD_API.GET_GLOBALNEWS_ARTICLES}`
-        this.loginUrl = `${LOCAL_LOGIN_URL}`
+        this.newsUrl = `${RTD_SERVER.LOCAL}${GET_ARTICLES}`
+        this.userAuthUrl = `${RTD_SERVER.LOCAL}${USER_AUTH}`
+        this.favoriteUrl = `${RTD_SERVER.LOCAL}${FAVORITES}`
     }
-    GetNews(params) {
-        return fetchArticlesRest(this.newsUrl, params)
+    getArticles(params) {
+        return getRest(this.newsUrl, params)
     }
-    loginManual(params) {
-        return loginManualRest(this.loginUrl, params)
+    userAuth(params) {
+        return postRest(this.userAuthUrl, params)
     }
+    favorites(params) {
+        return postRest(this.favoriteUrl, params)
+    }
+    // async rtdServerLoginWithGrant(email) {
+    //     return await postRest(this.loginGrantedAuth, email)
+    // }
 }
 
 const api = new Api()
