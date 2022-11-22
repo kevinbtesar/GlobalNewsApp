@@ -107,17 +107,27 @@ const Login = (props) => {
         try {
             await GoogleSignin.hasPlayServices()
             const userInfo = await GoogleSignin.signIn();
-            const login = await Api.userAuth({ email: userInfo.user.email, userAuth: 'true' });
-            // console.log(login);
 
-            if (login.success) {
-                dispatch(loginUser({ accessToken: login.api_token, name: userInfo.user.name, image: userInfo.user.photo }))
-                setLoginState("You've logged in successfully! 👏")
-            } else {
-                throw new Error("googleButton() -> Api.rtdServerLoginWithGrant ERROR: " + JSON.stringify(login.error));
+            try {
+                const login = await Api.userAuth({ email: userInfo.user.email, userAuth: 'true' });
+                // console.log(login);
+
+                if (login.success) {
+                    dispatch(loginUser({ accessToken: login.api_token, name: userInfo.user.name, image: userInfo.user.photo }))
+                    setLoginState("You've logged in successfully! 👏")
+                } else {
+                    setLoginState('An error occurred, please try again later 😔')
+                    throw new Error("googleButton() -> Api.rtdServerLoginWithGrant ERROR: " + JSON.stringify(login.error));
+                }
+
+            } catch(err){
+                setLoginState('An error occurred, please try again later 😔')
+                console.log('googleButton0 Error: ' + JSON.stringify(err))
             }
+
         } catch(err){
-            console.log('googleButton Error: ' + JSON.stringify(err))
+            setLoginState('An error occurred, please try again later 😔')
+            console.log('googleButton2 Error: ' + JSON.stringify(err))
         }
     }
 

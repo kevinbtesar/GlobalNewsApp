@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Colors from '../../utils/Colors';
 import { loginModalVisible } from '../../store/userStore/userStore.actions';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import Icon from 'react-native-vector-icons/Ionicons';
+// import Icon from 'react-native-vector-icons/Ionicons';
 
 const Header = (props) => {
     const dispatch = useDispatch();
@@ -16,17 +16,23 @@ const Header = (props) => {
     if (props.side == 'right') {
         return (
             isUserConnected ?
-                // <View style={styles.rightSideContainer}>
-                //     <Image
-                //         style={{ width: 30, height: 30, borderRadius: 35 }}
-                //         source={{ uri: userData.image, cache: "force-cache" }}
-                //     />
-                //     <Text style={styles.text}>{userData.name}</Text>
-                // </View> :
 
-                <View style={styles.rightSideContainer}>
+                <View style={styles.container}>
+                    <View
+                        style={styles.rightSideProfileContainer}>
+                        <View
+                            style={{alignItems: 'center',}}>
+
+                            <Image
+                                style={{ width: 30, height: 30, borderRadius: 35 }}
+                                source={{ uri: userData.image, cache: "force-cache" }}
+                            />
+                            <Text style={styles.text}>{userData.name}</Text>
+                        </View>
+                    </View>
+
                     <TouchableOpacity style={styles.leftSideContainer} onPress={() => dispatch(loginModalVisible(true))}>
-                        <MaterialCommunityIcons name="logout" color={Colors.white} size={25} />
+                        <MaterialCommunityIcons name="logout" color={Colors.white} size={29} />
                         <Text style={styles.text}>{'Logout'}</Text>
                     </TouchableOpacity>
                 </View>
@@ -43,13 +49,14 @@ const Header = (props) => {
     } else {
 
         return (
-
-            <Icon
-                style={{ paddingLeft: 10 }}
-                onPress={() => navigation.toggleDrawer()}
-                name="md-menu"
-                size={30}
-            />
+            <>
+            </>
+            // <Icon
+            //     style={{ paddingLeft: 10 }}
+            //     onPress={() => navigation.toggleDrawer()}
+            //     name="md-menu"
+            //     size={30}
+            // />
         )
     }
 }
@@ -57,17 +64,25 @@ const Header = (props) => {
 
 
 const styles = StyleSheet.create({
-    rightSideContainer: {
-        alignItems: 'center',
-        paddingRight: 13
+    rightSideProfileContainer: {
+        alignItems: 'flex-end',
+        paddingRight: 1,
+        flex: 1,
+        fontSize: 12,
+
+    },
+    container: {
+        flexDirection: "row",
+        flexWrap: "wrap"
     },
     leftSideContainer: {
         alignItems: 'center',
-        paddingLeft: 13
+        paddingLeft: 10,
+        alignSelf: "flex-start"
     },
     text: {
         color: Colors.white,
-        fontSize: 12,
+        
     }
 });
 
