@@ -1,28 +1,40 @@
 import React, { Component } from 'react'
 import { FlatList, StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import DeviceInfo from 'react-native-device-info';
+import { connect } from 'react-redux';
+import Modal from 'react-native-modal';
+import { TabNavigator } from 'react-navigation';
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 
+import { populateArticles } from '../../store/newsStore/newsStore.actions';
 import Api from '../../utils/Api';
 import { Loader, NoResults, NewsCardList, Login } from '../../components';
 import { NEWS_PICKER_TYPE } from '../../utils/Enums';
 import Colors from '../../utils/Colors';
-import Modal from 'react-native-modal';
 import { NewsCountriesData, NewsSortTypesData } from '../../data';
-import { connect } from 'react-redux';
 import Fonts from '../../utils/Fonts';
 import { TEXT_STRINGS } from '../../utils/Enums';
+// import { MaterialTopTabs } from '../routes/NewsStackNavigator';
 
-class NewsByCategory extends Component {
+let actions = undefined;
+const MaterialTopTabs = createMaterialTopTabNavigator();
+
+class NewsByCategory extends Component 
+{
     constructor(props) {
         super(props);
+        console.log('props: ' + JSON.stringify(props))
+        console.log('state: ' + JSON.stringify(this.state))
         this.state = {
             news: [],
+            categories: [],
             isLoading: true,
             error: false,
             isModalVisible: false,
             country: NewsCountriesData[0],
             sortType: NewsSortTypesData[0],
         };
+        actions = props;
     }
 
     componentDidMount() {
@@ -31,22 +43,43 @@ class NewsByCategory extends Component {
 
     async getNewsByCategory() {
         try {
-            const { route } = this.props;
+            const { route, navigation} = this.props;
             const { category } = route.params ?? '';
             const { country, sortType } = this.state;
             const news = await Api.getArticles({ category: 'general', languages: country.language, countries: country.symbol, sort: sortType.type, appName: DeviceInfo.getApplicationName() });
             if (news.error) {
                 throw new Error(news.error.message);
-            }
+            }   
+            // const MaterialTopTabs = createMaterialTopTabNavigator();
+            // console.log(JSON.stringify(news));
             newsArray = Object.keys(news['articles']).map(k => news['articles'][k]),
-            this.setState({ news: newsArray, isLoading: false, error: false });
-            // this.setState({  isLoading: false, error: false });
+                this.setState({ news: newsArray });
+            categoriesArray = Object.keys(news['categories']).map(k => news['categories'][k]),
+                this.setState({ categories: categoriesArray, isLoading: false, error: false });
+
+
+                // const components = {};
+                // const screens = {};
+                // const pages = [
+                //     { screenName: 'Foo', componentName: 'Foo' },
+                //     { screenName: 'Bar', componentName: 'Bar' },
+                //   ]
+                //   pages.forEach(page => {
+                //     console.log('page: ' + JSON.stringify(page))
+                //     screens[page.screenName] = { screen: components[page.componentName] };
+                // });
+                // console.log('screens: ' + JSON.stringify(screens))
+                // console.log('this.props: ' + JSON.stringify(this.props))
+
+                // this.setState({ tabs: MaterialTopTabs.Navigator(screens) });
+
+            console.log("NewsByCat" + JSON.stringify(navigation))
+               
         }
         catch (error) {
-            this.setState({ news: [], isLoading: false, error: error.toString() });
+            this.setState({ news: [], categories: [], isLoading: false, error: error.toString() });
         }
     }
-
 
 
     selectPicker = (item) => {
@@ -75,10 +108,11 @@ class NewsByCategory extends Component {
     }
 
     render() {
-        const { news, isLoading, isModalVisible, country, sortType, error } = this.state
+        const { news, categories, isLoading, isModalVisible, country, sortType, error } = this.state
+        const { route, navigation} = this.props;
         return (
             <>
-            
+
                 {/* <View style={styles.pickersLine}>
                     <TouchableOpacity style={styles.pickerButton} onPress={() => this.setState({ isModalVisible: NEWS_PICKER_TYPE.COUNTRIES })}>
                         <Text style={styles.pickerText}>{`${country.icon} ${country.name}`}</Text>
@@ -89,7 +123,7 @@ class NewsByCategory extends Component {
                 </View> */}
 
                 {!isLoading ? Object.keys(news).length ?
-                    <NewsCardList news={news} navigation={this.props.navigation} />
+                    <NewsCardList categories={categories} news={news} navigation={navigation} route={route} />
                     :
                     <NoResults text={error || null} />
                     : <Loader />
@@ -119,6 +153,7 @@ class NewsByCategory extends Component {
                 </Modal>
 
                 <Login message={TEXT_STRINGS.LOGIN_HEADER} />
+                
 
             </>
         )
@@ -131,6 +166,13 @@ const mapStateToProps = (state) => {
         NewsStore: state.news
     };
 };
+
+// const mapDispatchToProps = dispatch => {
+//     return {
+//         populateArticles: payload => dispatch(populateArticles(payload))
+//     }
+// }
+
 
 export default connect(mapStateToProps, null)(NewsByCategory);
 

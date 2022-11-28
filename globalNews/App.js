@@ -6,6 +6,7 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './src/store';
 import Colors from './src/utils/Colors';
+import { getArticlesHelper } from './src/utils/Api';
 
 import {
   DarkTheme as NavigationDarkTheme,
@@ -42,9 +43,18 @@ const App = () => {
   );
 
 
-  React.useEffect(() => {
-    setTimeout(() => setReady(true), 2000)
+  React.useEffect( () => {
+
+      try{
+        getArticlesHelper()
+        setReady(true)
+      } catch (err){
+        console.log("App.js error: " + JSON.stringify(err))
+      }
+      
+    
   }, [])
+  
   return (
 
     <>

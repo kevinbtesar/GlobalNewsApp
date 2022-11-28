@@ -21,7 +21,7 @@ const Favorites = (props) => {
         <>
             <LinearGradient start={{ x: 1, y: 1 }} end={{ x: 1, y: .7 }} colors={[Colors.off_white, Colors.yellow]} style={styles.toolBarLine}>
                 <View style={styles.toolBarTextContainer} >
-                    <Text style={styles.toolBarText}>{`You saved ${favorites.length} articles`}</Text>
+                    <Text style={styles.toolBarText}>{`You saved ${favorites.length ?? 0} articles`}</Text>
                 </View>
                 <TouchableOpacity style={[styles.toolBarButton, !favorites.length && { backgroundColor: Colors.black_opacity }]} onPress={() => dispatch(removeAllFavorites())} disabled={!favorites.length}>
                     <Text style={styles.toolBarText}>{`🗑 Delete All`}</Text>

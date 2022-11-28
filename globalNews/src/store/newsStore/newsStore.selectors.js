@@ -8,7 +8,23 @@ const favoritesSelector = createSelector(
     },
 );
 
+const articlesSelector = createSelector(
+    baseNews,
+    (news) => {
+        return (news.articles)
+    },
+);
 
+const categoriesSelector = createSelector(
+    baseNews,
+    (news) => {
+        return (news.categories)
+    },
+);
 export {
     favoritesSelector,
+    articlesSelector,
+    categoriesSelector,
 };
+
+

@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Colors from '../../utils/Colors';
 import { loginModalVisible } from '../../store/userStore/userStore.actions';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Feather from 'react-native-vector-icons/Feather';
 // import Icon from 'react-native-vector-icons/Ionicons';
 
 const Header = (props) => {
@@ -23,11 +24,12 @@ const Header = (props) => {
                         <View
                             style={{alignItems: 'center',}}>
 
-                            <Image
+                            {/* <Image
                                 style={{ width: 30, height: 30, borderRadius: 35 }}
                                 source={{ uri: userData.image, cache: "force-cache" }}
-                            />
-                            <Text style={styles.text}>{userData.name}</Text>
+                            /> */}
+                            <Feather name="search" color={Colors.white} size={29} />
+                            <Text style={styles.text}>Search</Text>
                         </View>
                     </View>
 

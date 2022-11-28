@@ -59,10 +59,10 @@ const Login = (props) => {
                         } else {
                             try {
                                 const login = await Api.userAuth({ email: res.email, userAuth: 'true' });
-                                // console.log("login", JSON.stringify(login))
+                                console.log("login", JSON.stringify(login))
 
                                 if (login.success) {
-                                    dispatch(loginUser({ accessToken: data.accessToken, name: res.name, image: res.picture.data.url }))
+                                    dispatch(loginUser({ accessToken: login.accessToken, name: res.name, image: res.picture.data.url }))
                                     setLoginState("You've logged in successfully! 👏")
                                 } else {
                                     throw new Error("facebookButton ERROR: " + JSON.stringify(login.error));
@@ -113,7 +113,7 @@ const Login = (props) => {
                 // console.log(login);
 
                 if (login.success) {
-                    dispatch(loginUser({ accessToken: login.api_token, name: userInfo.user.name, image: userInfo.user.photo }))
+                    dispatch(loginUser({ accessToken: login.accessToken, name: userInfo.user.name, image: userInfo.user.photo }))
                     setLoginState("You've logged in successfully! 👏")
                 } else {
                     setLoginState('An error occurred, please try again later 😔')

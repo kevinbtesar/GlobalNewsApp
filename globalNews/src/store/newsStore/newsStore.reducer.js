@@ -1,7 +1,9 @@
-import { ADD_TO_FAVORITES, REMOVE_FROM_FAVORITES, REMOVE_ALL_FAVORITES } from './newsStore.types';
+import { ADD_TO_FAVORITES, REMOVE_FROM_FAVORITES, REMOVE_ALL_FAVORITES,POPULATE_ARTICLES, POPULATE_CATEGORIES } from './newsStore.types';
 
 const initialState = {
-    favorites: []
+    favorites: [],
+    articles: [],
+    categories: [],
 };
 
 const newsReducer = (state = initialState, action) => {
@@ -20,6 +22,16 @@ const newsReducer = (state = initialState, action) => {
                 return {
                 ...state,
                 favorites: [],
+            };
+        case POPULATE_ARTICLES:
+                return {
+                ...state,
+                articles: action.payload,
+            };
+        case POPULATE_CATEGORIES:
+                return {
+                ...state,
+                categories: action.payload,
             };
         default: {
             return state;

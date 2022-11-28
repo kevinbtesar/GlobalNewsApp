@@ -1,21 +1,26 @@
-import React from "react";
+import React, {useState} from "react";
 import { NavigationContainer } from "@react-navigation/native";
 // import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { SafeAreaView } from "react-native";
+import AntDesign from "react-native-vector-icons/AntDesign";
+import Feather from "react-native-vector-icons/Feather";
+import { SafeAreaView} from "react-native";
+import { useTheme } from "react-native-paper";
+import DeviceInfo from 'react-native-device-info';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { NewsByCategory, Categories, Article, Favorites } from "../screens";
+import { NewsByCategory, Settings, Article, Favorites } from "../screens";
 import Colors from "../utils/Colors";
 import Fonts from "../utils/Fonts";
 import { Header } from "../components";
 import { SCREENS } from "../utils/Enums";
-import { useTheme } from "react-native-paper";
+import Api from "../utils/Api";
+import { categoriesSelector } from '../store/newsStore/newsStore.selectors';
 
 const Stack = createNativeStackNavigator();
-const MaterialTopTabs = createMaterialTopTabNavigator();
+const Tab = createMaterialTopTabNavigator();
 const MaterialBottomTabs = createMaterialBottomTabNavigator();
 const screenOptions = { headerShown: false, headerBackTitleVisible: false };
 
@@ -35,6 +40,7 @@ const stackScreenOptions = props => ({
 
 CreateRootStack = () => {
   const theme = useTheme();
+  
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <NavigationContainer
@@ -57,11 +63,13 @@ CreateRootStack = () => {
             options={props => stackScreenOptions(props)}
             component={CreateBottomTabs}
           />
+          <Stack.Screen name={SCREENS.ARTICLE} component={Article} options={{headerShown:false}} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaView>
   );
 };
+
 
 CreateBottomTabs = props => {
 
@@ -79,28 +87,27 @@ CreateBottomTabs = props => {
           ...stackScreenOptions(props),
           tabBarLabel: "Home",
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="home" color={color} size={26} />
+            <Feather name="home" color={color} size={26} />
           )
         })}
       />
-
       <MaterialBottomTabs.Screen
-        name="Notifications"
-        component={NewsByCategory}
+        name="Favorites"
+        component={Favorites}
         options={{
-          tabBarLabel: "Updates",
+          tabBarLabel: "Favorites",
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="bell" color={color} size={26} />
+            <AntDesign name="book" color={color} size={26} />
           )
         }}
       />
       <MaterialBottomTabs.Screen
-        name="Profile"
-        component={NewsByCategory}
+        name="Settings"
+        component={Settings}
         options={{
-          tabBarLabel: "Profile",
+          tabBarLabel: "Settings",
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="account" color={color} size={26} />
+            <Feather name="settings" color={color} size={26} />
           )
         }}
       />
@@ -108,26 +115,61 @@ CreateBottomTabs = props => {
   );
 };
 
+
+
+
 CreateTopTabs = props => {
 
+  let categories = useSelector(categoriesSelector);
+
   return (
-    <MaterialTopTabs.Navigator>
-      <MaterialTopTabs.Screen
-        name="Tab1"
+
+    <Tab.Navigator
+      removeClippedSubviews={true}
+      screenOptions={{
+        tabBarScrollEnabled: true,
+        tabBarLabelStyle: { fontSize: 12 },
+        tabBarItemStyle: { width: 100 },
+        tabBarStyle: { backgroundColor: 'powderblue' },
+        lazy:true
+      }}
+    >
+
+    {categories.length > 0 ?
+    
+    categories.map(index => (
+            <Tab.Screen
+                component={NewsByCategory}
+                key={index.component}
+
+                name={index.title}
+                // options={{
+                //     title: route
+                // }}
+            />
+        ))
+      :
+
+      <Tab.Screen
+        name="Loading"
         component={NewsByCategory}
+        style={{height:0}}
+        options={{
+          height:0
+        }}
       // options={{title: props.route.params.name}}
       />
-      <MaterialTopTabs.Screen
-        name="Tab2"
-        component={NewsByCategory}
-        // options={{ title: "Custom" }}
-      />
-      <MaterialTopTabs.Screen name="Tab3" component={NewsByCategory} />
-    </MaterialTopTabs.Navigator>
+      
+      }
+
+    </Tab.Navigator>
   );
 };
 
+
 export default CreateRootStack;
+
+
 
 // function NewsStackNavigator() {
 

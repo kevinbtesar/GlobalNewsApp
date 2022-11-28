@@ -60,6 +60,7 @@ const FavoriteIcon = (props) => {
     return (
         <>
             <TouchableOpacity
+                style={styles.favoriteIcon}
                 onPress={onClickFavoriteIcon}>
                 <AntDesign name="hearto" color={isInFavorites ? Colors.dark_pink : Colors.dark_grey} size={28} />
             </TouchableOpacity>
@@ -69,11 +70,12 @@ const FavoriteIcon = (props) => {
 
 const styles = StyleSheet.create({
     favoriteIcon: {
-        position: 'absolute',
-        alignItems: 'center',
-        borderRadius: 50,
-        zIndex: 9,
-        paddingTop: 0,
+        // position: 'absolute',
+        // alignItems: 'center',
+        // borderRadius: 50,
+        // zIndex: 9,
+        // paddingTop: 0,
+        paddingRight:5,
     }
 });
 

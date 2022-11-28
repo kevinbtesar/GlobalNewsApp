@@ -6,6 +6,7 @@ import NoResults from './NoResults'
 import NewsCardList from './NewsCardList'
 import FavoriteIcon from './FavoriteIcon'
 import Login from './Login'
+import OverflowMenu from './OverflowMenu'
 
 export {
     Login,
@@ -15,5 +16,6 @@ export {
     NewsCategoryCard,
     Loader,
     NewsCard,
-    Header
+    Header,
+    OverflowMenu,
 }

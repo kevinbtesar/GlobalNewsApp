@@ -3,13 +3,15 @@
  * @flow
  */
 import React, { useState } from 'react';
-import { StyleSheet, View, Image, TouchableOpacity, Button } from "react-native";
-import { Card, Headline, Caption, TouchableRipple } from 'react-native-paper';
+import { StyleSheet, View, Image, TouchableOpacity, IconButton } from "react-native";
+import { Card, Headline, Caption, TouchableRipple, Menu } from 'react-native-paper';
 import moment from 'moment';
 import Fonts from '../../utils/Fonts';
 import Colors from '../../utils/Colors';
 import { FavoriteIcon } from '..';
+import { OverflowMenu } from '..';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Share from 'react-native-share';
 
 const noImageAvailable = 'https://www.bengi.nl/wp-content/uploads/2014/10/no-image-available1.png'
@@ -18,7 +20,14 @@ const NewsCard = (props) => {
 
     const { article, navigation } = props
     const { title, /*thumbnail*/image, domain, created_utc, } = article
-
+    const [menuVisible, setMenuVisible] = useState(null)
+    const handleMenuShow = (showing) => {
+        if (showing) {
+            menuVisible = false
+        } else {
+            menuVisible = true
+        }
+    }
     /**
      * Share block
      * ref: https://github.com/react-native-share/react-native-share
@@ -59,6 +68,7 @@ const NewsCard = (props) => {
     }
 
 
+    const myIcon = (<MaterialCommunityIcons name="dots-vertical" size={28} />)
 
     if (image) {
         return (
@@ -76,14 +86,29 @@ const NewsCard = (props) => {
                                 <Caption >{moment(moment.unix(created_utc)).format("MM.DD.YYYY")}</Caption>
                                 <Caption numberOfLines={1} style={styles.sourceText}>{domain}</Caption>
                             </View>
+
                             <View style={styles.userActionRow}>
+                                <View style={{ flexDirection: "row", flexWrap: "wrap" }} >
 
-                                <TouchableOpacity
-                                    onPress={shareEmailImage}>
-                                    <AntDesign name="sharealt" size={28} />
-                                </TouchableOpacity>
+                                    <FavoriteIcon style={{ paddingRight: 5 }} article={article} color={Colors.dark_grey} />
 
-                                <FavoriteIcon article={article} color={Colors.dark_grey} />
+                                    <TouchableOpacity
+
+                                        onPress={shareEmailImage}>
+                                        <AntDesign name="sharealt" size={28} />
+
+                                    </TouchableOpacity>
+                                </View>
+                                <View
+                                    style={{ justifyContent: "flex-end" }} >
+                                    <OverflowMenu
+                                        customButton={myIcon}
+
+                                        destructiveIndex={1}
+                                        options={["Block", "Report", "Cancel"]}
+                                    //  actions={[blockSource, reportArticle]}
+                                    />
+                                </View>
 
                             </View>
                         </Card.Content>
@@ -115,6 +140,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingVertical: 4,
+        flexWrap: "wrap"
     },
     sourceAndDate: {
         flexDirection: 'row-reverse',
