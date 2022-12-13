@@ -6,28 +6,24 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Image, TouchableOpacity, IconButton } from "react-native";
 import { Card, Headline, Caption, TouchableRipple, Menu } from 'react-native-paper';
 import moment from 'moment';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Share from 'react-native-share';
+
 import Fonts from '../../utils/Fonts';
 import Colors from '../../utils/Colors';
 import { FavoriteIcon } from '..';
 import { OverflowMenu } from '..';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import Share from 'react-native-share';
 
 const noImageAvailable = 'https://www.bengi.nl/wp-content/uploads/2014/10/no-image-available1.png'
 
 const NewsCard = (props) => {
 
-    const { article, navigation } = props
-    const { title, /*thumbnail*/image, domain, created_utc, } = article
-    const [menuVisible, setMenuVisible] = useState(null)
-    const handleMenuShow = (showing) => {
-        if (showing) {
-            menuVisible = false
-        } else {
-            menuVisible = true
-        }
-    }
+    const { article, navigation, route } = props
+    const { title, /*thumbnail*/image_url, source, created_utc, } = article
+
+    // console.log("route: " + JSON.stringify(route))
+
     /**
      * Share block
      * ref: https://github.com/react-native-share/react-native-share
@@ -50,8 +46,8 @@ const NewsCard = (props) => {
             const ShareResponse = await Share.open(shareOptions);
             console.log('Result =>', ShareResponse);
             setResult(JSON.stringify(ShareResponse, null, 2));
-        } catch (error) {
-            console.log('Error =>', error);
+        } catch (e) {
+            console.Error('Error =>', e);
             setResult('error: '.concat(getErrorString(error)));
         }
     };
@@ -70,27 +66,39 @@ const NewsCard = (props) => {
 
     const myIcon = (<MaterialCommunityIcons name="dots-vertical" size={28} />)
 
-    if (image) {
+    /**
+     * Custom protection to never let an article card appear without an accompanying image
+     */
+    if (image_url) {
         return (
             <Card style={styles.cardContainer}>
                 <TouchableRipple
-                    onPress={() => navigation.navigate('Article', { title, ...props })}
+                    onPress={() => navigation.navigate('Article', { 
+                        title: props.article.title, 
+                        description: props.article.description, 
+                        image_url: props.article.image_url, 
+                        source: props.article.source, 
+                        category: props.article.category, 
+                        created_utc: props.article.created_utc, 
+                        author:props.article.author,
+                        article_id: props.article.article_id,
+                    })}
                     rippleColor={Colors.black_opacity}
                 >
                     <>
-                        <Image source={{ uri: image || noImageAvailable, cache: "force-cache" }} opacity={1.0} style={styles.image} />
+                        <Image source={{ uri: image_url || noImageAvailable, cache: "force-cache" }} opacity={1.0} style={styles.image} />
 
                         <Card.Content>
                             <Headline style={styles.title} numberOfLines={3}>{title}</Headline>
                             <View style={styles.sourceAndDate}>
                                 <Caption >{moment(moment.unix(created_utc)).format("MM.DD.YYYY")}</Caption>
-                                <Caption numberOfLines={1} style={styles.sourceText}>{domain}</Caption>
+                                <Caption numberOfLines={1} style={styles.sourceText}>{source}</Caption>
                             </View>
 
                             <View style={styles.userActionRow}>
                                 <View style={{ flexDirection: "row", flexWrap: "wrap" }} >
 
-                                    <FavoriteIcon style={{ paddingRight: 5 }} article={article} color={Colors.dark_grey} />
+                                    <FavoriteIcon style={{ paddingRight: 5 }} article={article} color={Colors.dark_grey} route={route} />
 
                                     <TouchableOpacity
 

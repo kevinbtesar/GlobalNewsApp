@@ -1,12 +1,8 @@
 import React from 'react';
 import { View, StatusBar, useColorScheme } from 'react-native';
-import NewsStackNavigator from './src/routes/NewsStackNavigator';
-import Splash from './src/components/Splash/Splash';
+
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
-import { store, persistor } from './src/store';
-import Colors from './src/utils/Colors';
-import { getArticlesHelper } from './src/utils/Api';
 
 import {
   DarkTheme as NavigationDarkTheme,
@@ -17,18 +13,23 @@ import {
   MD3DarkTheme,
   Provider as PaperProvider,
 } from 'react-native-paper';
-import { PreferencesContext } from './src/utils/PreferencesContext';
 import merge from 'deepmerge';
 
+import { PreferencesContext } from './src/utils/PreferencesContext';
+import { store, persistor } from './src/store';
+import Colors from './src/utils/Colors';
+import { getArticlesHelper } from './src/utils/Api';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import NewsStackNavigator from './src/routes/NewsStackNavigator';
+import Splash from './src/components/Splash/Splash';
 
 const App = () => {
   const [ready, setReady, isThemeDark, setIsThemeDark] = React.useState(false)
   const isDarkMode = useColorScheme() === 'dark';
-
   const CombinedDefaultTheme = merge(MD3LightTheme, NavigationDefaultTheme);
   const CombinedDarkTheme = merge(MD3DarkTheme, NavigationDarkTheme);
-
   const theme = isThemeDark ? CombinedDarkTheme : CombinedDefaultTheme;
+  
 
   const toggleTheme = React.useCallback(() => {
     return setIsThemeDark(!isThemeDark);
@@ -42,19 +43,23 @@ const App = () => {
     [toggleTheme, isThemeDark]
   );
 
+  
 
-  React.useEffect( () => {
+  React.useEffect(() => {
+    fetchData();
+    setReady(true);
 
-      try{
-        getArticlesHelper()
-        setReady(true)
-      } catch (err){
+    async function fetchData() {
+
+      try {
+        await getArticlesHelper();
+
+      } catch (err) {
         console.log("App.js error: " + JSON.stringify(err))
       }
-      
-    
+    }
   }, [])
-  
+
   return (
 
     <>
@@ -64,9 +69,11 @@ const App = () => {
         <PersistGate loading={<View />} persistor={persistor}>
           {ready ?
             <PreferencesContext.Provider value={preferences}>
-              <PaperProvider theme={theme}>
-                <NewsStackNavigator />
-              </PaperProvider>
+                <SafeAreaProvider>
+                  <PaperProvider theme={theme}>
+                    <NewsStackNavigator />
+                  </PaperProvider>
+                </SafeAreaProvider>
             </PreferencesContext.Provider>
             :
             <Splash />}

@@ -3,7 +3,8 @@ import {
     REMOVE_FROM_FAVORITES,
     REMOVE_ALL_FAVORITES,
     POPULATE_ARTICLES,
-    POPULATE_CATEGORIES
+    POPULATE_CATEGORIES,
+    PURGE_ARTICLES
 } from './newsStore.types';
 
 export function addNewsToFavorites(news) {
@@ -40,3 +41,11 @@ export function populateCategories(news) {
         payload: news,
     }
 }
+
+export function purgeArticles() {
+    return {
+        type: PURGE_ARTICLES,
+        // payload: news,
+    }
+}
+

@@ -9,7 +9,7 @@ export default class NewsCategoryCard extends React.PureComponent {
 
 
     render() {
-        const { category, image, navigation } = this.props
+        const { category, image_url, navigation } = this.props
         return (
             <TouchableRipple
                 onPress={() => navigation.navigate('NewsByCategory', { category })}
@@ -21,7 +21,7 @@ export default class NewsCategoryCard extends React.PureComponent {
                             <Image
                                 resizeMode={'cover'}
                                 style={styles.categoryImage}
-                                source={{ uri: image || 'https://cdn4.iconfinder.com/data/icons/basics-set-2/100/Question-512.png', cache: "force-cache" }}
+                                source={{ uri: image_url || 'https://cdn4.iconfinder.com/data/icons/basics-set-2/100/Question-512.png', cache: "force-cache" }}
                                 opacity={0.85}
                             />
                             <Title style={styles.text}>{capitalizeFirstLetter(category)}</Title>

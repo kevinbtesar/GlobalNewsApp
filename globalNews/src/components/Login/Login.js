@@ -14,6 +14,7 @@ import { Loader } from '..';
 import Colors from '../../utils/Colors';
 import Fonts from '../../utils/Fonts';
 import { loginModalVisible, loginUser, logoutUser } from '../../store/userStore/userStore.actions';
+import { addNewsToFavorites } from '../../store/newsStore/newsStore.actions';
 import { isLoginModalVisibleSelector, isUserConnectedSelector } from '../../store/userStore/userStore.selectors';
 import { TEXT_STRINGS } from '../../utils/Enums';
 import Api from '../../utils/Api';
@@ -38,20 +39,23 @@ const Login = (props) => {
         dispatch(loginModalVisible(false))
     }
 
-    const facebookButton = async () => {
+
+    const facebookButton = async () => 
+    {
         setLoginState('loading')
+
         try {
             const result = await LoginManager.logInWithPermissions([
                 'public_profile',
-                'email',
             ]);
             if (result.isCancelled) {
                 setLoginState(null)
             } else {
                 try {
                     const data = await AccessToken.getCurrentAccessToken();
-                    const responseInfoCallback = async (error, res) => {
-                        // console.log("[Facebook response]", JSON.stringify(res))
+
+                    const responseInfoCallback = async (error, res) => 
+                    {
                         if (error) {
                             setLoginState('An error occurred, please try again later 😔')
                             throw new Error("facebookButton ERROR: " + JSON.stringify(error));
@@ -61,9 +65,20 @@ const Login = (props) => {
                                 const login = await Api.userAuth({ email: res.email, userAuth: 'true' });
                                 console.log("login", JSON.stringify(login))
 
-                                if (login.success) {
+                                if (login.success) 
+                                {
                                     dispatch(loginUser({ accessToken: login.accessToken, name: res.name, image: res.picture.data.url }))
+
+                                    if(login.favorites.length>0)
+                                    {
+                                        Object.entries(login.favorites).forEach(([k, v], i) =>
+                                        {
+                                            dispatch(addNewsToFavorites(login.favorites[i]));
+                                        });
+                                    }
+
                                     setLoginState("You've logged in successfully! 👏")
+
                                 } else {
                                     throw new Error("facebookButton ERROR: " + JSON.stringify(login.error));
                                 }
@@ -72,6 +87,7 @@ const Login = (props) => {
                             }
                         }
                     };
+
                     const infoRequest = new GraphRequest(
                         '/me',
                         {
@@ -85,15 +101,18 @@ const Login = (props) => {
                         responseInfoCallback,
                     );
                     new GraphRequestManager().addRequest(infoRequest).start();
+
                 } catch (err) {
                     throw new Error("facebookButton ERROR: " + JSON.stringify(err));
                 }
             }
 
         } catch (err) {
+            setLoginState('An error occurred, please try again later 😔')
             console.log('[Facebook Error]' + err);
         }
     };
+
 
 
     const googleButton = async () => {
@@ -112,9 +131,20 @@ const Login = (props) => {
                 const login = await Api.userAuth({ email: userInfo.user.email, userAuth: 'true' });
                 // console.log(login);
 
-                if (login.success) {
+                if (login.success) 
+                {
                     dispatch(loginUser({ accessToken: login.accessToken, name: userInfo.user.name, image: userInfo.user.photo }))
+
+                    if(login.favorites.length>0)
+                    {
+                        Object.entries(login.favorites).forEach(([k, v], i) =>
+                        {
+                            dispatch(addNewsToFavorites(login.favorites[i]));
+                        });
+                    }
+
                     setLoginState("You've logged in successfully! 👏")
+
                 } else {
                     setLoginState('An error occurred, please try again later 😔')
                     throw new Error("googleButton() -> Api.rtdServerLoginWithGrant ERROR: " + JSON.stringify(login.error));
@@ -139,6 +169,14 @@ const Login = (props) => {
     //         const login = await Api.userAuth({ email: this.email, password: this.password, userAuth: 'false' });
     //         if (login.success) {
     //             dispatch(loginUser({ accessToken: login.api_token, name: login.user.name, image: '', }))
+                //    if(login.favorites.length>0)
+                //    {
+                //         Object.entries(login.favorites).forEach(([k, v], i) =>
+                //         {
+                //             dispatch(addNewsToFavorites(login.favorites[i]));
+                //         });
+                //    }
+
     //             setLoginState("You've logged in successfully! 👏")
     //         } else {
     //             throw new Error(login);

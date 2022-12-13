@@ -10,49 +10,62 @@ import { isUserConnectedSelector, getUserDataSelector } from '../../store/userSt
 import Api from '../../utils/Api';
 
 const FavoriteIcon = (props) => {
-    const { article, style } = props
-    const { title, id } = props.article
+    const { article, style, route } = props
+    const { article_id, title, image_url, created_utc, source, author, } = props.article
     const dispatch = useDispatch();
     const isUserConnected = useSelector(isUserConnectedSelector);
     const favorites = useSelector(favoritesSelector);
-    const isInFavorites = isUserConnected && favorites.findIndex(f => f.title === title) !== -1
+    // const isInFavorites = isUserConnected && favorites.findIndex(f => f.title === title) !== -1
+    const isInFavorites = isUserConnected && favorites.findIndex(f => f.article_id === article_id) !== -1
     const userData = useSelector(getUserDataSelector);
-    this.state = {
-        error: false,
-    };
-    const onClickFavoriteIcon = async () => 
-    {
-        if (isUserConnected && userData.accessToken) 
-        {
+
+    const onClickFavoriteIcon = async () => {
+        // console.log("route2: " + JSON.stringify(route))
+        // console.log("props.article: " + JSON.stringify(props.article))
+
+        if (isUserConnected && userData.accessToken) {
             try {
-                if (isInFavorites) 
-                {
-                    const favorite = await Api.favorites({ accessToken: userData.accessToken, action: 'delete', articleId: id });
+                if (isInFavorites) {
 
-                    if(favorite.success){
-                        dispatch(removeNewsFromFavorites(title))
-                    }else {
-                        
-                        throw new Error("onClickFavoriteIcon() -> isInFavorites ERROR: " + JSON.stringify(favorite));
+                    const favorite = await Api.favorites({
+                        accessToken: userData.accessToken,
+                        action: 'delete',
+                        articleId: article_id,
+                    });
+                    // console.log("favorite: " + JSON.stringify(favorite))
+                    if (favorite.success) {
+                        dispatch(removeNewsFromFavorites(article_id))
+                    } else {
+                        throw new Error(favorite);
                     }
-                    
-                } else {
-                    
-                    const favorite = await Api.favorites({ accessToken: userData.accessToken, action: 'create', articleId: id });
 
-                    if(favorite.success){
+                } else {
+
+                    const favorite = await Api.favorites({
+                        accessToken: userData.accessToken,
+                        action: 'create',
+                        articleId: article_id,
+                        title: title,
+                        imageUrl: image_url,
+                        source: source,
+                        category: route.name,
+                        publishedAt: created_utc,
+                        author: author,
+                    });
+
+                    if (favorite.success) 
+                    {
                         dispatch(addNewsToFavorites(article))
                     } else {
- 
-                        throw new Error("onClickFavoriteIcon() -> !isInFavorites ERROR: " + JSON.stringify(favorite));
+                        throw new Error(favorite);
                     }
                 }
 
-            } catch (err){
-                console.error("ERROR err: " + JSON.stringify(err))
+            } catch (err) {
+                console.error("Favorites ERROR err: " + JSON.stringify(err))
             }
 
-            
+
         } else {
             dispatch(loginModalVisible(true))
         }
@@ -75,7 +88,7 @@ const styles = StyleSheet.create({
         // borderRadius: 50,
         // zIndex: 9,
         // paddingTop: 0,
-        paddingRight:5,
+        paddingRight: 5,
     }
 });
 

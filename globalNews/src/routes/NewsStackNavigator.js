@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 // import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -6,17 +6,17 @@ import { createMaterialTopTabNavigator } from "@react-navigation/material-top-ta
 import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import Feather from "react-native-vector-icons/Feather";
-import { SafeAreaView} from "react-native";
 import { useTheme } from "react-native-paper";
-import DeviceInfo from 'react-native-device-info';
-import { useDispatch, useSelector } from 'react-redux';
+// import DeviceInfo from 'react-native-device-info';
+import {  useSelector } from 'react-redux';
+import { useSafeAreaInsets, SafeAreaProvider } from 'react-native-safe-area-context';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 import { NewsByCategory, Settings, Article, Favorites } from "../screens";
 import Colors from "../utils/Colors";
 import Fonts from "../utils/Fonts";
 import { Header } from "../components";
 import { SCREENS } from "../utils/Enums";
-import Api from "../utils/Api";
 import { categoriesSelector } from '../store/newsStore/newsStore.selectors';
 
 const Stack = createNativeStackNavigator();
@@ -24,15 +24,18 @@ const Tab = createMaterialTopTabNavigator();
 const MaterialBottomTabs = createMaterialBottomTabNavigator();
 const screenOptions = { headerShown: false, headerBackTitleVisible: false };
 
+
 const stackScreenOptions = props => ({
-  // title: 'Global News',
+  // title: props.route.name,
   headerStyle: {
-    backgroundColor: Colors.yellow
+    backgroundColor: Colors.black_opacity,
+    height:4,
   },
   headerTintColor: "#fff",
   headerTitleStyle: {
     fontFamily: Fonts.Walk,
-    alignSelf: "center"
+    alignSelf: "center",
+    fontSize:20,
   },
   headerRight: () => <Header side="right" navigation={props.navigation} />,
   headerLeft: () => <Header side="left" navigation={props.navigation} />
@@ -40,16 +43,17 @@ const stackScreenOptions = props => ({
 
 CreateRootStack = () => {
   const theme = useTheme();
-  
+  const insets = useSafeAreaInsets();
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    // <SafeAreaView style={{ flex: 1 }}>
+    
       <NavigationContainer
-        screenOptions={screenOptions}
         theme={theme}
         initialRouteName={SCREENS.HOME}
         backBehavior="history">
-        <Stack.Navigator>
-          
+        <Stack.Navigator screenOptions={{screenOptions,presentation: 'modal'}}>
+
           {/* <Stack.Screen name={SCREENS.CATEGORIES} component={Categories}
           options={(props) => ({ ...stackScreenOptions(), headerLeft: () => <Header side='left' /> })} />
         <Stack.Screen name={SCREENS.NEWS_BY_CATEGORY} component={NewsByCategory}
@@ -59,14 +63,25 @@ CreateRootStack = () => {
           {/* <Stack.Screen name="Top Tabs" children={CreateTopTabs} options={{headerShown:false}} /> */}
 
           <Stack.Screen
-            name={SCREENS.HOME}
-            options={props => stackScreenOptions(props)}
+            name={'Home'}
+            options={(props) => ({ 
+              ...stackScreenOptions(props), headerShown: true, headerTitle: getHeaderTitle(props.route)  
+            })}
             component={CreateBottomTabs}
           />
-          <Stack.Screen name={SCREENS.ARTICLE} component={Article} options={{headerShown:false}} />
+
+          <Stack.Screen 
+            name={SCREENS.ARTICLE} 
+            component={Article} 
+            options={props => ({ 
+              ...stackScreenOptions(props), headerShown: true, headerTitle: getHeaderTitle(props.route), headerStyle: { height:100 + insets.top} 
+            })} 
+          />
+
         </Stack.Navigator>
       </NavigationContainer>
-    </SafeAreaView>
+
+    // </SafeAreaView>
   );
 };
 
@@ -76,15 +91,16 @@ CreateBottomTabs = props => {
   return (
     <MaterialBottomTabs.Navigator
       barStyle={{
-        height:72,
+        height: 72,
       }}
-      defaultScreenOptions={true}
     >
       <MaterialBottomTabs.Screen
-        name="Top"
+        name="Refresh"
         component={CreateTopTabs}
         options={props => ({
           ...stackScreenOptions(props),
+          title: 'test',
+          headerShown: true,
           tabBarLabel: "Home",
           tabBarIcon: ({ color }) => (
             <Feather name="home" color={color} size={26} />
@@ -96,6 +112,7 @@ CreateBottomTabs = props => {
         component={Favorites}
         options={{
           tabBarLabel: "Favorites",
+          title: "Favorites",
           tabBarIcon: ({ color }) => (
             <AntDesign name="book" color={color} size={26} />
           )
@@ -121,7 +138,7 @@ CreateBottomTabs = props => {
 CreateTopTabs = props => {
 
   let categories = useSelector(categoriesSelector);
-
+  // console.log("categories: " + JSON.stringify(categories))
   return (
 
     <Tab.Navigator
@@ -129,37 +146,32 @@ CreateTopTabs = props => {
       screenOptions={{
         tabBarScrollEnabled: true,
         tabBarLabelStyle: { fontSize: 12 },
-        tabBarItemStyle: { width: 100 },
+        tabBarItemStyle: { width: 100,height:50 },
         tabBarStyle: { backgroundColor: 'powderblue' },
-        lazy:true
+        lazy: true
       }}
     >
 
-    {categories.length > 0 ?
-    
-    categories.map(index => (
-            <Tab.Screen
-                component={NewsByCategory}
-                key={index.component}
+      {(categories && categories.length > 0) ?
 
-                name={index.title}
-                // options={{
-                //     title: route
-                // }}
-            />
+        categories.map(index => (
+          <Tab.Screen
+            name={index.title}
+            component={NewsByCategory}
+            key={index.title}
+          />
         ))
-      :
+        :
 
-      <Tab.Screen
-        name="Loading"
-        component={NewsByCategory}
-        style={{height:0}}
-        options={{
-          height:0
-        }}
-      // options={{title: props.route.params.name}}
-      />
-      
+        <Tab.Screen
+          name="Loading"
+          component={NewsByCategory}
+          style={{ height: 0 }}
+          options={{
+            height: 0
+          }}
+        />
+
       }
 
     </Tab.Navigator>
@@ -170,6 +182,22 @@ CreateTopTabs = props => {
 export default CreateRootStack;
 
 
+
+function getHeaderTitle(route) {
+  // If the focused route is not found, we need to assume it's the initial screen
+  // This can happen during if there hasn't been any navigation inside the screen
+  // In our case, it's "Feed" as that's the first screen inside the navigator
+  const routeName = getFocusedRouteNameFromRoute(route) ?? 'Home';
+
+  switch (routeName) {
+    case 'Home':
+      return 'Home';
+    case 'Favorites':
+      return 'Favorites';
+    case 'Settings':
+      return 'Settings';
+  }
+}
 
 // function NewsStackNavigator() {
 
@@ -194,3 +222,5 @@ export default CreateRootStack;
 //     </NavigationContainer>
 //   );
 // }
+
+

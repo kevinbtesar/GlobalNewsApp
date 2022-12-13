@@ -9,7 +9,7 @@ const persistConfig = {
     key: 'root',
     storage: AsyncStorage,
     whiteList: ['cryptoWallet'],
-    blacklist: ['app']
+    // blacklist: ['app']
 
 };
 
@@ -17,10 +17,10 @@ const persistConfig = {
 let logger = undefined
 if (process.env.NODE_ENV === `development`) {
     logger = createLogger({
-        level:'log', //: 'log' | 'console' | 'warn' | 'error' | 'info', // console's level 
+        level:'info', //: 'log' | 'console' | 'warn' | 'error' | 'info', // console's level 
     });
 }
-  
+
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 

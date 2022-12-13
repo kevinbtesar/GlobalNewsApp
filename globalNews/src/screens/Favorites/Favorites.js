@@ -12,11 +12,16 @@ import LinearGradient from 'react-native-linear-gradient';
 const Favorites = (props) => {
     const dispatch = useDispatch();
     const favorites = useSelector(favoritesSelector);
-    this.state = {
+    state = {
         isLoading: true,
         error: false,
     };
     
+    // props.navigation.setParams({
+    //     title: 'Your Updated Title',
+    //   })
+
+      
     return (
         <>
             <LinearGradient start={{ x: 1, y: 1 }} end={{ x: 1, y: .7 }} colors={[Colors.off_white, Colors.yellow]} style={styles.toolBarLine}>

@@ -1,6 +1,4 @@
-import React, { useState } from 'react'
 import DeviceInfo from 'react-native-device-info';
-
 import { getRest, postRest } from "./Rest"
 import {  
     GET_ARTICLES,
@@ -10,6 +8,7 @@ import {
 } from './Enums';
 import { populateArticles, populateCategories } from './../store/newsStore/newsStore.actions';
 import { store } from './../store';
+// import GLOBAL from './../store/globalStore'
 
 class Api {
     constructor() {
@@ -32,30 +31,31 @@ class Api {
 
 }
 
-const api = new Api()
-export default api
-
-
-export async function getArticlesHelper(){
-    // const [state, setState] = useState(false);
+export async function getArticlesHelper(category){
+    console.log("category: " + category);
     try {
-        const news = await api.getArticles({ category: 'general', appName: DeviceInfo.getApplicationName() });
-        console.log(JSON.stringify(news));
-        if (news.error) {
-            throw new Error(JSON.stringify(news));
+
+        const news = await api.getArticles({ category: category ?? 'Home', appName: DeviceInfo.getApplicationName() });
+
+        // console.log(JSON.stringify(news));
+        if (news && news.error) {
+            // console.log("news: " + JSON.stringify(news))
+            throw new Error(news);
         }
+
         newsArray = Object.keys(news['articles']).map(k => news['articles'][k]),
-            // setState({ news: newsArray, isLoading: false, error: false });
             store.dispatch(populateArticles(newsArray))
 
         categoriesArray = Object.keys(news['categories']).map(k => news['categories'][k]),
-            // setState({ news: newsArray, isLoading: false, error: false });
             store.dispatch(populateCategories(categoriesArray))
-            // console.log("na: " + JSON.stringify(newsArray))
-            // return newsArray
+        // GLOBAL.categories = categoriesArray;
 
-    } catch (err) {
-        console.log('Error', err);
-        // setRefreshing(false)
+        return news;
+    } catch (e) {
+        console.error('API.js Error: ' + JSON.stringify(e));
     }
 }
+
+
+const api = new Api()
+export default api

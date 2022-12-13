@@ -1,5 +1,5 @@
 import React from 'react'
-import { /*ScrollView,*/ StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { Card, Title, Subheading, Caption } from 'react-native-paper';
 import Colors from '../../utils/Colors';
 import moment from 'moment';
@@ -10,16 +10,14 @@ import { TEXT_STRINGS } from '../../utils/Enums';
 
 const Article = (props) => {
     const { route } = props
-    const { article } = route.params
-    const { title, description, image, source, category, published_at, author } = article
+    const { title, description, image, source, category, created_utc, author, article_id } = route.params
+    let article = {title: title, article_id: article_id}
+    
     return (
         <>
             <View style={styles.cardContainer}>
-                {/* 
 
-                <ScrollView /> removed for list performance issue
-
-                <ScrollView style={styles.container}> */}
+                <ScrollView style={styles.container}> 
                     <Card.Content>
                         <View style={styles.titleLine}>
                             <Title style={styles.title} >{title}</Title>
@@ -28,13 +26,13 @@ const Article = (props) => {
                         <Caption style={styles.subtitles}>{source}</Caption>
                         <Caption style={styles.subtitles}>{`Category: ${capitalizeFirstLetter(category)}`}</Caption>
                         <View style={styles.sourceAndDate}>
-                            <Caption style={styles.subtitles}>{moment(published_at).format("DD.MM.YYYY")}</Caption>
+                            <Caption style={styles.subtitles}>{moment(created_utc).format("DD.MM.YYYY")}</Caption>
                             {author ? <Caption style={styles.subtitles}>{`Author: ${author}`}</Caption> : <React.Fragment />}
                         </View>
                         {image ? <Card.Cover source={{ uri: image }} style={styles.image} /> : <React.Fragment />}
                         {description ? <Subheading style={styles.description}>{description}</Subheading> : <React.Fragment />}
                     </Card.Content>
-                {/* </ScrollView> */}
+                </ScrollView>
             </View>
             <Login message={TEXT_STRINGS.LOGIN_HEADER} />
         </>
