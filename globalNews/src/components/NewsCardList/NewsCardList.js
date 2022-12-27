@@ -1,15 +1,17 @@
 import React, { useState } from 'react'
 import { RefreshControl, FlatList, View } from "react-native";
+import { useSelector } from 'react-redux';
 
 import { NewsCard } from '..';
 import { getArticlesHelper } from '../../utils/Api';
-
+import { favoritesSelector } from '../../store/newsStore/newsStore.selectors';
 
 const NewsCardList = (props) => {
 
     const renderNewsCardItem = ({ item, index }) => (<NewsCard article={item} {...props} />)
     const [refreshing, setRefreshing] = useState(false);
     const [ state, setState] = useState(false);
+    let favorites = useSelector(favoritesSelector);
     const onRefresh = React.useCallback(async () => {
 
         try {
@@ -25,6 +27,9 @@ const NewsCardList = (props) => {
         }
 
     }, []);
+// console.log("HERE fav: " + JSON.stringify(store.getState().news.favorites))
+// console.log("HERE fav: " + JSON.stringify(favorites))
+
 
     return (
 
@@ -34,6 +39,7 @@ const NewsCardList = (props) => {
                 horizontal={false}
                 style={{ paddingTop: 0 }}
                 data={state.news ?? props.news}
+                extraData={favorites}
                 initialNumToRender={5}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={renderNewsCardItem}

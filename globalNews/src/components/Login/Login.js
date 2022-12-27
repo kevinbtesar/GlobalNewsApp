@@ -8,17 +8,18 @@ import {
     GoogleSigninButton,
     statusCodes,
 } from '@react-native-google-signin/google-signin';
-
+import OneSignal from 'react-native-onesignal';
+import DeviceInfo from 'react-native-device-info';
 
 import { Loader } from '..';
 import Colors from '../../utils/Colors';
 import Fonts from '../../utils/Fonts';
 import { loginModalVisible, loginUser, logoutUser } from '../../store/userStore/userStore.actions';
-import { addNewsToFavorites } from '../../store/newsStore/newsStore.actions';
+import { addNewsToFavorites, removeAllFavorites } from '../../store/newsStore/newsStore.actions';
 import { isLoginModalVisibleSelector, isUserConnectedSelector } from '../../store/userStore/userStore.selectors';
 import { TEXT_STRINGS } from '../../utils/Enums';
 import Api from '../../utils/Api';
-
+import { KEYS } from '../../utils/Enums';
 
 
 const Login = (props) => {
@@ -40,8 +41,7 @@ const Login = (props) => {
     }
 
 
-    const facebookButton = async () => 
-    {
+    const facebookButton = async () => {
         setLoginState('loading')
 
         try {
@@ -54,25 +54,29 @@ const Login = (props) => {
                 try {
                     const data = await AccessToken.getCurrentAccessToken();
 
-                    const responseInfoCallback = async (error, res) => 
-                    {
+                    const responseInfoCallback = async (error, res) => {
                         if (error) {
                             setLoginState('An error occurred, please try again later 😔')
                             throw new Error("facebookButton ERROR: " + JSON.stringify(error));
 
                         } else {
                             try {
-                                const login = await Api.userAuth({ email: res.email, userAuth: 'true' });
+                            
+                                const login = await Api.userAuth({ email: res.email, userAuth: 'true', name: res.name, deviceId: DeviceInfo.getDeviceId(), appId: DeviceInfo.getBundleId()});
+                                // console.log("res", JSON.stringify(res))
                                 console.log("login", JSON.stringify(login))
 
-                                if (login.success) 
-                                {
+                                if (login.success) {
+
+                                    OneSignal.setExternalUserId(login.user.id.toString());
+                                    OneSignal.setEmail(login.user.email);
+
                                     dispatch(loginUser({ accessToken: login.accessToken, name: res.name, image: res.picture.data.url }))
 
-                                    if(login.favorites.length>0)
-                                    {
-                                        Object.entries(login.favorites).forEach(([k, v], i) =>
-                                        {
+                                    if (login.favorites.length > 0) {
+                                        dispatch(removeAllFavorites());
+
+                                        Object.entries(login.favorites).forEach(([k, v], i) => {
                                             dispatch(addNewsToFavorites(login.favorites[i]));
                                         });
                                     }
@@ -80,10 +84,11 @@ const Login = (props) => {
                                     setLoginState("You've logged in successfully! 👏")
 
                                 } else {
-                                    throw new Error("facebookButton ERROR: " + JSON.stringify(login.error));
+                                    throw new Error("facebookButton 0 ERROR: " + JSON.stringify(login.error));
                                 }
+                            
                             } catch (err) {
-                                throw new Error("facebookButton ERROR: " + JSON.stringify(err));
+                                throw new Error("facebookButton 1 ERROR: " + JSON.stringify(err));
                             }
                         }
                     };
@@ -103,7 +108,7 @@ const Login = (props) => {
                     new GraphRequestManager().addRequest(infoRequest).start();
 
                 } catch (err) {
-                    throw new Error("facebookButton ERROR: " + JSON.stringify(err));
+                    throw new Error("facebookButton 2 ERROR: " + JSON.stringify(err));
                 }
             }
 
@@ -117,8 +122,8 @@ const Login = (props) => {
 
     const googleButton = async () => {
         GoogleSignin.configure({
-            androidClientId: '260894939219-623mta5qv66n16kde1gf77pqpofs3906.apps.googleusercontent.com',
-            iosClientId: '43023367729-h888o3pfeutvs4n63vqrqgb2h38fivsd.apps.googleusercontent.com',
+            androidClientId: KEYS.GOOGLE_SIGN_IN_ANDROID_CLIENT_ID,
+            iosClientId: KEYS.GOOGLE_SIGN_IN_IOS_CLIENT_ID,
         })
 
         setLoginState('loading')
@@ -128,17 +133,21 @@ const Login = (props) => {
             const userInfo = await GoogleSignin.signIn();
 
             try {
-                const login = await Api.userAuth({ email: userInfo.user.email, userAuth: 'true' });
+                const login = await Api.userAuth({ email: userInfo.user.email, userAuth: 'true', name: userInfo.user.name, deviceId: DeviceInfo.getDeviceId(), appId: DeviceInfo.getBundleId() });
+                
                 // console.log(login);
 
                 if (login.success) 
                 {
+                    OneSignal.setExternalUserId(login.user.id.toString());
+                    OneSignal.setEmail(login.user.email);
+                    
                     dispatch(loginUser({ accessToken: login.accessToken, name: userInfo.user.name, image: userInfo.user.photo }))
 
-                    if(login.favorites.length>0)
-                    {
-                        Object.entries(login.favorites).forEach(([k, v], i) =>
-                        {
+                    if (login.favorites.length > 0) {
+                        dispatch(removeAllFavorites());
+
+                        Object.entries(login.favorites).forEach(([k, v], i) => {
                             dispatch(addNewsToFavorites(login.favorites[i]));
                         });
                     }
@@ -147,15 +156,15 @@ const Login = (props) => {
 
                 } else {
                     setLoginState('An error occurred, please try again later 😔')
-                    throw new Error("googleButton() -> Api.rtdServerLoginWithGrant ERROR: " + JSON.stringify(login.error));
+                    throw new Error("googleButton()0 -> Api.rtdServerLoginWithGrant ERROR: " + JSON.stringify(login.error));
                 }
 
-            } catch(err){
+            } catch (err) {
                 setLoginState('An error occurred, please try again later 😔')
-                console.log('googleButton0 Error: ' + JSON.stringify(err))
+                console.log('googleButton1 Error: ' + JSON.stringify(err))
             }
 
-        } catch(err){
+        } catch (err) {
             setLoginState('An error occurred, please try again later 😔')
             console.log('googleButton2 Error: ' + JSON.stringify(err))
         }
@@ -169,13 +178,13 @@ const Login = (props) => {
     //         const login = await Api.userAuth({ email: this.email, password: this.password, userAuth: 'false' });
     //         if (login.success) {
     //             dispatch(loginUser({ accessToken: login.api_token, name: login.user.name, image: '', }))
-                //    if(login.favorites.length>0)
-                //    {
-                //         Object.entries(login.favorites).forEach(([k, v], i) =>
-                //         {
-                //             dispatch(addNewsToFavorites(login.favorites[i]));
-                //         });
-                //    }
+    //    if(login.favorites.length>0)
+    //    {
+    //         Object.entries(login.favorites).forEach(([k, v], i) =>
+    //         {
+    //             dispatch(addNewsToFavorites(login.favorites[i]));
+    //         });
+    //    }
 
     //             setLoginState("You've logged in successfully! 👏")
     //         } else {

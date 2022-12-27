@@ -7,40 +7,76 @@ import { NewsCardList, NoResults } from '../../components';
 import Colors from '../../utils/Colors';
 import Fonts from '../../utils/Fonts';
 import LinearGradient from 'react-native-linear-gradient';
-
+import { loginModalVisible } from '../../store/userStore/userStore.actions';
+import { isUserConnectedSelector, getUserDataSelector } from '../../store/userStore/userStore.selectors';
+import Api from '../../utils/Api';
+import { TEXT_STRINGS } from '../../utils/Enums';
 
 const Favorites = (props) => {
     const dispatch = useDispatch();
     const favorites = useSelector(favoritesSelector);
+    const isUserConnected = useSelector(isUserConnectedSelector);
+    const userData = useSelector(getUserDataSelector);
+
     state = {
         isLoading: true,
         error: false,
     };
-    
-    // props.navigation.setParams({
-    //     title: 'Your Updated Title',
-    //   })
 
+    const onClickDeleteAll = async () => {
+        // console.log("route2: " + JSON.stringify(route))
+        console.log("props.article: " + JSON.stringify(props.article))
+
+        if (isUserConnected && userData.accessToken) {
+            try {
+  
+                const favorite = await Api.favorites({
+                    accessToken: userData.accessToken,
+                    action: 'deleteAll',
+                });
+
+                if (favorite.success) 
+                {
+                    dispatch(removeAllFavorites())
+                } else {
+                    throw new Error(favorite);
+                }
+
+      
+            } catch (err) {
+                console.error("Favorites ERROR err: " + JSON.stringify(err))
+            }
+        } else {
+            dispatch(loginModalVisible(true))
+        }
+    }
       
     return (
         <>
             <LinearGradient start={{ x: 1, y: 1 }} end={{ x: 1, y: .7 }} colors={[Colors.off_white, Colors.yellow]} style={styles.toolBarLine}>
                 <View style={styles.toolBarTextContainer} >
-                    <Text style={styles.toolBarText}>{`You saved ${favorites.length ?? 0} articles`}</Text>
+                    <Text style={styles.toolBarText}>{`You saved ${(favorites.length && isUserConnected) ? favorites.length : 0} articles`}</Text>
                 </View>
-                <TouchableOpacity style={[styles.toolBarButton, !favorites.length && { backgroundColor: Colors.black_opacity }]} onPress={() => dispatch(removeAllFavorites())} disabled={!favorites.length}>
+                <TouchableOpacity style={[styles.toolBarButton, !favorites.length && { backgroundColor: Colors.black_opacity }]} onPress={() => onClickDeleteAll()} disabled={!favorites.length}>
                     <Text style={styles.toolBarText}>{`🗑 Delete All`}</Text>
                 </TouchableOpacity>
             </LinearGradient>
-            {favorites.length > 0 ?
-                <NewsCardList news={favorites} navigation={props.navigation} />
+            
+                {!isUserConnected ?
+
+                    <Text style={{...styles.toolBarText, marginTop:40}}>{TEXT_STRINGS.LOGIN_FOR_FAVORITES}</Text>
+
+                : favorites.length > 0  ?
+
+                    <NewsCardList news={favorites} navigation={props.navigation} />
                 :
-                <NoResults text={'You have no favorite news'} fontSize={26} color={Colors.yellow}>
-                    <TouchableOpacity style={styles.navigateButton} onPress={() => props.navigation.navigate('Categories')} >
-                        <Text style={styles.navigateButtonText}>{'Go to Select Favorite News'}</Text>
-                    </TouchableOpacity>
-                </NoResults>
-            }
+                    <NoResults text={'You have no favorite news'} fontSize={26} color={Colors.yellow}>
+                        <TouchableOpacity style={styles.navigateButton} onPress={() => props.navigation.navigate('Categories')} >
+                            <Text style={styles.navigateButtonText}>{'Go to Select Favorite News'}</Text>
+                        </TouchableOpacity>
+                    </NoResults>
+                }
+       
         </>
     )
 };
@@ -71,7 +107,8 @@ const styles = StyleSheet.create({
     toolBarText: {
         fontSize: 16,
         fontFamily: Fonts.KBWriterThin,
-        textAlign: 'center'
+        textAlign: 'center',
+        
     },
     navigateButton: {
         marginTop: 20,

@@ -1,15 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
-// import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import Feather from "react-native-vector-icons/Feather";
 import { useTheme } from "react-native-paper";
-// import DeviceInfo from 'react-native-device-info';
 import {  useSelector } from 'react-redux';
-import { useSafeAreaInsets, SafeAreaProvider } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 import { NewsByCategory, Settings, Article, Favorites } from "../screens";
@@ -23,7 +21,6 @@ const Stack = createNativeStackNavigator();
 const Tab = createMaterialTopTabNavigator();
 const MaterialBottomTabs = createMaterialBottomTabNavigator();
 const screenOptions = { headerShown: false, headerBackTitleVisible: false };
-
 
 const stackScreenOptions = props => ({
   // title: props.route.name,

@@ -4,7 +4,6 @@ import { createAnimation, createInterpolate } from '../../utils/Animation';
 import styles from './Style';
 import LinearGradient from 'react-native-linear-gradient';
 import Colors from '../../utils/Colors';
-import DeviceInfo from 'react-native-device-info';
 
 export default class Splash extends React.Component {
   constructor(props) {

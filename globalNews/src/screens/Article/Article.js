@@ -34,7 +34,7 @@ const Article = (props) => {
                     </Card.Content>
                 </ScrollView>
             </View>
-            <Login message={TEXT_STRINGS.LOGIN_HEADER} />
+            <Login message={TEXT_STRINGS.LOGIN_FOR_FAVORITES} />
         </>
     )
 }

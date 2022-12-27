@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
-import { ADD_TO_FAVORITES, REMOVE_FROM_FAVORITES, REMOVE_ALL_FAVORITES,POPULATE_ARTICLES, POPULATE_CATEGORIES, PURGE_ARTICLES} from './newsStore.types';
+import { ADD_TO_FAVORITES, REMOVE_FROM_FAVORITES, REMOVE_ALL_FAVORITES,POPULATE_ARTICLES, POPULATE_CATEGORIES, PURGE_ARTICLES, POPULATE_FAVORITES} from './newsStore.types';
 import {reducers} from '../reducers';
 
 const initialState = {
@@ -16,6 +16,11 @@ const newsReducer = (state = initialState, action) => {
             return {
                 ...state,
                 favorites: [...state.favorites, action.payload]
+            };
+        case POPULATE_FAVORITES:
+            return {
+                ...state,
+                favorites: [action.payload]
             };
         case REMOVE_FROM_FAVORITES:
             return {

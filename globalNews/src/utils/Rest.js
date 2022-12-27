@@ -1,30 +1,29 @@
-export const getRest = (url, params) => {
+export const getRest = async (url, params) => {
   let apiUrl = url;
   if (params) {
     apiUrl = withQuery(url, params);
   }
    console.log(`${apiUrl}`)
-  return fetch(apiUrl, {
-    method: "GET",
-    headers: {
-      Accept: "application/json",
-      'Content-Type': 'application/json'
-    }
-  })
-    .then(res => res.json())
-    .then(data => {
-      // console.log(JSON.stringify(data));
-      return data;
-    })
-    .catch(error => {
-      console.log("error: " + error);
+  try {
+    const res = await fetch(apiUrl, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        'Content-Type': 'application/json'
+      }
     });
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.log("error: " + error);
+  }
 };
 
 
 export const postRest = async (url, params) => {
 
-  // console.log("params: " + JSON.stringify(params))
+  console.log("url: " + url)
+  console.log("params: " + JSON.stringify(params))
   
   try {
     const res = await fetch(url, {
@@ -47,16 +46,19 @@ export const postRest = async (url, params) => {
         category: params.category ?? '',
         createdUtc: params.createdUtc ?? '',
         author: params.author ?? '',
+        deviceId: params.deviceId ?? '',
+        appId: params.appId ?? '',
+        name: params.name ?? '',
       }),
 
     });
    
     const data = await res.json();
-    console.log('data: ' + JSON.stringify(data));
+    // console.log('data: ' + JSON.stringify(data));
 
     return data;
-  } catch (error) {
-    console.log("error: " + error);
+  } catch (err) {
+    console.error("error: " + err);
   }
 };
 

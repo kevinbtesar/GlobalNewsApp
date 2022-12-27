@@ -2,123 +2,111 @@
  * @format
  * @flow
  */
-import React, { useState } from 'react';
-import { StyleSheet, View, Image, TouchableOpacity, IconButton } from "react-native";
-import { Card, Headline, Caption, TouchableRipple, Menu } from 'react-native-paper';
+import React from 'react';
+import { StyleSheet, View, Image } from "react-native";
+import { Card, Headline, Caption, TouchableRipple } from 'react-native-paper';
 import moment from 'moment';
-import AntDesign from 'react-native-vector-icons/AntDesign';
+// import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import Share from 'react-native-share';
+import { useDispatch, useSelector } from 'react-redux';
 
 import Fonts from '../../utils/Fonts';
 import Colors from '../../utils/Colors';
-import { FavoriteIcon } from '..';
+// import { FavoriteIcon } from '..';
 import { OverflowMenu } from '..';
+import { initializeShare } from '../../utils/Share';
+// import { onClickFavoriteIcon } from '../FavoriteIcon/FavoriteIcon';
 
-const noImageAvailable = 'https://www.bengi.nl/wp-content/uploads/2014/10/no-image-available1.png'
+import { addNewsToFavorites, removeNewsFromFavorites } from '../../store/newsStore/newsStore.actions';
+import { favoritesSelector } from '../../store/newsStore/newsStore.selectors';
+import { loginModalVisible } from '../../store/userStore/userStore.actions';
+import { isUserConnectedSelector, getUserDataSelector } from '../../store/userStore/userStore.selectors';
+import Api from '../../utils/Api';
+import { onClickFavoriteIcon } from '../../screens/Favorites/FavoritesHelper';
+
 
 const NewsCard = (props) => {
 
     const { article, navigation, route } = props
-    const { title, /*thumbnail*/image_url, source, created_utc, } = article
-
+    const { title, /*thumbnail*/image_url, source, created_utc, article_id, author } = article
     // console.log("route: " + JSON.stringify(route))
+    const overflowDotsIcon = (<MaterialCommunityIcons name="dots-vertical" size={28} />)
+    const dispatch = useDispatch();
+    const isUserConnected = useSelector(isUserConnectedSelector);
+    const favorites = useSelector(favoritesSelector);
+    const isInFavorites = isUserConnected && favorites.findIndex(f => f.article_id === article_id) !== -1
+    const userData = useSelector(getUserDataSelector);
+    // const noImageAvailable = 'https://www.bengi.nl/wp-content/uploads/2014/10/no-image-available1.png'
 
-    /**
-     * Share block
-     * ref: https://github.com/react-native-share/react-native-share
-     */
-    const [setResult] = useState < string > ('');
-    /**
-     * This functions share a image passed using the
-     * url param
-     */
-    const shareEmailImage = async () => {
-        const shareOptions = {
-            title: 'Share file',
-            email: 'email@example.com',
-            social: Share.Social.EMAIL,
-            failOnCancel: false,
-            urls: ['https://avatars.githubusercontent.com/u/54149309?s=40&v=4'],
-        };
 
-        try {
-            const ShareResponse = await Share.open(shareOptions);
-            console.log('Result =>', ShareResponse);
-            setResult(JSON.stringify(ShareResponse, null, 2));
-        } catch (e) {
-            console.Error('Error =>', e);
-            setResult('error: '.concat(getErrorString(error)));
-        }
-    };
-    function getErrorString(error, defaultValue) {
-        let e = defaultValue || 'Something went wrong. Please try again';
-        if (typeof error === 'string') {
-            e = error;
-        } else if (error && error.message) {
-            e = error.message;
-        } else if (error && error.props) {
-            e = error.props;
-        }
-        return e;
+    let options = ["Add Favorite", "Share Article"]
+    if (isInFavorites) {
+        options = ["Remove Favorite", "Share Article"]
     }
-
-
-    const myIcon = (<MaterialCommunityIcons name="dots-vertical" size={28} />)
+    
 
     /**
      * Custom protection to never let an article card appear without an accompanying image
      */
     if (image_url) {
+
+        
         return (
             <Card style={styles.cardContainer}>
                 <TouchableRipple
-                    onPress={() => navigation.navigate('Article', { 
-                        title: props.article.title, 
-                        description: props.article.description, 
-                        image_url: props.article.image_url, 
-                        source: props.article.source, 
-                        category: props.article.category, 
-                        created_utc: props.article.created_utc, 
-                        author:props.article.author,
+                    onPress={() => navigation.navigate('Article', {
+                        title: props.article.title,
+                        description: props.article.description,
+                        image_url: props.article.image_url,
+                        source: props.article.source,
+                        category: props.article.category,
+                        created_utc: props.article.created_utc,
+                        author: props.article.author,
                         article_id: props.article.article_id,
                     })}
                     rippleColor={Colors.black_opacity}
                 >
                     <>
-                        <Image source={{ uri: image_url || noImageAvailable, cache: "force-cache" }} opacity={1.0} style={styles.image} />
+                        <Image source={{ uri: image_url /*|| noImageAvailable*/, cache: "force-cache" }} opacity={1.0} style={styles.image} />
 
                         <Card.Content>
                             <Headline style={styles.title} numberOfLines={3}>{title}</Headline>
-                            <View style={styles.sourceAndDate}>
-                                <Caption >{moment(moment.unix(created_utc)).format("MM.DD.YYYY")}</Caption>
-                                <Caption numberOfLines={1} style={styles.sourceText}>{source}</Caption>
-                            </View>
+
 
                             <View style={styles.userActionRow}>
                                 <View style={{ flexDirection: "row", flexWrap: "wrap" }} >
 
-                                    <FavoriteIcon style={{ paddingRight: 5 }} article={article} color={Colors.dark_grey} route={route} />
 
-                                    <TouchableOpacity
+                                    <View style={{ ...styles.sourceAndDate, flexDirection: "column" }}>
+                                        <Caption >{moment(moment.unix(created_utc)).format("MM.DD.YYYY")}</Caption>
+                                        <Caption numberOfLines={1} style={styles.sourceText}>{source}</Caption>
+                                    </View>
 
-                                        onPress={shareEmailImage}>
-                                        <AntDesign name="sharealt" size={28} />
 
-                                    </TouchableOpacity>
+                                    {/* <FavoriteIcon style={{ paddingRight: 5 }} article={article} color={Colors.dark_grey} route={route} />
+ 
+                                     <TouchableOpacity
+ 
+                                         onPress={() => initializeShare(props.article.title, props.article.source)}>
+                                         <AntDesign name="sharealt" size={28} />
+ 
+                                     </TouchableOpacity> */}
+
+
+                                    <View style={{ justifyContent: "space-evenly" }} >
+                                        <OverflowMenu
+                                            customButton={overflowDotsIcon}
+                                            destructiveIndex={1}
+                                            options={options}
+                                            //  actions={[blockSource, reportArticle]}
+                                            // actions={[() => onClickFavoriteIcon(props), () => initializeShare(props.article.title, props.article.source)]}
+                                            actions={[() => onClickFavoriteIcon(props, isUserConnected, userData, dispatch, isInFavorites), () => initializeShare(props.article.title, props.article.source)]}
+                                        />
+                                    </View>
+
                                 </View>
-                                <View
-                                    style={{ justifyContent: "flex-end" }} >
-                                    <OverflowMenu
-                                        customButton={myIcon}
-
-                                        destructiveIndex={1}
-                                        options={["Block", "Report", "Cancel"]}
-                                    //  actions={[blockSource, reportArticle]}
-                                    />
-                                </View>
-
                             </View>
+
                         </Card.Content>
                     </>
                 </TouchableRipple>
@@ -154,6 +142,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row-reverse',
         justifyContent: 'space-between',
         paddingVertical: 4,
+        width: '90%'
     },
     sourceText: {
         width: '50%'

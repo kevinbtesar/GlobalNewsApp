@@ -14,15 +14,19 @@ const OverflowMenu = (props) =>{
     const inputRef = useRef();
     const [open,setOpen] = useState(false);
 
-
-    const handleClick = index => {
+    const handleClick = (index) => {
+      // console.log("index: " + index)
         let options = props.options;
         for (var i = 0; i < options.length; i++) {
             if (index === i) {
-              if (index === options.length - 1) {
+  
+              // if condition handles if nothing was selected from overflow menu
+              if ( index === options.length ) {
+              // if ( index === options.length-1 ) { // this is how it originally was, but didn't work when hitting second option in overflow menu
                 const open = false;
                 setOpen(open);
               } else {
+                // run action that was selected
                 if (props.actions[i] !== null) {
                   props.actions[i]();
                 }
@@ -36,6 +40,7 @@ const OverflowMenu = (props) =>{
     };
 
     const handlePress = () => {
+      // console.log("HERE0")
         let options = props.options;
         if (Platform.OS === "ios") {
           let destructiveIndex = -1;
@@ -90,7 +95,7 @@ const OverflowMenu = (props) =>{
           <View key={option}>
             <TouchableOpacity
               style={{ padding: 10 }}
-              onPress={() => handleClick(index)}
+              onPress={(props) => handleClick(index, props)}
             >
               <Text style={{ textAlign: "center" }}>{option}</Text>
             </TouchableOpacity>

@@ -32,7 +32,15 @@ export const SORT_NEWS = {
 }
 
 export const TEXT_STRINGS = {
-    LOGIN_HEADER: 'To use Favorites you must login first',
+    LOGIN_FOR_FAVORITES: 'To use Favorites you must sign in first',
     LOGIN_MANUALLY: 'Or login/register manually',
+    FAVORITES_TEXT_FIRST: 'Please ',
+    FAVORITES_TEXT_SECOND: ' to use Favorites'
 }
 
+export const KEYS = {
+    ONESIGNAL_APP_ID: '164548bb-bc7c-4b8a-ae09-91afb5865e5f',
+    GOOGLE_SIGN_IN_ANDROID_CLIENT_ID: '260894939219-623mta5qv66n16kde1gf77pqpofs3906.apps.googleusercontent.com',
+    GOOGLE_SIGN_IN_IOS_CLIENT_ID: '43023367729-h888o3pfeutvs4n63vqrqgb2h38fivsd.apps.googleusercontent.com',
+
+}

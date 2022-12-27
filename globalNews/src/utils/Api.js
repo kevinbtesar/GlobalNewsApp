@@ -32,7 +32,7 @@ class Api {
 }
 
 export async function getArticlesHelper(category){
-    console.log("category: " + category);
+    // console.log("category: " + category);
     try {
 
         const news = await api.getArticles({ category: category ?? 'Home', appName: DeviceInfo.getApplicationName() });

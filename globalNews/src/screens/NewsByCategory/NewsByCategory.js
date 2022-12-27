@@ -1,33 +1,29 @@
 import React, { Component } from 'react'
-import { StyleSheet, FlatList, View, TouchableOpacity, Text, } from "react-native";
-import DeviceInfo from 'react-native-device-info';
-import { connect } from 'react-redux';
-import Modal from 'react-native-modal';
+import { StyleSheet, /*FlatList, View, TouchableOpacity, Text,*/ } from "react-native";
+// import { connect } from 'react-redux';
+// import Modal from 'react-native-modal';
+import OneSignal from 'react-native-onesignal';
 
 import { Loader, NoResults, NewsCardList, Login } from '../../components';
-import { NEWS_PICKER_TYPE } from '../../utils/Enums';
+// import { NEWS_PICKER_TYPE } from '../../utils/Enums';
 import Colors from '../../utils/Colors';
 import { NewsCountriesData, NewsSortTypesData } from '../../data';
-import Api, {getArticlesHelper} from '../../utils/Api';
+import { getArticlesHelper } from '../../utils/Api';
 import Fonts from '../../utils/Fonts';
 import { TEXT_STRINGS } from '../../utils/Enums';
-// import { articlesSelector } from '../../store/newsStore/newsStore.selectors';
-// import { getArticles } from '../../store/newsStore/newsStore.actions';
 // import GLOBAL from '../../store/globalStore';
+import { KEYS } from '../../utils/Enums';
 
-// let actions = undefined;
-
-
-class NewsByCategory extends Component 
-{
+class NewsByCategory extends Component {
     constructor(props) {
         super(props);
         // console.log('props: ' + JSON.stringify(props))
-        console.log('route.name: ' + this.props.route.name)
+        // console.log('route.name: ' + this.props.route.name)
 
         this.state = {
             news: [],
-            categories: [],
+            // categories: [],
+            favorites: [],
             isLoading: true,
             error: false,
             isModalVisible: false,
@@ -35,18 +31,20 @@ class NewsByCategory extends Component
             sortType: NewsSortTypesData[0],
         };
         actions = props;
+    
     }
 
-    componentDidMount() { 
+    componentDidMount() {
+
         this.getNewsByCategory();
 
         this._unsubscribe = this.props.navigation.addListener('focus', () => {
             console.log('route.params.subreddit HERE: ' + this.props.route.name)
+            // console.log('state: ' + JSON.stringify(this.state))
         });
 
-         // console.log("Value: " + JSON.stringify(GLOBAL.categories))
+        // console.log("Value: " + JSON.stringify(GLOBAL.categories))
     }
-
 
     componentWillUnmount() {
         this._unsubscribe();
@@ -54,15 +52,15 @@ class NewsByCategory extends Component
 
     async getNewsByCategory() {
         try {
-            const { route, navigation} = this.props;
+            const { route, navigation } = this.props;
             const { name } = route;
             // const { country, sortType } = this.state;
             // const news = await Api.getArticles({ category: ((this.props.route.name=='Loading') ? 'Home' : this.props.route.name), sort: sortType.type, appName: DeviceInfo.getApplicationName() });
-            const news = await getArticlesHelper();
+            const news = await getArticlesHelper((this.props.route.name && this.props.route.name != 'Loading') ? this.props.route.name : 'Home');
             if (news && news.error) {
-                this.setState({ isLoading: false});
+                this.setState({ isLoading: false });
                 throw new Error(JSON.stringify(news.error));
-            } 
+            }
 
             // console.log(JSON.stringify(news['articles']));
             newsArray = Object.keys(news['articles']).map(k => news['articles'][k]),
@@ -79,7 +77,7 @@ class NewsByCategory extends Component
 
         }
         catch (e) {
-            this.setState({ news: [], categories: [], isLoading: false, error: JSON.stringify(e) });
+            this.setState({ news: [], isLoading: false, error: JSON.stringify(e) });
         }
     }
 
@@ -111,7 +109,7 @@ class NewsByCategory extends Component
 
     render() {
         const { news, categories, isLoading, isModalVisible, country, sortType, error } = this.state
-        const { route, navigation} = this.props;
+        const { route, navigation } = this.props;
         return (
             <>
 
@@ -125,7 +123,7 @@ class NewsByCategory extends Component
                 </View> */}
 
                 {!isLoading ? Object.keys(news).length ?
-                    <NewsCardList categories={categories} news={news} navigation={navigation} route={route} />
+                    <NewsCardList categories={categories} news={news} state={this.state} navigation={navigation} route={route} />
                     :
                     <NoResults text={error || null} />
                     : <Loader />
@@ -154,8 +152,8 @@ class NewsByCategory extends Component
                     </View>
                 </Modal> */}
 
-                <Login message={TEXT_STRINGS.LOGIN_HEADER} />
-                
+                <Login message={TEXT_STRINGS.LOGIN_FOR_FAVORITES} />
+
 
             </>
         )
@@ -163,13 +161,15 @@ class NewsByCategory extends Component
 }
 
 
-const mapStateToProps = (state) => ({
-    news: state.news,
-    categories: state.categories
-});
+
+// const mapStateToProps = (state) => ({
+//     news: state.news,
+//     categories: state.categories
+// });
 
 
-export default connect(mapStateToProps)(NewsByCategory);
+// export default connect(mapStateToProps)(NewsByCategory);
+export default (NewsByCategory);
 
 const styles = StyleSheet.create({
     pickersLine: {
