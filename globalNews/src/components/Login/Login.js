@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LoginManager, GraphRequest, GraphRequestManager, AccessToken } from 'react-native-fbsdk';
+import { LoginManager, GraphRequest, GraphRequestManager, AccessToken } from 'react-native-fbsdk-next';
 import { useDispatch, useSelector } from 'react-redux';
 import Modal from 'react-native-modal';
 import { TouchableOpacity, StyleSheet, Text, View, TextInput, Button, Alert } from 'react-native';
