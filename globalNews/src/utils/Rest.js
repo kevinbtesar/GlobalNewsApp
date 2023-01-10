@@ -3,7 +3,7 @@ export const getRest = async (url, params) => {
   if (params) {
     apiUrl = withQuery(url, params);
   }
-   console.log(`${apiUrl}`)
+  console.log(`${apiUrl}`)
   try {
     const res = await fetch(apiUrl, {
       method: "GET",
@@ -15,16 +15,16 @@ export const getRest = async (url, params) => {
     const data = await res.json();
     return data;
   } catch (error) {
-    console.log("error: " + error);
+    console.log("getRest error: " + error);
   }
 };
 
 
 export const postRest = async (url, params) => {
 
-  console.log("url: " + url)
-  console.log("params: " + JSON.stringify(params))
-  
+  // console.log("url: " + url)
+  // console.log("params: " + JSON.stringify(params))
+
   try {
     const res = await fetch(url, {
       method: 'POST',
@@ -49,16 +49,17 @@ export const postRest = async (url, params) => {
         deviceId: params.deviceId ?? '',
         appId: params.appId ?? '',
         name: params.name ?? '',
+        url: params.url ?? '',
       }),
 
     });
-   
+
     const data = await res.json();
     // console.log('data: ' + JSON.stringify(data));
 
     return data;
   } catch (err) {
-    console.error("error: " + err);
+    console.error("postRest error: " + err);
   }
 };
 

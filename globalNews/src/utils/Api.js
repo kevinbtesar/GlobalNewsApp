@@ -29,32 +29,35 @@ class Api {
     //     return await postRest(this.loginGrantedAuth, email)
     // }
 
-}
-
-export async function getArticlesHelper(category){
-    // console.log("category: " + category);
-    try {
-
-        const news = await api.getArticles({ category: category ?? 'Home', appName: DeviceInfo.getApplicationName() });
-
-        // console.log(JSON.stringify(news));
-        if (news && news.error) {
-            // console.log("news: " + JSON.stringify(news))
-            throw new Error(news);
+    async getArticlesHelper(category){
+        // console.log("category: " + category);
+        try {
+    
+            const news = await api.getArticles({ category: category ?? 'Home', appName: DeviceInfo.getApplicationName() });
+            // const news = await api.getArticles({ category: category ?? 'Home', appName: DeviceInfo.getApplicationName() });
+            
+            // console.log(JSON.stringify(news));
+            if (news && news.error) {
+                // console.log("news: " + JSON.stringify(news))
+                throw new Error(news);
+            }
+    
+            newsArray = Object.keys(news['articles']).map(k => news['articles'][k]),
+                store.dispatch(populateArticles(newsArray))
+    
+            categoriesArray = Object.keys(news['categories']).map(k => news['categories'][k]),
+                store.dispatch(populateCategories(categoriesArray))
+            // GLOBAL.categories = categoriesArray;
+    
+            return news;
+        } catch (e) {
+            console.error('API.js Error: ' + JSON.stringify(e));
         }
-
-        newsArray = Object.keys(news['articles']).map(k => news['articles'][k]),
-            store.dispatch(populateArticles(newsArray))
-
-        categoriesArray = Object.keys(news['categories']).map(k => news['categories'][k]),
-            store.dispatch(populateCategories(categoriesArray))
-        // GLOBAL.categories = categoriesArray;
-
-        return news;
-    } catch (e) {
-        console.error('API.js Error: ' + JSON.stringify(e));
     }
+    
+
 }
+
 
 
 const api = new Api()

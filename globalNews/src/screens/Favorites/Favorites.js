@@ -1,6 +1,8 @@
 import React from 'react'
-import { TouchableOpacity, StyleSheet, View, Text } from "react-native";
+import { TouchableOpacity, StyleSheet, View, Text, TouchableWithoutFeedback } from "react-native";
 import { useDispatch, useSelector } from 'react-redux';
+import { Button } from 'react-native-paper';
+
 import { removeAllFavorites } from '../../store/newsStore/newsStore.actions';
 import { favoritesSelector } from '../../store/newsStore/newsStore.selectors';
 import { NewsCardList, NoResults } from '../../components';
@@ -50,7 +52,11 @@ const Favorites = (props) => {
             dispatch(loginModalVisible(true))
         }
     }
-      
+
+    const onPressSignInButton = () => {
+        dispatch(loginModalVisible(true))
+    }
+
     return (
         <>
             <LinearGradient start={{ x: 1, y: 1 }} end={{ x: 1, y: .7 }} colors={[Colors.off_white, Colors.yellow]} style={styles.toolBarLine}>
@@ -62,20 +68,24 @@ const Favorites = (props) => {
                 </TouchableOpacity>
             </LinearGradient>
             
-                {!isUserConnected ?
+            {!isUserConnected ?
+                <TouchableWithoutFeedback onPress={onPressSignInButton} style={{flexDirection:'row', marginTop:30, alignItems:'center', alignSelf:'center'}}>
+                    <View style={{flexDirection:'row', marginTop:30, alignItems:'center', alignSelf:'center'}}>
+                        <Button style={{width:118}} mode="contained" >{TEXT_STRINGS.FAVORITES_TEXT_FIRST}</Button>
+                        <Text >{TEXT_STRINGS.FAVORITES_TEXT_SECOND}</Text>
+                    </View>
+                </TouchableWithoutFeedback>
 
-                    <Text style={{...styles.toolBarText, marginTop:40}}>{TEXT_STRINGS.LOGIN_FOR_FAVORITES}</Text>
+            : favorites.length > 0  ?
 
-                : favorites.length > 0  ?
-
-                    <NewsCardList news={favorites} navigation={props.navigation} />
-                :
-                    <NoResults text={'You have no favorite news'} fontSize={26} color={Colors.yellow}>
-                        <TouchableOpacity style={styles.navigateButton} onPress={() => props.navigation.navigate('Categories')} >
-                            <Text style={styles.navigateButtonText}>{'Go to Select Favorite News'}</Text>
-                        </TouchableOpacity>
-                    </NoResults>
-                }
+                <NewsCardList news={favorites} navigation={props.navigation} />
+            :
+                <NoResults text={'You have no favorite news'} fontSize={26} color={Colors.yellow}>
+                    <TouchableOpacity style={styles.navigateButton} onPress={() => props.navigation.navigate('Categories')} >
+                        <Text style={styles.navigateButtonText}>{'Go to Select Favorite News'}</Text>
+                    </TouchableOpacity>
+                </NoResults>
+            }
        
         </>
     )

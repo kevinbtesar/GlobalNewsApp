@@ -22,95 +22,120 @@ const Settings = (props) => {
     const reportBug = () => {
         console.log("TODO: MAKE REPORTING SYSTEM")
     };
-    const [ranOnceFlag, setRanOnceFlag] = useState(false);
+    const [ranNotificationOnceFlag, setRanNotificationOnceFlag] = useState(false);
+    const [ranDarkModeOnceFlag, setRanDarkModeOnceFlag] = useState(false);
 
     // const [isNotificationSwitchOn, setIsNotificationSwitchOn] = useState(false);
     // const [isDarkModeSwitchOn, setIsDarkModeSwitchOn] = useState(false);
     // const onToggleNotificationSwitch = () => setIsNotificationSwitchOn(!isNotificationSwitchOn);
     // const onToggleDarkModeSwitch = () => setIsDarkModeSwitchOn(!isDarkModeSwitchOn);
 
-    const onToggleNotificationSwitch = async (desiredSetting) => {
+    const onToggleNotificationSwitch = async () => {
+        // console.log("Desired: " + desiredSetting)
+        
+            let mNotificationSwitchStatus = !isNotificationSwitchOn 
+       
+            setNotificationSwitch(mNotificationSwitchStatus) // set the toggle switch to the desired setting
+            // console.log("isNotificationSwitchOn: " + mNotificationSwitchStatus)
+            
 
-        setNotificationSwitch(desiredSetting) // set the toggle switch to the desired setting
+            if (mNotificationSwitchStatus) {
+                // console.log("HERE")
+                try {
+                    const state = await OneSignal.getDeviceState();
 
-        if (desiredSetting) {
-            try {
-                const state = await OneSignal.getDeviceState();
-                
-                if (!state.hasNotificationPermission) 
-                {
-                    OneSignal.promptForPushNotificationsWithUserResponse(true, response => 
+                    if (!state.hasNotificationPermission) 
                     {
-                        if (response)
+                        OneSignal.promptForPushNotificationsWithUserResponse(true, response => 
                         {
-                            // notifications permission was set to On
-                            OneSignal.disablePush(false);
-                            AsyncStorage.setItem('@notificationsSetting', "true")
-                            
-                        } else {
-                            setNotificationSwitch(false) // denied permission so set toggle back to Off
-                            AsyncStorage.setItem('@notificationsSetting', "false")
-                        }
-                    });
-                } else {
-                    OneSignal.disablePush(false);
-                    await AsyncStorage.setItem('@notificationsSetting', "true")
-                }
-            } catch (e) {
-                setNotificationSwitch(false)  // there was an issue with Async or OneSignal, so set toggle back to Off
-            }
+                            if (response)
+                            {
+                                // notifications permission was set to On
+                                OneSignal.disablePush(false);
+                                AsyncStorage.setItem('@notificationsSetting', "true")
 
-        } else {
-            OneSignal.disablePush(true);
-            await AsyncStorage.setItem('@notificationsSetting', "false")
+                            } else {
+                                setNotificationSwitch(false) // denied permission so set toggle back to Off
+                                AsyncStorage.setItem('@notificationsSetting', "false")
+                            }
+                        });
+                    } else {
+                        OneSignal.disablePush(false);
+                        await AsyncStorage.setItem('@notificationsSetting', "true")
+                    }
+                } catch (e) {
+                    setNotificationSwitch(false)  // there was an issue with Async or OneSignal, so set toggle back to Off
+                }
+
+            } else {
+                OneSignal.disablePush(true);
+                await AsyncStorage.setItem('@notificationsSetting', "false")
+            }
+    };
+
+    const onToggleDarkModeSwitch = async () => {
+        // let mDarkModeSwitchStatus = !isDarkModeSwitchOn
+        setIsDarkModeSwitch(!isDarkModeSwitchOn)
+        try {
+           
+            await AsyncStorage.setItem('@darkModeSetting', !isDarkModeSwitchOn ? "true" : "false")
+        } catch (e) {
+            setIsDarkModeSwitch(false)
+            // saving error
         }
     };
 
-    async function getNotificationsSetting() {
+
+    async function getNotificationsSetting (){
         try {
-            const value = await AsyncStorage.getItem('@notificationsSetting')
+            const notificationsSettingValue = await eval(AsyncStorage.getItem('@notificationsSetting') ?? "true")
             const state = await OneSignal.getDeviceState();
 
-            /**
-             * ranOnceFlag is used to set the notifications switch to the proper setting on init. 
-             * without it, setNotificationSwitch() is ran with every toggle, which looks odd
-             **/ 
-            if(!ranOnceFlag){ 
-                setRanOnceFlag(true);
-                setNotificationSwitch(value == "true" && state.hasNotificationPermission ? true : false)
+            // console.log("state: " + JSON.stringify(state))
+
+            let notificationBool = (notificationsSettingValue && state.hasNotificationPermission && !state.isPushDisabled)
+            
+            if(!ranNotificationOnceFlag){
+                setNotificationSwitch(notificationBool)
+                setRanNotificationOnceFlag(true)
             }
- 
-            return (value == "true" && state.hasNotificationPermission ? true : false)
+            
+            // console.log("notificationBool " + notificationBool)
+            return notificationBool
+            
 
         } catch (e) {
-            setNotificationSwitch(false);
+            if(!ranNotificationOnceFlag){
+                setNotificationSwitch(false)
+                setRanNotificationOnceFlag(true)
+            }
             return false;
         }
 
     }
 
 
-    
-    const onToggleDarkModeSwitch = async (value) => {
-        setIsDarkModeSwitch(value)
+    async function getDarkModeSetting () {
         try {
-            const setValue = (value && value == true) ? "true" : "false"
-            await AsyncStorage.setItem('@darkModeSetting', setValue)
+            let darkModeBool = await AsyncStorage.getItem('@darkModeSetting') ?? "false"
+            darkModeBool = eval(darkModeBool)
+            if(!ranDarkModeOnceFlag){
+                setIsDarkModeSwitch(darkModeBool)
+                setRanDarkModeOnceFlag(true)
+                
+            } 
+            
+            return darkModeBool
         } catch (e) {
-            // saving error
-        }
-    };
-
-    async function getDarkModeSetting() {
-        try {
-            const value = await AsyncStorage.getItem('@darkModeSetting')
-            setIsDarkModeSwitch(value == "true" ? true : false)
-            return value
-        } catch (e) {
-            setIsDarkModeSwitch(false)
+            if(!ranDarkModeOnceFlag){
+                setIsDarkModeSwitch(false)
+                setRanDarkModeOnceFlag(true)
+            }
             return false
         }
     }
+  
+    
 
 
 
@@ -150,7 +175,7 @@ const Settings = (props) => {
                     title="Notifications"
                     description="Allow one notification every other day"
                     left={() => <List.Icon color={MD3Colors.tertiary70} icon="bell-outline" />}
-                    right={() => <Switch value={isNotificationSwitchOn} onValueChange={(value) => onToggleNotificationSwitch(value)} />}
+                    right={() => <Switch value={isNotificationSwitchOn} onValueChange={onToggleNotificationSwitch} />}
                 />
             </List.Section>
 
@@ -160,7 +185,7 @@ const Settings = (props) => {
                 <List.Item
                     title="Dark Mode"
                     left={() => <List.Icon color={MD3Colors.tertiary70} icon="lightbulb-on-outline" />}
-                    right={() => <Switch value={isDarkModeSwitchOn} onValueChange={(value) => onToggleDarkModeSwitch(value)} />}
+                    right={() => <Switch value={isDarkModeSwitchOn} onValueChange={onToggleDarkModeSwitch} />}
                 />
             </List.Section>
 
@@ -186,8 +211,7 @@ const Settings = (props) => {
 
             <List.Section>
 
-                <List.Item title="Version Code" description={DeviceInfo.getVersion()} />
-                <List.Item title="Build Number" description={DeviceInfo.getBuildNumber()} />
+                <List.Item title="" description={`v ${DeviceInfo.getVersion()}.${DeviceInfo.getBuildNumber()}`} />
 
             </List.Section>
 

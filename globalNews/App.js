@@ -16,6 +16,7 @@ import OneSignal from 'react-native-onesignal';
 import * as eva from '@eva-design/eva';
 import { ApplicationProvider, Layout, Text } from '@ui-kitten/components';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// import DeviceInfo from 'react-native-device-info';
 
 import { PreferencesContext } from './src/utils/PreferencesContext';
 import { store, persistor } from './src/store';
@@ -24,7 +25,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import NewsStackNavigator from './src/routes/NewsStackNavigator';
 import Splash from './src/components/Splash/Splash';
 import { KEYS } from './src/utils/Enums';
-
+;
 const App = () => {
   const [ready, setReady, isThemeDark, setIsThemeDark] = React.useState(false)
   const isDarkMode = useColorScheme() === 'dark';
@@ -46,11 +47,20 @@ const App = () => {
   );
 
   React.useEffect(() => {
-    
-     initialOnesignal()
-    setTimeout(() => setReady(true), 1000)
 
+    
+    callOneSignal()
+    // setTimeout(() => setReady(true), 1000) // for splash screen
+
+
+    async function callOneSignal() {
+      await initialOnesignal();
+
+      setReady(true)
+
+    }
   }, [])
+
 
   return (
 
@@ -82,8 +92,8 @@ const App = () => {
 const initialOnesignal = async () => {
   // OneSignal Initialization
   OneSignal.setRequiresUserPrivacyConsent(false);
-   OneSignal.setAppId(KEYS.ONESIGNAL_APP_ID);
-   OneSignal.setLogLevel(6, 0);
+  OneSignal.setAppId(KEYS.ONESIGNAL_APP_ID);
+  OneSignal.setLogLevel(6, 0);
 
 
   // promptForPushNotificationsWithUserResponse will show the native iOS or Android notification permission prompt.
@@ -91,7 +101,7 @@ const initialOnesignal = async () => {
   // OneSignal.promptForPushNotificationsWithUserResponse(response => {
   //   console.log("Prompt response:", response);
   // });
-  
+
 
   //Method for handling notifications received while app in foreground
   OneSignal.setNotificationWillShowInForegroundHandler(
@@ -108,20 +118,20 @@ const initialOnesignal = async () => {
       try {
         const value = await AsyncStorage.getItem('@notificationsSetting')
         console.log("App value: " + value)
-        if(value && value=="true"){
+        if (value && value == "true") {
           // Complete with null means don't show a notification.
           notificationReceivedEvent.complete(notification);
-        }else {
+        } else {
           notificationReceivedEvent.complete(null);
         }
-        
-        
+
+
 
       } catch (e) {
-        
-        
+
+
       }
-      
+
     },
   );
 
@@ -130,10 +140,10 @@ const initialOnesignal = async () => {
     console.log('OneSignal: notification opened:', notification);
   });
 
-  let state = await OneSignal.getDeviceState();
-  console.log("state: " + JSON.stringify(state))
+  // let state = await OneSignal.getDeviceState();
+  // console.log("state: " + JSON.stringify(state))
 
-  
+
 };
 
 

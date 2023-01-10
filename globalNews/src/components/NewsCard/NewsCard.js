@@ -30,6 +30,8 @@ const NewsCard = (props) => {
     const { article, navigation, route } = props
     const { title, /*thumbnail*/image_url, source, created_utc, article_id, author } = article
     // console.log("route: " + JSON.stringify(route))
+    // console.log("props: " + JSON.stringify(props))
+    // console.log("name: " + props.route ? props.route.name : 'undef')
     const overflowDotsIcon = (<MaterialCommunityIcons name="dots-vertical" size={28} />)
     const dispatch = useDispatch();
     const isUserConnected = useSelector(isUserConnectedSelector);
@@ -59,10 +61,11 @@ const NewsCard = (props) => {
                         description: props.article.description,
                         image_url: props.article.image_url,
                         source: props.article.source,
-                        category: props.article.category,
+                        category: (props.route) ? props.route.name : '',
                         created_utc: props.article.created_utc,
                         author: props.article.author,
                         article_id: props.article.article_id,
+                        url: props.article.url,
                     })}
                     rippleColor={Colors.black_opacity}
                 >

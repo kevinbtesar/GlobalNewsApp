@@ -1,43 +1,161 @@
-import React from 'react'
-import { ScrollView, StyleSheet, View } from "react-native";
-import { Card, Title, Subheading, Caption } from 'react-native-paper';
-import Colors from '../../utils/Colors';
+import React, { useState, useEffect, useRef } from 'react'
+import { ScrollView, StyleSheet, View, ActivityIndicator, Platform, BackHandler } from "react-native";
+import { Card, Title, Subheading, Caption, Snackbar } from 'react-native-paper';
+import { WebView } from 'react-native-webview';
+import Device from 'react-native-device-info';
+
 import moment from 'moment';
+import Colors from '../../utils/Colors';
 import { FavoriteIcon, Login } from '../../components';
 import { capitalizeFirstLetter } from '../../utils/Tools';
 import Fonts from '../../utils/Fonts';
 import { TEXT_STRINGS } from '../../utils/Enums';
+import { showSnackbar } from '../../components/Snackbar/SnackbarComponent';
 
 const Article = (props) => {
-    const { route } = props
-    const { title, description, image, source, category, created_utc, author, article_id } = route.params
-    let article = {title: title, article_id: article_id}
-    
-    return (
-        <>
-            <View style={styles.cardContainer}>
+    const { route, navigation } = props
+    const { title, description, image_url, source, category, created_utc, author, article_id, url } = route.params
+    const [currentURI, setURI] = useState(url);
+    const isTablet = Device.isTablet();
 
-                <ScrollView style={styles.container}> 
-                    <Card.Content>
-                        <View style={styles.titleLine}>
-                            <Title style={styles.title} >{title}</Title>
-                            <FavoriteIcon article={article} style={styles.favoriteIcon} />
-                        </View>
-                        <Caption style={styles.subtitles}>{source}</Caption>
-                        <Caption style={styles.subtitles}>{`Category: ${capitalizeFirstLetter(category)}`}</Caption>
-                        <View style={styles.sourceAndDate}>
-                            <Caption style={styles.subtitles}>{moment(created_utc).format("DD.MM.YYYY")}</Caption>
-                            {author ? <Caption style={styles.subtitles}>{`Author: ${author}`}</Caption> : <React.Fragment />}
-                        </View>
-                        {image ? <Card.Cover source={{ uri: image }} style={styles.image} /> : <React.Fragment />}
-                        {description ? <Subheading style={styles.description}>{description}</Subheading> : <React.Fragment />}
-                    </Card.Content>
-                </ScrollView>
-            </View>
-            <Login message={TEXT_STRINGS.LOGIN_FOR_FAVORITES} />
-        </>
+    const webViewRef = useRef()
+    // let article = { title: title, article_id: article_id }
+    canGoBack = false
+    canGoForward = false
+    // console.log("props: " + route.name)
+    // console.log("props: " + JSON.stringify(props.navigation))
+    // console.log("route: " + JSON.stringify(route))
+    // console.log("source: " + source)
+
+    useEffect(() => 
+    {
+        // props.navigation.setOptions({ headerTitle: category })
+
+        if (Platform.OS === 'android') {
+            BackHandler.addEventListener('hardwareBackPress', onAndroidBackPress);
+            // BackHandler.addEventListener('hardwareBackPress', backButtonHandler);
+            return () => {
+                BackHandler.removeEventListener('hardwareBackPress', onAndroidBackPress);
+            };
+        }
+
+    }, [])
+
+    const onAndroidBackPress = () => {
+        // console.log("onAndroidBackPress canGoBack: " + canGoBack)
+        // console.log("onAndroidBackPress canGoForward: " + canGoForward)
+        if ( webViewRef.current && canGoBack ) {
+            // console.log("HERE0  current: " + JSON.stringify(webViewRef.current))
+            webViewRef.current.goBack();
+            return true; // prevent default behavior (exit app)
+        } else {
+            // console.log("HERE2")
+            return false;
+        }
+    };
+
+
+    return (
+       
+
+            //  <ScrollView style={styles.container}> 
+            //     <Card.Content>
+            //         <View style={styles.titleLine}>
+            //             <Title style={styles.title} >{title}</Title>
+            //             <FavoriteIcon article={article} style={styles.favoriteIcon} />
+            //         </View>
+            //         <Caption style={styles.subtitles}>{`Source: ${source}`}</Caption>
+                    
+            //         <View style={styles.sourceAndDate}>
+            //         <Caption style={styles.subtitles}>{moment(created_utc).format("DD.MM.YYYY")}</Caption>
+            //             <Caption style={styles.subtitles}>{`Category: ${capitalizeFirstLetter(category)}`}</Caption>
+                        
+            //         </View>
+            //         {image_url ? <Card.Cover source={{ uri: image_url }} style={styles.image} /> : <React.Fragment />}
+            //         {description ? <Subheading style={styles.description}>{description}</Subheading> : <React.Fragment />}
+            //     </Card.Content>
+            // </ScrollView> 
+
+            <WebView
+                ref={webViewRef}
+                source={{ uri: url }}
+                userAgent="Mozilla/5.0 (Linux; Android 4.4.4; One Build/KTU84L.H4) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/33.0.0.0 Mobile Safari/537.36 [FB_IAB/FB4A;FBAV/28.0.0.20.16;]"
+                decelerationRate='normal'
+                allowsInlineMediaPlayback={true}                    
+                mediaPlaybackRequiresUserAction={false}
+                sharedCookiesEnabled={true}
+                mixedContentMode='always'
+                startInLoadingState={true}
+                limitsNavigationsToAppBoundDomains={true}
+                textInteractionEnabled={false}
+                setSupportMultipleWindows={false}
+                automaticallyAdjustContentInsets={true}
+                containerStyle={{ marginTop: isTablet ? -100 : -90 }}  // pushes other website's nav bar off the screen
+                renderLoading={() => (
+                    <ActivityIndicator
+                        color='#29aae1'
+                        size='large'
+                        style={{ flex: 1, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'flex-start' }}
+                    />
+                )}
+
+                // Only allow navigating within this website
+                originWhitelist={["http", "https"]}
+                onNavigationStateChange={navState => {
+                    // console.log('navState HERE: ' + JSON.stringify(navState))
+                    // console.log('navState.canGoBack HERE: ' + navState.canGoBack)
+                    // const { url } = navState;
+                    // Keep track of going back navigation within component
+                    canGoBack = navState.canGoBack
+                    canGoForward = navState.canGoForward
+                    // console.log('canGoBack: ' + canGoBack)
+                    // console.log('canGoForward: ' + canGoForward)
+
+                    // } else {
+                    //     console.log("h1")
+                    //     return;
+                    // }
+                    // if(navState.url !== url){
+                        // console.log("h0")
+                        // showSnackbar('TEST Cannot change from source URL', 2)
+                        // if (webviewRef.current) webviewRef.current.goBack()
+                        // webViewRef.current.goBack()
+                        // return;
+                    // } else {
+                    //     console.log("h1")
+                    // }
+                }}
+                onShouldStartLoadWithRequest={(request) => {
+                    // console.log('request HERE: ' + JSON.stringify(request))
+                    // console.log('request.url: ' + request.url)
+                    // console.log('currentURI: ' + currentURI)
+                    // const second = source.split('.').slice(0)[0]
+                    // const last = source.split('.').slice(-1)[0]
+                    // const domain = second + '.' + last
+                    // console.log("second: " + second)
+                    // console.log("lst: " + last)
+                    // console.log('domain: ' + domain)
+
+                    // if (request.url.includes(source)) {
+
+                    // Only allow navigating within this website
+                    if (request.url === currentURI && request.url.startsWith(url)) {
+                        return true;
+                    } else {
+                        // We're loading a new URL -- change state first
+                        setURI(request.url)
+                        // responseMessage('Cannot change from source URL')
+                        showSnackbar('Cannot change from source URL', 2)
+                        return false;
+                    }
+                }}
+            />
+   
     )
+
+
 }
+
 
 export default Article
 

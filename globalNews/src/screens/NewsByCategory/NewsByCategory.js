@@ -1,7 +1,9 @@
 import React, { Component } from 'react'
 import { StyleSheet, /*FlatList, View, TouchableOpacity, Text,*/ } from "react-native";
-// import { connect } from 'react-redux';
+import { connect, mapStateToProps } from 'react-redux';
 // import Modal from 'react-native-modal';
+import { store } from '../../store';
+import DeviceInfo from 'react-native-device-info';
 import OneSignal from 'react-native-onesignal';
 
 import { Loader, NoResults, NewsCardList, Login } from '../../components';
@@ -13,6 +15,10 @@ import Fonts from '../../utils/Fonts';
 import { TEXT_STRINGS } from '../../utils/Enums';
 // import GLOBAL from '../../store/globalStore';
 import { KEYS } from '../../utils/Enums';
+import api from '../../utils/Api';
+import { populateArticles } from '../../store/newsStore/newsStore.actions';
+import { populateCategories } from '../../store/newsStore/newsStore.actions';
+
 
 class NewsByCategory extends Component {
     constructor(props) {
@@ -22,7 +28,7 @@ class NewsByCategory extends Component {
 
         this.state = {
             news: [],
-            // categories: [],
+            categories: [],
             favorites: [],
             isLoading: true,
             error: false,
@@ -31,15 +37,16 @@ class NewsByCategory extends Component {
             sortType: NewsSortTypesData[0],
         };
         actions = props;
-    
+
     }
 
     componentDidMount() {
 
-        this.getNewsByCategory();
 
+        this.getNewsByCategory();
         this._unsubscribe = this.props.navigation.addListener('focus', () => {
             console.log('route.params.subreddit HERE: ' + this.props.route.name)
+
             // console.log('state: ' + JSON.stringify(this.state))
         });
 
@@ -55,26 +62,29 @@ class NewsByCategory extends Component {
             const { route, navigation } = this.props;
             const { name } = route;
             // const { country, sortType } = this.state;
-            // const news = await Api.getArticles({ category: ((this.props.route.name=='Loading') ? 'Home' : this.props.route.name), sort: sortType.type, appName: DeviceInfo.getApplicationName() });
-            const news = await getArticlesHelper((this.props.route.name && this.props.route.name != 'Loading') ? this.props.route.name : 'Home');
-            if (news && news.error) {
-                this.setState({ isLoading: false });
-                throw new Error(JSON.stringify(news.error));
+            const news = await api.getArticlesHelper(name && name != 'Loading' ? name : 'Home');
+            // console.log(JSON.stringify(news));
+            // console.log(news.articles);
+            // console.log(JSON.stringify(news['categories']));
+
+            if (news && news['articles']) {
+
+
+                categoriesArray = Object.keys(news['categories']).map(k => news['categories'][k]),
+                    this.setState({ categories: categoriesArray, isLoading: false, error: false });
+                newsArray = Object.keys(news['articles']).map(k => news['articles'][k]),
+                    this.setState({ news: newsArray, isLoading: false, error: false });
+                    
+                // console.log("categoriesArray: " + JSON.stringify(categoriesArray));
+
+
+            } else if (news && news.error) {
+                throw new Error(news.error);
+            } else {
+                throw new Error("There was an issue getting article data");
             }
 
-            // console.log(JSON.stringify(news['articles']));
-            newsArray = Object.keys(news['articles']).map(k => news['articles'][k]),
-                this.setState({ news: newsArray, isLoading: false, error: false });
-
-            // categoriesArray = Object.keys(news['categories']).map(k => news['categories'][k]),
-            //     this.setState({ categories: categoriesArray, isLoading: false, error: false });
-            //     console.log("categoriesArray: " + JSON.stringify(categoriesArray));
-            // newsArray = Object.keys(this.props.news['articles']).map(k => this.props.news['articles'][k]),
-            //     this.setState({ news: newsArray });
-            // console.log("Value: " + JSON.stringify(GLOBAL.categories))
-            // store.dispatch(populateArticles(newsArray))
-            // store.dispatch(populateCategories(categoriesArray))
-
+    
         }
         catch (e) {
             this.setState({ news: [], isLoading: false, error: JSON.stringify(e) });
@@ -168,8 +178,8 @@ class NewsByCategory extends Component {
 // });
 
 
-// export default connect(mapStateToProps)(NewsByCategory);
-export default (NewsByCategory);
+export default connect(mapStateToProps)(NewsByCategory);
+// export default (NewsByCategory);
 
 const styles = StyleSheet.create({
     pickersLine: {

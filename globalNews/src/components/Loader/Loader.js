@@ -2,10 +2,10 @@ import React from 'react';
 import { ActivityIndicator, View, Text, StyleSheet } from 'react-native';
 import Colors from '../../utils/Colors';
 
-function Loader({ text = 'Loading...', color = Colors.black, size = 'large' }) {
+function Loader({ text = 'Loading...', color = Colors.black, size = 'large', display = 'flex', align= 'center'}) {
     return (
-        <View style={styles.container}>
-            <View style={styles.containerLoader}>
+        <View style={{ ...styles.container, display: display}}>
+            <View style={{...styles.containerLoader, justifyContent: align, alignItems: align}}>
                 <ActivityIndicator color={color} size={size} />
                 <Text style={styles.textLoader}>{text}</Text>
             </View>
@@ -16,7 +16,7 @@ function Loader({ text = 'Loading...', color = Colors.black, size = 'large' }) {
 
 const styles = StyleSheet.create({
     container: {
-        flex: .9
+        flex: 1
     },
     containerLoader: {
         position: 'absolute',
@@ -25,8 +25,7 @@ const styles = StyleSheet.create({
         right: 0,
         bottom: 0,
         zIndex: 2,
-        justifyContent: "center",
-        alignItems: "center",
+
     },
     textLoader: {
         fontSize: 20,

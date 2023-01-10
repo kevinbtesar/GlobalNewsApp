@@ -9,7 +9,7 @@
         // console.log("props.article: " + JSON.stringify(props.article))
 
         const { article, style, route } = props
-        const { article_id, title, image_url, created_utc, source, author, } = props.article
+        const { article_id, title, image_url, created_utc, source, author, url, } = props.article
 
 
         if (isUserConnected && userData.accessToken) {
@@ -40,6 +40,7 @@
                         category: route.name,
                         createdUtc: created_utc,
                         author: author,
+                        url: url,
                     });
                     // console.log("favorite: " + JSON.stringify(favorite))
                     if (favorite.success) {

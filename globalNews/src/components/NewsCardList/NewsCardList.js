@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { RefreshControl, FlatList, View } from "react-native";
 import { useSelector } from 'react-redux';
-
 import { NewsCard } from '..';
-import { getArticlesHelper } from '../../utils/Api';
+
+import api from '../../utils/Api';
 import { favoritesSelector } from '../../store/newsStore/newsStore.selectors';
 
 const NewsCardList = (props) => {
@@ -16,9 +16,25 @@ const NewsCardList = (props) => {
 
         try {
             // setRefreshing(true);
-            const news = await getArticlesHelper(props.route.name);
-            newsArray = Object.keys(news['articles']).map(k => news['articles'][k]),
-                setState({ news: newsArray });
+            const news = await api.getArticlesHelper(props.route.name);
+
+            if (news && news['articles']) {
+
+
+                categoriesArray = Object.keys(news['categories']).map(k => news['categories'][k]),
+                    this.setState({ categories: categoriesArray });
+                newsArray = Object.keys(news['articles']).map(k => news['articles'][k]),
+                    this.setState({ news: newsArray });
+                    
+                // console.log("categoriesArray: " + JSON.stringify(categoriesArray));
+
+
+            } else if (news && news.error) {
+                throw new Error(news.error);
+            } else {
+                throw new Error("There was an issue getting article data");
+            }
+
             setRefreshing(false)
 
         } catch (e) {
@@ -29,6 +45,7 @@ const NewsCardList = (props) => {
     }, []);
 // console.log("HERE fav: " + JSON.stringify(store.getState().news.favorites))
 // console.log("HERE fav: " + JSON.stringify(favorites))
+// console.log("HERE props.news: " + JSON.stringify(props.news))
 
 
     return (

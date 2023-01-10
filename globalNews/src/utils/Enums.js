@@ -32,9 +32,9 @@ export const SORT_NEWS = {
 }
 
 export const TEXT_STRINGS = {
-    LOGIN_FOR_FAVORITES: 'To use Favorites you must sign in first',
+    LOGIN_FOR_FAVORITES: 'Sign in to use Favorites',
     LOGIN_MANUALLY: 'Or login/register manually',
-    FAVORITES_TEXT_FIRST: 'Please ',
+    FAVORITES_TEXT_FIRST: 'Sign in',
     FAVORITES_TEXT_SECOND: ' to use Favorites'
 }
 
