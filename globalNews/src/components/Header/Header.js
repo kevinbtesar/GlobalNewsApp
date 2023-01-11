@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import { TouchableOpacity, View, StyleSheet, Text, Image } from 'react-native';
+import { TouchableOpacity, View, StyleSheet, Text, Image, FlatList} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';;
 import { useDispatch, useSelector } from 'react-redux';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
@@ -7,7 +7,7 @@ import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { isUserConnectedSelector, getUserDataSelector } from '../../store/userStore/userStore.selectors';
 import Colors from '../../utils/Colors';
 import { loginModalVisible } from '../../store/userStore/userStore.actions';
-import api from '../../utils/Api';
+import getArticlesHelper from '../../utils/Api';
 import Loader from '../Loader';
 
 const Header = (props) => {
@@ -19,33 +19,24 @@ const Header = (props) => {
     const userData = useSelector(getUserDataSelector);
     const { navigation, navigationRef } = props;
     const [refreshing, setRefreshing ] = useState('none');
-
+    
     const onRefresh = async () => {
     
         try {
+            setRefreshing('flex');
             const mRootStackNavContainerRefState = navigationRef.getRootState()
             const mTopTabNavigationRefState = mRootStackNavContainerRefState.routes[0].state.routes[0].state
             const mRouteName = mTopTabNavigationRefState?.routeNames[mTopTabNavigationRefState.index] ?? 'Home'
-            
-            // console.log("mRouteName : " + mRouteName)
-            
-            setRefreshing('flex');
-            // console.log("refreshing : " + refreshing)
-    
-            const news = await api.getArticlesHelper(mRouteName);
-
-            // console.log("news : " + JSON.stringify(news))
-
-            if (news && news['articles']) {
-                setRefreshing('none')
-            } else if (news && news.error) {
-                throw new Error(news.error);
-            } else {
-                throw new Error("There was an issue getting article data");
-            }
+            const news = await getArticlesHelper(mRouteName)
 
             setRefreshing('none')
-
+            
+            if (news && news.error) {
+                throw new Error(news.error);
+            } else if(!news) {
+                throw new Error("There was an issue getting article data");
+            }
+            
         } catch (e) {
             console.error('Error', JSON.stringify(e));
             setRefreshing('none')

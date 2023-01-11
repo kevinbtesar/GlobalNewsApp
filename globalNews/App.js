@@ -50,7 +50,7 @@ const App = () => {
 
     
     callOneSignal()
-    // setTimeout(() => setReady(true), 1000) // for splash screen
+    setTimeout(() => setReady(true), 3000) // for splash screen
 
 
     async function callOneSignal() {

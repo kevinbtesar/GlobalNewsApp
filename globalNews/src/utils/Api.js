@@ -10,36 +10,41 @@ import { populateArticles, populateCategories } from './../store/newsStore/newsS
 import { store } from './../store';
 // import GLOBAL from './../store/globalStore'
 
-class Api {
-    constructor() {
-        this.newsUrl = `${RTD_SERVER.LOCAL}${GET_ARTICLES}`
-        this.userAuthUrl = `${RTD_SERVER.LOCAL}${USER_AUTH}`
-        this.favoriteUrl = `${RTD_SERVER.LOCAL}${FAVORITES}`
+// class Api {
+    // constructor() {
+        // this.newsUrl = `${RTD_SERVER.LOCAL}${GET_ARTICLES}`
+        // this.userAuthUrl = `${RTD_SERVER.LOCAL}${USER_AUTH}`
+        // this.favoriteUrl = `${RTD_SERVER.LOCAL}${FAVORITES}`
+        let newsUrl = `${RTD_SERVER.LOCAL}${GET_ARTICLES}`
+        let userAuthUrl = `${RTD_SERVER.LOCAL}${USER_AUTH}`
+        let favoriteUrl = `${RTD_SERVER.LOCAL}${FAVORITES}`
+    // }
+    function getArticles(params) {
+        return getRest(newsUrl, params)
     }
-    getArticles(params) {
-        return getRest(this.newsUrl, params)
+    export function userAuth(params) {
+        return postRest(userAuthUrl, params)
     }
-    userAuth(params) {
-        return postRest(this.userAuthUrl, params)
-    }
-    favorites(params) {
-        return postRest(this.favoriteUrl, params)
+    export function favorites(params) {
+        return postRest(favoriteUrl, params)
     }
     // async rtdServerLoginWithGrant(email) {
     //     return await postRest(this.loginGrantedAuth, email)
     // }
 
-    async getArticlesHelper(category){
+    async function getArticlesHelper(category){
         // console.log("category: " + category);
         try {
     
-            const news = await api.getArticles({ category: category ?? 'Home', appName: DeviceInfo.getApplicationName() });
+            const news = await getArticles({ category: category ?? 'Home', appName: DeviceInfo.getApplicationName() });
             // const news = await api.getArticles({ category: category ?? 'Home', appName: DeviceInfo.getApplicationName() });
             
             // console.log(JSON.stringify(news));
             if (news && news.error) {
                 // console.log("news: " + JSON.stringify(news))
                 throw new Error(news);
+            } else if(!news){
+                throw new Error("API.js Error")
             }
     
             newsArray = Object.keys(news['articles']).map(k => news['articles'][k]),
@@ -51,14 +56,16 @@ class Api {
     
             return news;
         } catch (e) {
-            console.error('API.js Error: ' + JSON.stringify(e));
+            let er = 'API.js Error: ' + JSON.stringify(e)
+            console.error(er);
+            return er
         }
     }
     
 
-}
+// }
+export default getArticlesHelper
 
 
-
-const api = new Api()
-export default api
+// const api = new Api()
+// export default api

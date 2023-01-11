@@ -10,15 +10,11 @@ import { Loader, NoResults, NewsCardList, Login } from '../../components';
 // import { NEWS_PICKER_TYPE } from '../../utils/Enums';
 import Colors from '../../utils/Colors';
 import { NewsCountriesData, NewsSortTypesData } from '../../data';
-import { getArticlesHelper } from '../../utils/Api';
 import Fonts from '../../utils/Fonts';
 import { TEXT_STRINGS } from '../../utils/Enums';
 // import GLOBAL from '../../store/globalStore';
 import { KEYS } from '../../utils/Enums';
-import api from '../../utils/Api';
-import { populateArticles } from '../../store/newsStore/newsStore.actions';
-import { populateCategories } from '../../store/newsStore/newsStore.actions';
-
+import getArticlesHelper from '../../utils/Api';
 
 class NewsByCategory extends Component {
     constructor(props) {
@@ -37,17 +33,16 @@ class NewsByCategory extends Component {
             sortType: NewsSortTypesData[0],
         };
         actions = props;
-
+       
     }
 
     componentDidMount() {
 
-
         this.getNewsByCategory();
-        this._unsubscribe = this.props.navigation.addListener('focus', () => {
-            console.log('route.params.subreddit HERE: ' + this.props.route.name)
+    
 
-            // console.log('state: ' + JSON.stringify(this.state))
+        this._unsubscribe = this.props.navigation.addListener('focus', () => {
+            console.log('this.props.route.name HERE: ' + this.props.route.name)
         });
 
         // console.log("Value: " + JSON.stringify(GLOBAL.categories))
@@ -62,21 +57,24 @@ class NewsByCategory extends Component {
             const { route, navigation } = this.props;
             const { name } = route;
             // const { country, sortType } = this.state;
-            const news = await api.getArticlesHelper(name && name != 'Loading' ? name : 'Home');
+
+            console.log('name: ' + name)
+            const news = await getArticlesHelper(name && name != 'Loading' ? name : 'Home');
+            // const news = await getArticlesHelper(name);
             // console.log(JSON.stringify(news));
             // console.log(news.articles);
+            // console.log("name: " + name && name != 'Loading' ? name : 'Home');
             // console.log(JSON.stringify(news['categories']));
 
             if (news && news['articles']) {
 
-
-                categoriesArray = Object.keys(news['categories']).map(k => news['categories'][k]),
-                    this.setState({ categories: categoriesArray, isLoading: false, error: false });
-                newsArray = Object.keys(news['articles']).map(k => news['articles'][k]),
-                    this.setState({ news: newsArray, isLoading: false, error: false });
+                // categoriesArray = Object.keys(news['categories']).map(k => news['categories'][k]),
+                //     this.setState({ categories: categoriesArray, isLoading: false, error: false });
+                // newsArray = Object.keys(news['articles']).map(k => news['articles'][k]),
+                //     this.setState({ news: newsArray, isLoading: false, error: false });
                     
                 // console.log("categoriesArray: " + JSON.stringify(categoriesArray));
-
+                this.setState({ isLoading: false, error: false });
 
             } else if (news && news.error) {
                 throw new Error(news.error);
@@ -132,11 +130,17 @@ class NewsByCategory extends Component {
                     </TouchableOpacity>
                 </View> */}
 
-                {!isLoading ? Object.keys(news).length ?
+                {/* {!isLoading ? Object.keys(news).length ?
                     <NewsCardList categories={categories} news={news} state={this.state} navigation={navigation} route={route} />
                     :
                     <NoResults text={error || null} />
                     : <Loader />
+                } */}
+
+                {!isLoading ?
+                    <NewsCardList categories={categories} news={news} state={this.state} navigation={navigation} route={route} />
+                    :
+                    <Loader />
                 }
 
                 {/* <Modal

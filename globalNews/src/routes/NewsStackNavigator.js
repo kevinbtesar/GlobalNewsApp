@@ -53,7 +53,8 @@ CreateRootStack = () => {
 
     <NavigationContainer
       theme={theme}
-      initialRouteName={undefined}
+      initialRouteName={'Root'}
+      // initialRouteName={undefined}
       ref={navigationRef}
       backBehavior="history">
       <Stack.Navigator screenOptions={{ screenOptions, presentation: 'modal' }}>
