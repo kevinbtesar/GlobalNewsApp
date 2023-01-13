@@ -2,9 +2,6 @@ import React, { Component } from 'react'
 import { StyleSheet, /*FlatList, View, TouchableOpacity, Text,*/ } from "react-native";
 import { connect, mapStateToProps } from 'react-redux';
 // import Modal from 'react-native-modal';
-import { store } from '../../store';
-import DeviceInfo from 'react-native-device-info';
-import OneSignal from 'react-native-onesignal';
 
 import { Loader, NoResults, NewsCardList, Login } from '../../components';
 // import { NEWS_PICKER_TYPE } from '../../utils/Enums';
@@ -20,6 +17,7 @@ class NewsByCategory extends Component {
     constructor(props) {
         super(props);
         // console.log('props: ' + JSON.stringify(props))
+        // console.log('navigation: ' + JSON.stringify(props.navigation.getState()))
         // console.log('route.name: ' + this.props.route.name)
 
         this.state = {
@@ -37,19 +35,25 @@ class NewsByCategory extends Component {
     }
 
     componentDidMount() {
-
+        this.setState({ isLoading: true})
         this.getNewsByCategory();
-    
+       
+        this._unsubscribeFocus = this.props.navigation.addListener('focus', () => {
+            console.log('NewsByCategory this.props.route.name HERE: ' + this.props.route.name)
+            // this.setState({ isLoading: false})
+            // this.getNewsByCategory();
+        });
 
-        this._unsubscribe = this.props.navigation.addListener('focus', () => {
-            console.log('this.props.route.name HERE: ' + this.props.route.name)
+        this._unsubscribeBlur = this.props.navigation.addListener('blur', () => {   
+            // this.setState({ isLoading: true})
         });
 
         // console.log("Value: " + JSON.stringify(GLOBAL.categories))
     }
 
     componentWillUnmount() {
-        this._unsubscribe();
+        this._unsubscribeFocus();
+        this._unsubscribeBlur();
     }
 
     async getNewsByCategory() {
@@ -59,13 +63,18 @@ class NewsByCategory extends Component {
             // const { country, sortType } = this.state;
 
             console.log('name: ' + name)
-            const news = await getArticlesHelper(name && name != 'Loading' ? name : 'Home');
+            console.log('navigation.getState(): ' + navigation.getState().history.length)
+
+            if(navigation.getState().history.length>1){
+                const news = await getArticlesHelper(name && name != 'Loading' ? name : 'Home');
+            }
+            
             // const news = await getArticlesHelper(name);
             // console.log(JSON.stringify(news));
             // console.log(news.articles);
             // console.log("name: " + name && name != 'Loading' ? name : 'Home');
             // console.log(JSON.stringify(news['categories']));
-
+            // console.log(JSON.stringify(news));
             if (news && news['articles']) {
 
                 // categoriesArray = Object.keys(news['categories']).map(k => news['categories'][k]),
@@ -82,6 +91,7 @@ class NewsByCategory extends Component {
                 throw new Error("There was an issue getting article data");
             }
 
+            // this.setState({ isLoading: false, error: false });
     
         }
         catch (e) {

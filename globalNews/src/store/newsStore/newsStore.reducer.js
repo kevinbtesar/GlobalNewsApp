@@ -11,6 +11,7 @@ const initialState = {
 };
 
 const newsReducer = (state = initialState, action) => {
+    // console.log("actionpayload: " + JSON.stringify(action.payload))
     switch (action.type) {
         case ADD_TO_FAVORITES:
             return {
@@ -37,6 +38,7 @@ const newsReducer = (state = initialState, action) => {
                 return {
                 ...state,
                 articles: action.payload,
+                // articles: [...state.favorites.filter(article => article.app_category === action.payload)]
             };
         case POPULATE_CATEGORIES:
                 return {

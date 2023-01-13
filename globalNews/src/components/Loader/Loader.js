@@ -2,7 +2,8 @@ import React from 'react';
 import { ActivityIndicator, View, Text, StyleSheet } from 'react-native';
 import Colors from '../../utils/Colors';
 
-function Loader({ text = 'Loading...', color = Colors.black, size = 'large', display = 'flex', align= 'center'}) {
+function Loader( ) {
+    let text = 'Loading...', color = Colors.black, size = 'large', display = 'flex', align= 'center'
     return (
         <View style={{ ...styles.container, display: display}}>
             <View style={{...styles.containerLoader, justifyContent: align, alignItems: align}}>
