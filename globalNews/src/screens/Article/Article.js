@@ -9,7 +9,7 @@ import Colors from '../../utils/Colors';
 import { FavoriteIcon, Login } from '../../components';
 import { capitalizeFirstLetter } from '../../utils/Tools';
 import Fonts from '../../utils/Fonts';
-import { TEXT_STRINGS } from '../../utils/Enums';
+import { TEXT_STRINGS } from '../../data/Enums';
 import { showSnackbar } from '../../components/Snackbar/SnackbarComponent';
 
 const Article = (props) => {

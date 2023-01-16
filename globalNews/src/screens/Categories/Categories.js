@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Text, TouchableOpacity, FlatList, StyleSheet } from "react-native";
 import { NewsCategoryCard, Login } from '../../components';
-import { NewsCategoriesData } from '../../data';
+// import { NewsCategoriesData } from '../../data';
 import Colors from '../../utils/Colors';
 import Fonts from '../../utils/Fonts';
 import { useDispatch, useSelector } from 'react-redux';
@@ -53,7 +53,7 @@ const Categories = (props) => {
             </LinearGradient>
             <PosedComponent pose={poseOpen ? 'open' : 'closed'}>
                 <FlatList
-                    data={NewsCategoriesData}
+                    // data={NewsCategoriesData}
                     keyExtractor={(item, index) => item.category}
                     renderItem={renderCategoryItem}
 

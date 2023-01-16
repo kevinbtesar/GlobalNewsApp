@@ -12,7 +12,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { loginModalVisible } from '../../store/userStore/userStore.actions';
 import { isUserConnectedSelector, getUserDataSelector } from '../../store/userStore/userStore.selectors';
 import Api from '../../utils/Api';
-import { TEXT_STRINGS } from '../../utils/Enums';
+import { TEXT_STRINGS } from '../../data/Enums';
 
 const Favorites = (props) => {
     const dispatch = useDispatch();

@@ -7,8 +7,9 @@ import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { isUserConnectedSelector, getUserDataSelector } from '../../store/userStore/userStore.selectors';
 import Colors from '../../utils/Colors';
 import { loginModalVisible } from '../../store/userStore/userStore.actions';
-import getArticlesHelper from '../../utils/Api';
+import { getArticlesHelper } from '../../utils/Api';
 import Loader from '../Loader';
+import { ActivityIndicator } from 'react-native-paper';
 
 const Header = (props) => {
 
@@ -27,7 +28,7 @@ const Header = (props) => {
             const mRootStackNavContainerRefState = navigationRef.getRootState()
             const mTopTabNavigationRefState = mRootStackNavContainerRefState.routes[0].state.routes[0].state
             const mRouteName = mTopTabNavigationRefState?.routeNames[mTopTabNavigationRefState.index] ?? 'Home'
-            const news = await getArticlesHelper(mRouteName)
+            const news = await getArticlesHelper()
 
             setRefreshing('none')
             
@@ -64,11 +65,11 @@ const Header = (props) => {
                     <View style={{flexDirection: "row",  justifyContent:  'flex-end'}}>
                         
                         <Image
-                            style={{ width: 40, height: 40, borderRadius: 35 }}
+                            style={{ width: 40, height: 40, borderRadius: 35, marginEnd:10}}
                             source={{ uri: userData.image, cache: "force-cache" }}
                         />
 
-                        <TouchableOpacity style={styles.leftSideContainer} onPress={() => dispatch(loginModalVisible(true))}>
+                        <TouchableOpacity style={styles.rightSideContainer} onPress={() => dispatch(loginModalVisible(true))}>
                             <MaterialCommunityIcons name="logout" color={Colors.white} size={20} />
                             <Text style={styles.rightSideText}>{'Logout'}</Text>
                         </TouchableOpacity>
@@ -84,12 +85,11 @@ const Header = (props) => {
                     )
             )
         } else {
-            // <View style={{ flexDirection: "row", flexWrap: "wrap" }} >
             
             return (
                 <>
                 
-                    <View style={{flexDirection: 'row', alignItems:'center', }} >
+                    <View style={styles.leftSideContainer} >
                         <Text style={styles.headerText}>
                             { navigation?.getState().index == 1 ? 
                                 topTabNavigationRefState?.routeNames[topTabNavigationRefState.index] : routeName ?? 'Home'
@@ -97,21 +97,19 @@ const Header = (props) => {
                         </Text>
                         
                         {(routeName != 'Favorites' && routeName != 'Settings') ? (
-
-                            ( refreshing === 'flex' ) ? ( 
-                                <Loader display={refreshing} align={'flex-start'} />
-                        
-                            ):(
-                                <TouchableOpacity onPress={() => onRefresh(refreshing)}>
+                            <>
+                                <ActivityIndicator display={refreshing} style={styles.activityIndicator} />
+                     
+                                <TouchableOpacity onPress={() => onRefresh()}>
                                     <MaterialCommunityIcons
-                                        style={{display: (refreshing=='none' ? 'flex' : 'none')}}
+                                        style={{...styles.activityIndicator, display: (refreshing=='none' ? 'flex' : 'none')}}
                                         name={'refresh'}
                                         color={Colors.white}
                                         size={25}
                                     />
                                 </TouchableOpacity>
-                            )
-
+                  
+                            </>
                         ) : <></>}
                     </View>
                     
@@ -132,16 +130,18 @@ const styles = StyleSheet.create({
     //     fontSize: 12,
     //     width:'50%',
     // },
+    activityIndicator: {
+        // paddingTop:2
+    },
     rightSideContainer: {
         alignItems: 'center',
-        paddingRight: 13,
+        paddingRight: 5,
     },
     
     leftSideContainer: {
-        alignItems: 'center',
-        paddingLeft: 10,
+        flexDirection: 'row', 
+        alignItems:'center',
         fontSize: 12,
-        alignSelf: "flex-start"
     },
     rightSideText: {
         color: Colors.white,

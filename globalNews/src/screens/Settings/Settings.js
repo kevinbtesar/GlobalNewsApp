@@ -12,7 +12,6 @@ import DeviceInfo from 'react-native-device-info';
 import { loginModalVisible } from '../../store/userStore/userStore.actions';
 import { initializeShare } from '../../utils/Share';
 
-
 const Settings = (props) => {
     const dispatch = useDispatch();
     const isUserConnected = useSelector(isUserConnectedSelector);
@@ -38,7 +37,6 @@ const Settings = (props) => {
             setNotificationSwitch(mNotificationSwitchStatus) // set the toggle switch to the desired setting
             // console.log("isNotificationSwitchOn: " + mNotificationSwitchStatus)
             
-
             if (mNotificationSwitchStatus) {
                 // console.log("HERE")
                 try {
@@ -88,11 +86,13 @@ const Settings = (props) => {
 
     async function getNotificationsSetting (){
         try {
-            const notificationsSettingValue = await eval(AsyncStorage.getItem('@notificationsSetting') ?? "true")
+            const notificationsSettingValue = await eval(AsyncStorage.getItem('@notificationsSetting')) ?? "true"
             const state = await OneSignal.getDeviceState();
 
-            // console.log("state: " + JSON.stringify(state))
+            // console.log("getNotificationsSetting state: " + JSON.stringify(state))
+            // console.log("getNotificationsSetting statnotificationsSetting: " + notificationsSettingValue)
 
+            // notificationBool must be initinized before return value can be used in setNotificationSwitch()
             let notificationBool = (notificationsSettingValue && state.hasNotificationPermission && !state.isPushDisabled)
             
             if(!ranNotificationOnceFlag){
@@ -100,10 +100,8 @@ const Settings = (props) => {
                 setRanNotificationOnceFlag(true)
             }
             
-            // console.log("notificationBool " + notificationBool)
             return notificationBool
             
-
         } catch (e) {
             if(!ranNotificationOnceFlag){
                 setNotificationSwitch(false)
@@ -135,14 +133,10 @@ const Settings = (props) => {
         }
     }
   
-    
-
-
 
     return (
 
         <ScrollView >
-
 
             <List.Section>
                 <List.Subheader>Account</List.Subheader>
@@ -215,11 +209,7 @@ const Settings = (props) => {
 
             </List.Section>
 
-
-
-
         </ScrollView>
-
 
     )
 };

@@ -17,9 +17,9 @@ import Fonts from '../../utils/Fonts';
 import { loginModalVisible, loginUser, logoutUser } from '../../store/userStore/userStore.actions';
 import { addNewsToFavorites, removeAllFavorites } from '../../store/newsStore/newsStore.actions';
 import { isLoginModalVisibleSelector, isUserConnectedSelector } from '../../store/userStore/userStore.selectors';
-import { TEXT_STRINGS } from '../../utils/Enums';
-import Api from '../../utils/Api';
-import { KEYS } from '../../utils/Enums';
+import { TEXT_STRINGS } from '../../data/Enums';
+import { userAuth } from '../../utils/Api';
+import { KEYS } from '../../data/Enums';
 
 
 const Login = (props) => {
@@ -62,7 +62,7 @@ const Login = (props) => {
                         } else {
                             try {
                             
-                                const login = await Api.userAuth({ email: res.email, userAuth: 'true', name: res.name, deviceId: DeviceInfo.getDeviceId(), appId: DeviceInfo.getBundleId()});
+                                const login = await userAuth({ email: res.email, userAuth: 'true', name: res.name, deviceId: DeviceInfo.getDeviceId(), appId: DeviceInfo.getBundleId()});
                                 // console.log("res", JSON.stringify(res))
                                 console.log("login", JSON.stringify(login))
 
@@ -133,7 +133,7 @@ const Login = (props) => {
             const userInfo = await GoogleSignin.signIn();
 
             try {
-                const login = await Api.userAuth({ email: userInfo.user.email, userAuth: 'true', name: userInfo.user.name, deviceId: DeviceInfo.getDeviceId(), appId: DeviceInfo.getBundleId() });
+                const login = await userAuth({ email: userInfo.user.email, userAuth: 'true', name: userInfo.user.name, deviceId: DeviceInfo.getDeviceId(), appId: DeviceInfo.getBundleId() });
                 
                 // console.log(login);
 

@@ -24,8 +24,8 @@ import Colors from './src/utils/Colors';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import NewsStackNavigator from './src/routes/NewsStackNavigator';
 import Splash from './src/components/Splash/Splash';
-import { KEYS } from './src/utils/Enums';
-;
+import { KEYS } from './src/data/Enums';
+
 const App = () => {
   const [ready, setReady, isThemeDark, setIsThemeDark] = React.useState(false)
   const isDarkMode = useColorScheme() === 'dark';
@@ -94,15 +94,6 @@ const initialOnesignal = async () => {
   OneSignal.setRequiresUserPrivacyConsent(false);
   OneSignal.setAppId(KEYS.ONESIGNAL_APP_ID);
   OneSignal.setLogLevel(6, 0);
-
-
-  // promptForPushNotificationsWithUserResponse will show the native iOS or Android notification permission prompt.
-  // We recommend removing the following code and instead using an In-App Message to prompt for notification permission (See step 8)
-  // OneSignal.promptForPushNotificationsWithUserResponse(response => {
-  //   console.log("Prompt response:", response);
-  // });
-
-
   //Method for handling notifications received while app in foreground
   OneSignal.setNotificationWillShowInForegroundHandler(
     async notificationReceivedEvent => {
@@ -128,7 +119,7 @@ const initialOnesignal = async () => {
 
 
       } catch (e) {
-
+        console.error('setNotificationWillShowInForegroundHandler error: ', JSON.stringify(e));
 
       }
 
