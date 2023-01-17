@@ -20,7 +20,6 @@ import { isUserConnectedSelector } from "../store/userStore/userStore.selectors"
 import { loginModalVisible } from "../store/userStore/userStore.actions";
 import { Loader } from "../components";
 import { getArticlesHelper } from "../utils/Api";
-// import GLOBAL from '../store/globalStore';
 
 const Stack = createNativeStackNavigator();
 const MaterialTopTabs = createMaterialTopTabNavigator();
@@ -28,7 +27,7 @@ const MaterialBottomTabs = createMaterialBottomTabNavigator();
 const screenOptions = { headerShown: false, headerBackTitleVisible: false };
 
 
-const stackScreenOptions = (props, navigationRef) => ({
+const stackScreenOptions = (props, navigationRef, webviewRef) => ({
   headerStyle: {
     backgroundColor: Colors.black_opacity,
     height: 4,
@@ -92,6 +91,7 @@ TopTabs = props => {
 
     <MaterialTopTabs.Navigator
       removeClippedSubviews={true}
+      id="TopTabs"
       initialRouteName={"Loading"}
       initialLayout={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height }}
       backBehavior={'order'}
@@ -112,6 +112,7 @@ TopTabs = props => {
             name={index.title}
             component={NewsByCategory}
             key={index.title}
+            navigationKey={index.title}
           />
         ))
 
@@ -163,12 +164,12 @@ BottomTabs = (props) => {
       barStyle={{
         height: 72,
       }}
+      id={'BottomTabs'}
       initialRouteName={"Home"}
       initialLayout={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height }}
     >
       <MaterialBottomTabs.Screen
         name="Home"
-        // key="Home"
         component={TopTabs}
         options={props => ({
           ...stackScreenOptions(props),
@@ -181,7 +182,6 @@ BottomTabs = (props) => {
       />
       <MaterialBottomTabs.Screen
         name="Favorites"
-        key="Favorites"
         component={Favorites}
         options={{
           tabBarLabel: "Favorites",
@@ -202,7 +202,6 @@ BottomTabs = (props) => {
       />
       <MaterialBottomTabs.Screen
         name="Settings"
-        key="Settings"
         component={Settings}
         options={{
           tabBarLabel: "Settings",

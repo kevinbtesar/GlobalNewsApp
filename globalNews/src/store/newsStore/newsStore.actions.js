@@ -53,7 +53,6 @@ export function populateCategories(news) {
 export function purgeArticles() {
     return {
         type: PURGE_ARTICLES,
-        // payload: news,
     }
 }
 

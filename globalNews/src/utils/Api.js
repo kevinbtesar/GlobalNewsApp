@@ -6,7 +6,7 @@ import {
     USER_AUTH,
     FAVORITES,
 } from '../data/Enums';
-import { populateArticles, populateCategories } from './../store/newsStore/newsStore.actions';
+import { populateArticles, populateCategories, purgeArticles } from './../store/newsStore/newsStore.actions';
 import { store } from './../store';
 // import GLOBAL from './../store/globalStore'
 
@@ -46,7 +46,8 @@ export async function getArticlesHelper() {
             throw new Error("API.js Error")
         }
 
-        newsArray = Object.keys(news['articles']).map(k => news['articles'][k]),
+        newsArray = Object.keys(news['articles']).map(k => news['articles'][k])
+            store.dispatch(purgeArticles()),
             store.dispatch(populateArticles(newsArray))
 
         categoriesArray = Object.keys(news['categories']).map(k => news['categories'][k]),
