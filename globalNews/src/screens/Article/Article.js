@@ -13,6 +13,7 @@ import Fonts from '../../utils/Fonts';
 import { showSnackbar } from '../../components/Snackbar/SnackbarComponent';
 import GLOBAL from '../../store/globalStore';
 
+import { createClient } from '@supabase/supabase-js'
 
 const Article = (props) => {
     const { route, navigation } = props
@@ -64,7 +65,8 @@ const Article = (props) => {
 
     return (
         <WebView
-            ref={(ref) => GLOBAL.webviewRef = ref}
+            // ref={(ref) => GLOBAL.webviewRef = ref}
+            ref={webViewRef}
             source={{ uri: url }}
             userAgent="Mozilla/5.0 (Linux; Android 4.4.4; One Build/KTU84L.H4) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/33.0.0.0 Mobile Safari/537.36 [FB_IAB/FB4A;FBAV/28.0.0.20.16;]"
             decelerationRate='normal'
@@ -90,6 +92,8 @@ const Article = (props) => {
             originWhitelist={["http", "https"]}
             onNavigationStateChange={navState => {
                 console.log('navState HERE: ' + JSON.stringify(navState))
+                GLOBAL.webviewRef = webViewRef
+
                 // console.log('navState.canGoBack HERE: ' + navState.canGoBack)
                 // const { url } = navState;
                 // Keep track of going back navigation within component
@@ -99,28 +103,25 @@ const Article = (props) => {
                 // console.log('canGoForward: ' + canGoForward)
             }}
             onShouldStartLoadWithRequest={(request) => {
-                // console.log('request HERE: ' + JSON.stringify(request))
+                console.log('request HERE: ' + JSON.stringify(request))
                 // console.log('request.url: ' + request.url)
                 // console.log('url: ' + url)
                 // console.log('currentURI: ' + currentURI)
-                const second = url.split('.').slice(0)[0]
-                const last = url.split('.').slice(-1)[0]
-                const domain = second + '.' + last
-                // console.log("second: " + second)
-                // console.log("lst: " + last)
+                console.log("webViewRef: " + JSON.stringify(webViewRef))
+                // let domain = extractRootDomain(url)
                 // console.log('domain: ' + domain)
-                
+
                 // Only allow navigating within this website
                 // if (request.url.includes(source)) { // too lenient 
-                // if (request.url === currentURI && request.url.startsWith(url)) { // too strict
-                // f ( request.url.startsWith(url) ) { // to strict
-                if (request.url.startsWith(domain)) {
+                if (request.url === currentURI && request.url.startsWith(url)) 
+                {
                     return true;
                 } else {
                     // We're loading a new URL -- change state first
                     setURI(request.url)
-                    // responseMessage('Cannot change from source URL')
                     showSnackbar('Cannot change from source URL', 2)
+                    // navigation.goBack()
+                    
                     return false;
                 }
             }}
@@ -150,6 +151,40 @@ const Article = (props) => {
 
     )
 
+    function extractHostname(url) {
+        var hostname;
+        //find & remove protocol (http, ftp, etc.) and get hostname
+      
+        if (url.indexOf("//") > -1) {
+          hostname = url.split('/')[2];
+        } else {
+          hostname = url.split('/')[0];
+        }
+      
+        //find & remove port number
+        hostname = hostname.split(':')[0];
+        //find & remove "?"
+        hostname = hostname.split('?')[0];
+      
+        return hostname;
+      }
+      function extractRootDomain(url) {
+        var domain = extractHostname(url),
+        splitArr = domain.split('.'),
+        arrLen = splitArr.length;
+      
+        //extracting the root domain here
+        //if there is a subdomain
+        if (arrLen > 2) {
+          domain = splitArr[arrLen - 2] + '.' + splitArr[arrLen - 1];
+          //check to see if it's using a Country Code Top Level Domain (ccTLD) (i.e. ".me.uk")
+          if (splitArr[arrLen - 2].length == 2 && splitArr[arrLen - 1].length == 2) {
+            //this is using a ccTLD
+            domain = splitArr[arrLen - 3] + '.' + domain;
+          }
+        }
+        return domain;
+      }
 
 }
 

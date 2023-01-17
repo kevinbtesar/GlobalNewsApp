@@ -25,7 +25,7 @@ const Header = (props) => {
         setRefreshing('flex')
 
         if (navigation.getState().routeNames[navigation.getState().index] == 'Article') {
-            GLOBAL.webviewRef.reload()
+            GLOBAL.webviewRef.current.reload()
             setRefreshing('none')
 
         } else {

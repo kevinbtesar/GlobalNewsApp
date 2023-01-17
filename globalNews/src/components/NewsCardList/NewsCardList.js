@@ -86,7 +86,7 @@ const NewsCardList = (props) => {
     
         // console.log('newscarelist articlesArray: ' + JSON.stringify(articlesArray))
         // console.log("newscarelist appCategory: " + props.route.name)
-    
+        let counter = 0
         for (let i = 0; i <= articlesArray.length; i++) {
     
             // console.log(' props.route.name: ' +  props.route.name)
@@ -95,9 +95,10 @@ const NewsCardList = (props) => {
                 // console.log('newscarelist val: ' + articlesArray[i].app_category)
                 returnArray.push(articlesArray[i])
                 // console.log('returnArray : ' + JSON.stringify(returnArray))
+                counter++
             }
         }
-    
+    // console.log("counter: " +counter)
         return returnArray
         
     }
