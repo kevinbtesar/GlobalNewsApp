@@ -6,13 +6,13 @@ import Snackbar from 'react-native-snackbar';
 
 export function showSnackbar(message, length) {
 
-  if(length == 0){
-    length = Snackbar.LENGTH_INDEFINITE
-  } else if(length == 1){
-    length = Snackbar.LENGTH_SHORT
-  } else if(length == 2){
-    length = Snackbar.LENGTH_LONG
-  }
+  // if(length == 0){
+  //   length = Snackbar.LENGTH_INDEFINITE
+  // } else if(length == 1){
+  //   length = Snackbar.LENGTH_SHORT
+  // } else if(length == 2){
+  //   length = Snackbar.LENGTH_LONG
+  // }
 
 
   Snackbar.show({

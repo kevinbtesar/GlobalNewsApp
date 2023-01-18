@@ -41,9 +41,9 @@ const NewsCard = (props) => {
     // const noImageAvailable = 'https://www.bengi.nl/wp-content/uploads/2014/10/no-image-available1.png'
 
 
-    let options = ["Add Favorite", "Share Article"]
+    let options = ["Add Favorite", "Share Article", "Report Article"]
     if (isInFavorites) {
-        options = ["Remove Favorite", "Share Article"]
+        options = ["Remove Favorite", "Share Article", "Report Article"]
     }
     
 
@@ -103,7 +103,11 @@ const NewsCard = (props) => {
                                             options={options}
                                             //  actions={[blockSource, reportArticle]}
                                             // actions={[() => onClickFavoriteIcon(props), () => initializeShare(props.article.title, props.article.source)]}
-                                            actions={[() => onClickFavoriteIcon(props, isUserConnected, userData, dispatch, isInFavorites), () => initializeShare(props.article.title, props.article.source)]}
+                                            actions={[
+                                                () => onClickFavoriteIcon(props, isUserConnected, userData, dispatch, isInFavorites), 
+                                                () => initializeShare(props.article.title, props.article.source), 
+                                                ()=>{}
+                                            ]}
                                         />
                                     </View>
 

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { StyleSheet, View, ActivityIndicator, Platform, BackHandler } from "react-native";
+import { StyleSheet, View, ActivityIndicator, Platform, BackHandler, Dimensions } from "react-native";
 // import { Card, Title, Subheading, Caption } from 'react-native-paper';
 import { WebView } from 'react-native-webview';
 import Device from 'react-native-device-info';
-// import moment from 'moment';
+import Snackbar from 'react-native-snackbar';
 
 import Colors from '../../utils/Colors';
 // import { FavoriteIcon, Login } from '../../components';
@@ -55,15 +55,9 @@ const Article = (props) => {
         
     }, [])
 
-    const OverlaySpinner = () => {
-        return (
-           <View style={styles.spinnerView}>
-             <ActivityIndicator size="large" color="#0000ff" />
-           </View>
-         );   
-        };
 
-    return (
+
+    return ( <View style={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height }}>
         <WebView
             // ref={(ref) => GLOBAL.webviewRef = ref}
             ref={webViewRef}
@@ -73,9 +67,9 @@ const Article = (props) => {
             allowsInlineMediaPlayback={true}                    
             mediaPlaybackRequiresUserAction={false}
             sharedCookiesEnabled={true}
+            style={{width: Dimensions.get('window').width, height: Dimensions.get('window').height}}
             mixedContentMode='always'
             startInLoadingState={true}
-            limitsNavigationsToAppBoundDomains={true}
             textInteractionEnabled={false}
             setSupportMultipleWindows={false}
             automaticallyAdjustContentInsets={true}
@@ -87,15 +81,22 @@ const Article = (props) => {
                     style={{ ...StyleSheet.absoluteFill, justifyContent: 'center', alignItems: 'center',}}
                 />
             )}
-
+            onMessage={(event) => {
+                alert(event.nativeEvent.data);
+            }}
+    
+            onContentProcessDidTerminate={(syntheticEvent) => {
+                const { nativeEvent } = syntheticEvent;
+                console.warn('Content process terminated, reloading', nativeEvent);
+                webViewRef.current.reload();
+            }}
+            
             // Only allow navigating within this website
             originWhitelist={["http", "https"]}
             onNavigationStateChange={navState => {
                 console.log('navState HERE: ' + JSON.stringify(navState))
                 GLOBAL.webviewRef = webViewRef
-
-                // console.log('navState.canGoBack HERE: ' + navState.canGoBack)
-                // const { url } = navState;
+                
                 // Keep track of going back navigation within component
                 canGoBack = navState.canGoBack
                 canGoForward = navState.canGoForward
@@ -104,30 +105,32 @@ const Article = (props) => {
             }}
             onShouldStartLoadWithRequest={(request) => {
                 console.log('request HERE: ' + JSON.stringify(request))
-                // console.log('request.url: ' + request.url)
-                // console.log('url: ' + url)
-                // console.log('currentURI: ' + currentURI)
-                console.log("webViewRef: " + JSON.stringify(webViewRef))
+                console.log('request.url: ' + request.url)
+                console.log('url: ' + url)
+                console.log('currentURI: ' + currentURI)
                 // let domain = extractRootDomain(url)
                 // console.log('domain: ' + domain)
 
                 // Only allow navigating within this website
                 // if (request.url.includes(source)) { // too lenient 
-                if (request.url === currentURI && request.url.startsWith(url)) 
-                {
-                    return true;
-                } else {
+                // if ((request.url === currentURI && request.url.startsWith(url)) || request.url.includes('redirect')) return true; // too strict. wasnt allowing adding query params
+                if ( request.url.startsWith(url) || request.url.includes('redirect'))  return true;
+               
+                else {
                     // We're loading a new URL -- change state first
                     setURI(request.url)
-                    showSnackbar('Cannot change from source URL', 2)
-                    // navigation.goBack()
+                    showSnackbar('Cannot change from source URL', Snackbar.LENGTH_LONG)
+
+                    if(request.lockIdentifier && !request.canGoBack && !request.canGoForward && request.loading){
+                        navigation.goBack()
+                    } 
                     
                     return false;
                 }
             }}
         />
 
-
+</View>
 
         
         //  <ScrollView style={styles.container}> 

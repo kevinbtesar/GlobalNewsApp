@@ -3,6 +3,7 @@ import { StyleSheet, /*FlatList, View, TouchableOpacity, Text,*/ } from "react-n
 import { connect, mapStateToProps } from 'react-redux';
 // import Modal from 'react-native-modal';
 
+
 import { Loader, NewsCardList, Login } from '../../components';
 // import { NEWS_PICKER_TYPE } from '../../utils/Enums';
 import Colors from '../../utils/Colors';
@@ -10,7 +11,7 @@ import Colors from '../../utils/Colors';
 import Fonts from '../../utils/Fonts';
 import { TEXT_STRINGS } from '../../data/Enums';
 // import GLOBAL from '../../store/globalStore';
-// import { getArticlesHelper } from '../../utils/Api';
+import ConnectivityTracker from '../../utils/ConnectivityTracker'
 
 class NewsByCategory extends Component {
     constructor(props) {
@@ -32,14 +33,27 @@ class NewsByCategory extends Component {
         actions = props;
 
     }
-
+    const onConnectivityChange = (isConnected, timestamp, connectionInfo) => {
+        console.log(`isConnected: ${isConnected}, when: ${timestamp} more info: ${JSON.stringify(connectionInfo)}`)
+        // connectionInfo is only available if attachConnectionInfo is set to true
+    }
     componentDidMount() {
+
+
+
+        ConnectivityTracker.init({
+            onConnectivityChange,
+            attachConnectionInfo: false,
+            onError: msg => console.log(msg),
+            // verifyServersAreUp: () => store.dispatch(checkOurServersAreUp()),
+        });
 
         // this.getNewsByCategory();
         this.setState({ isLoading: false })
 
         this._unsubscribeFocus = this.props.navigation.addListener('focus', () => {
-        //     console.log('NewsByCategory this.props.route.name HERE: ' + this.props.route.name)
+        //     console.log('NewsByCategory this.props.route.name HERE: ' + this.props.route.name) 
+            console.log('NewsByCategory tryConnection: ' + this.props.route.name) 
             this.setState({ isLoading: false })
         });
 
@@ -154,28 +168,6 @@ class NewsByCategory extends Component {
                     <Loader />
                 }
 
-                {/* <Modal
-                    isVisible={!!isModalVisible}
-                    onRequestClose={() => this.setState({ isModalVisible: false })}
-                    onBackdropPress={() => this.setState({ isModalVisible: false })}
-                >
-                    <View style={styles.modalHolder}>
-                        <TouchableOpacity
-                            style={styles.modalCloseButton}
-                            onPress={() => this.setState({ isModalVisible: false })}>
-                            <Text style={styles.modalCloseIcon}>𝖷</Text>
-                        </TouchableOpacity>
-                        <View style={styles.modalHolderHeader}>
-                            <Text style={styles.modalHeaderTitle}>{isModalVisible == NEWS_PICKER_TYPE.COUNTRIES ? 'Select country news' : 'Select sort type'}</Text>
-                        </View>
-                        <FlatList
-                            style={styles.filtersListHolder}
-                            data={isModalVisible == NEWS_PICKER_TYPE.COUNTRIES ? NewsCountriesData : NewsSortTypesData}
-                            keyExtractor={(item, index) => index.toString()}
-                            renderItem={this.renderOption}
-                        />
-                    </View>
-                    </Modal> */}
 
                 <Login message={TEXT_STRINGS.LOGIN_FOR_FAVORITES} />
 

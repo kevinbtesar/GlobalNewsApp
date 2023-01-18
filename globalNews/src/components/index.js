@@ -7,6 +7,7 @@ import NewsCardList from './NewsCardList'
 import FavoriteIcon from './FavoriteIcon'
 import Login from './Login'
 import OverflowMenu from './OverflowMenu'
+import Modal from './Modal'
 
 export {
     Login,
@@ -18,4 +19,5 @@ export {
     NewsCard,
     Header,
     OverflowMenu,
+    Modal,
 }
