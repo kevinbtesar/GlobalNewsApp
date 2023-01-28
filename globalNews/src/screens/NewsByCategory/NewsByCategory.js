@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
-import { StyleSheet, /*FlatList, View, TouchableOpacity, Text,*/ } from "react-native";
+import { StyleSheet, Alert/*FlatList, View, TouchableOpacity, Text,*/ } from "react-native";
 import { connect, mapStateToProps } from 'react-redux';
 // import Modal from 'react-native-modal';
+import NetInfo from "@react-native-community/netinfo";
 
 
 import { Loader, NewsCardList, Login } from '../../components';
@@ -10,8 +11,9 @@ import Colors from '../../utils/Colors';
 // import { NewsCountriesData, NewsSortTypesData } from '../../data';
 import Fonts from '../../utils/Fonts';
 import { TEXT_STRINGS } from '../../data/Enums';
-// import GLOBAL from '../../store/globalStore';
-import ConnectivityTracker from '../../utils/ConnectivityTracker'
+import { is } from 'immer/dist/internal';
+import { hideModal, showModal } from '../../components/Modal/Modal';
+import GLOBAL from '../../store/globalStore';
 
 class NewsByCategory extends Component {
     constructor(props) {
@@ -26,42 +28,51 @@ class NewsByCategory extends Component {
             favorites: [],
             isLoading: true,
             error: false,
+            isConnectedAndReachable: true,
             isModalVisible: false,
+            modalId: '',
             // country: NewsCountriesData[0],
             // sortType: NewsSortTypesData[0],
         };
         actions = props;
 
+
+       
     }
-    const onConnectivityChange = (isConnected, timestamp, connectionInfo) => {
-        console.log(`isConnected: ${isConnected}, when: ${timestamp} more info: ${JSON.stringify(connectionInfo)}`)
-        // connectionInfo is only available if attachConnectionInfo is set to true
-    }
+ 
     componentDidMount() {
-
-
-
-        ConnectivityTracker.init({
-            onConnectivityChange,
-            attachConnectionInfo: false,
-            onError: msg => console.log(msg),
-            // verifyServersAreUp: () => store.dispatch(checkOurServersAreUp()),
-        });
 
         // this.getNewsByCategory();
         this.setState({ isLoading: false })
 
         this._unsubscribeFocus = this.props.navigation.addListener('focus', () => {
         //     console.log('NewsByCategory this.props.route.name HERE: ' + this.props.route.name) 
-            console.log('NewsByCategory tryConnection: ' + this.props.route.name) 
+            console.log('NewsByCategory this.props.route.name: ' + this.props.route.name) 
             this.setState({ isLoading: false })
         });
 
-        // console.log("Value: " + JSON.stringify(GLOBAL.categories))
+        this._unsubscribeNetinfo = NetInfo.addEventListener(state => {
+           
+            // console.log(JSON.stringify(state))
+
+            this.setState({ isConnectedAndReachable: (state.isConnected ?? state.isInternetReachable) })
+
+            if(!this.state.isConnectedAndReachable)
+            {
+                this.setState({modalId: showModal("Sorry, there was an issue finding an Internet connection", "Okay")})
+                GLOBAL.noInternetModalId = this.state.modalId
+            } else {
+                hideModal(this.state.modalId)
+            }
+      
+        });
+
+
     }
 
     componentWillUnmount() {
         this._unsubscribeFocus();
+        this._unsubscribeNetinfo()
     }
 
     componentDidUpdate(prevProps) {
@@ -115,30 +126,6 @@ class NewsByCategory extends Component {
     }
 
 
-    // selectPicker = (item) => {
-    //     const pickerType = this.state.isModalVisible // if true - is type of picker
-    //     switch (pickerType) {
-    //         case NEWS_PICKER_TYPE.COUNTRIES:
-    //             this.setState({ country: item, isModalVisible: false, isLoading: true }, this.getNewsByCategory)
-    //             break;
-    //         case NEWS_PICKER_TYPE.SORT:
-    //             this.setState({ sortType: item, isModalVisible: false, isLoading: true }, this.getNewsByCategory)
-    //             break;
-    //         default:
-    //             break;
-    //     }
-    // }
-
-    // renderOption = ({ item, index }) => {
-    //     const { isModalVisible, country, sortType } = this.state
-    //     const stateItem = isModalVisible == NEWS_PICKER_TYPE.COUNTRIES ? country : sortType
-    //     return (
-    //         <TouchableOpacity style={styles.optionContainer} onPress={() => this.selectPicker(item)}>
-    //             <Text style={styles.optionIcon}>{item.icon}</Text>
-    //             <Text style={[styles.optionText, { fontWeight: item.id == stateItem.id ? '400' : '200' }]}>{item.name}</Text>
-    //         </TouchableOpacity>
-    //     )
-    // }
 
     render() {
         const { news, categories, isLoading, isModalVisible, country, sortType, error } = this.state
@@ -146,14 +133,6 @@ class NewsByCategory extends Component {
         return (
             <>
 
-                {/* <View style={styles.pickersLine}>
-                    <TouchableOpacity style={styles.pickerButton} onPress={() => this.setState({ isModalVisible: NEWS_PICKER_TYPE.COUNTRIES })}>
-                        <Text style={styles.pickerText}>{`${country.icon} ${country.name}`}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.pickerButton} onPress={() => this.setState({ isModalVisible: NEWS_PICKER_TYPE.SORT })}>
-                        <Text style={styles.pickerText}>{`${sortType.icon} ${sortType.name}`}</Text>
-                    </TouchableOpacity>
-                </View> */}
 
                 {/* {!isLoading ? Object.keys(news).length ?
                     <NewsCardList categories={categories} news={news} state={this.state} navigation={navigation} route={route} />
@@ -167,6 +146,7 @@ class NewsByCategory extends Component {
                     :
                     <Loader />
                 }
+               
 
 
                 <Login message={TEXT_STRINGS.LOGIN_FOR_FAVORITES} />

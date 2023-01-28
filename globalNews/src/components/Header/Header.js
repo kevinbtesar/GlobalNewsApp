@@ -10,7 +10,6 @@ import { loginModalVisible } from '../../store/userStore/userStore.actions';
 import { getArticlesHelper } from '../../utils/Api';
 import { ActivityIndicator } from 'react-native-paper';
 import GLOBAL from '../../store/globalStore';
-import { showModal } from '../Modal/Modal';
 
 const Header = (props) => {
 
@@ -56,7 +55,7 @@ const Header = (props) => {
                 setRefreshing('none')
             }
         }
-        showModal()
+
     }
 
     if (navigationRef.isReady())

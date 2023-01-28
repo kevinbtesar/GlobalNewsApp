@@ -1,30 +1,38 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Alert} from 'react-native';
 import { Layout, Button, Text, ModalService, Modal, Card} from '@ui-kitten/components';
-// import { Card, Headline, Caption, TouchableRipple } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
+
 import Colors from './../../utils/Colors';
+import GLOBAL from '../../store/globalStore';
 
-let modalID = '';
 
-export const showModal = () => {
-    const contentElement = renderModalContentElement();
-    modalID = ModalService.show(contentElement, { onBackdropPress: hideModal });
+let modalID
+export const showModal = (inputText, buttonText) => {
+    const contentElement = renderModalContentElement(inputText, buttonText);
+    modalID = ModalService.show(contentElement, { onBackdropPress: hideModal(modalID) });
+    return modalID  
 };
 
-export const hideModal = () => {
-    ModalService.hide(modalID);
+export const hideModal = (modalId) => {
+
+    ModalService.hide(modalId);
+    
+    // Commenting this line will force noInternetModal to stay on screen until there is a connection
+    ModalService.hide(GLOBAL.noInternetModalId); 
 };
 
-const renderModalContentElement = () => {
+const renderModalContentElement = (displayText, buttonText) => {
+
     return (
         <Layout level='1'>
 
             <Modal visible={true} style={{height:300}} >
                 <Card disabled={true} >
 
-                    <Text>Welcome to UI Kitten </Text>
+                    <Text>{displayText}</Text>
                     <Button onPress={() => hideModal()}>
-                        DISMISS
+                        {buttonText}
                     </Button>
                 </Card>
             </Modal>
