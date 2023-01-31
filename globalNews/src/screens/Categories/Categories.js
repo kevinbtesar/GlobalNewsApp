@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Text, TouchableOpacity, FlatList, StyleSheet } from "react-native";
-import { NewsCategoryCard, Login } from '../../components';
+import { NewsCategoryCard, LoginModal } from '../../components';
 // import { NewsCategoriesData } from '../../data';
 import Colors from '../../utils/Colors';
 import Fonts from '../../utils/Fonts';
@@ -60,7 +60,7 @@ const Categories = (props) => {
                 />
             </PosedComponent>
 
-            <Login message={'To save an article to favorites you need to login'} />
+            <LoginModal message={'To save an article to favorites you need to login'} />
 
         </>
     )

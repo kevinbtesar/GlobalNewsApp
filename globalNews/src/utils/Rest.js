@@ -50,6 +50,7 @@ export const postRest = async (url, params) => {
         appId: params.appId ?? '',
         name: params.name ?? '',
         url: params.url ?? '',
+        id: params.id ?? '',
       }),
 
     });

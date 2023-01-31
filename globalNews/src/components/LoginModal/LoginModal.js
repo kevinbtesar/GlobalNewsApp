@@ -22,7 +22,7 @@ import { userAuth } from '../../utils/Api';
 import { KEYS } from '../../data/Enums';
 
 
-const Login = (props) => {
+const LoginModal = (props) => {
     const dispatch = useDispatch();
     const isModalVisible = useSelector(isLoginModalVisibleSelector);
     const isUserConnected = useSelector(isUserConnectedSelector);
@@ -291,8 +291,6 @@ const styles = StyleSheet.create({
     modalHolderHeader: {
         justifyContent: 'center',
         alignItems: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: Colors.grey_green,
         padding: 15,
         marginTop: '5%'
     },
@@ -376,4 +374,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Login;
+export default LoginModal;

@@ -5,7 +5,7 @@ import { connect, mapStateToProps } from 'react-redux';
 import NetInfo from "@react-native-community/netinfo";
 
 
-import { Loader, NewsCardList, Login } from '../../components';
+import { Loader, NewsCardList, LoginModal } from '../../components';
 // import { NEWS_PICKER_TYPE } from '../../utils/Enums';
 import Colors from '../../utils/Colors';
 // import { NewsCountriesData, NewsSortTypesData } from '../../data';
@@ -149,7 +149,7 @@ class NewsByCategory extends Component {
                
 
 
-                <Login message={TEXT_STRINGS.LOGIN_FOR_FAVORITES} />
+                <LoginModal message={TEXT_STRINGS.LOGIN_FOR_FAVORITES} />
 
 
             </>
