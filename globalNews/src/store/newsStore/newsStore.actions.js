@@ -5,7 +5,10 @@ import {
     POPULATE_ARTICLES,
     POPULATE_FAVORITES,
     POPULATE_CATEGORIES,
-    PURGE_ARTICLES
+    PURGE_ARTICLES,
+    ADD_TO_NOTIFICATIONS,
+    REMOVE_ALL_NOTIFICATIONS,
+    REMOVE_FROM_NOTIFICATIONS
 } from './newsStore.types';
 
 export function addNewsToFavorites(news) {
@@ -55,4 +58,26 @@ export function purgeArticles() {
         type: PURGE_ARTICLES,
     }
 }
+
+export function addNewsToNotifications(news) {
+    return {
+        type: ADD_TO_NOTIFICATIONS,
+        payload: news
+    }
+}
+
+
+export function removeNewsFromNotifications(news) {
+    return {
+        type: REMOVE_FROM_NOTIFICATIONS,
+        payload: news,
+    }
+}
+
+export function removeAllNotifications() {
+    return {
+        type: REMOVE_ALL_NOTIFICATIONS,
+    }
+}
+
 

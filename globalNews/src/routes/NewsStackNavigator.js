@@ -10,7 +10,7 @@ import { useSelector, useDispatch } from 'react-redux';
 // import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Dimensions } from "react-native";
 
-import { NewsByCategory, Settings, Article, Favorites } from "../screens";
+import { NewsByCategory, Settings, Article, Favorites, Notifications } from "../screens";
 import Colors from "../utils/Colors";
 import Fonts from "../utils/Fonts";
 import { Header } from "../components";
@@ -199,6 +199,17 @@ BottomTabs = (props) => {
 
           },
         }}
+      />
+      <MaterialBottomTabs.Screen
+        name="Notifications"
+        component={Notifications}
+        options={{
+          tabBarLabel: "Notifications",
+          tabBarIcon: ({ color }) => (
+            <Feather name="bell" color={color} size={26} />
+          )
+        }}
+
       />
       <MaterialBottomTabs.Screen
         name="Settings"

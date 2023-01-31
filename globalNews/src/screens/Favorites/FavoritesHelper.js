@@ -1,48 +1,41 @@
 
     import { addNewsToFavorites, removeNewsFromFavorites } from '../../store/newsStore/newsStore.actions';
     import { loginModalVisible } from '../../store/userStore/userStore.actions';
-    import Api from '../../utils/Api';
+    import { favorites } from '../../utils/Api';
   
     export const onClickFavoriteIcon = async (props, isUserConnected, userData, dispatch, isInFavorites) => {
         // console.log("route2: " + JSON.stringify(route))
-        // console.log("props: " + JSON.stringify(props))
-        // console.log("props.article: " + JSON.stringify(props.article))
+        console.log("props: " + JSON.stringify(props))
+        console.log("props.article: " + JSON.stringify(props.article))
 
         const { article, style, route } = props
-        const { article_id, title, image_url, created_utc, source, author, url, } = props.article
+        const { id, reddit_article_id, title, image_url, created_utc, source, author, url, } = props.article
 
 
         if (isUserConnected && userData.accessToken) {
             try {
                 if (isInFavorites) {
 
-                    const favorite = await Api.favorites({
+                    const favorite = await favorites({
                         accessToken: userData.accessToken,
                         action: 'delete',
-                        articleId: article_id,
+                        id: id,
                     });
-                    // console.log("favorite: " + JSON.stringify(favorite))
+                    console.log("favorite: " + JSON.stringify(favorite))
                     if (favorite.success) {
-                        dispatch(removeNewsFromFavorites(article_id))
+                        dispatch(removeNewsFromFavorites(id))
                     } else {
                         throw new Error(favorite);
                     }
 
                 } else {
 
-                    const favorite = await Api.favorites({
+                    const favorite = await favorites({
                         accessToken: userData.accessToken,
                         action: 'create',
-                        articleId: article_id,
-                        title: title,
-                        imageUrl: image_url,
-                        source: source,
-                        category: route.name,
-                        createdUtc: created_utc,
-                        author: author,
-                        url: url,
+                        id: id,
                     });
-                    // console.log("favorite: " + JSON.stringify(favorite))
+                    console.log("favorite1: " + JSON.stringify(favorite))
                     if (favorite.success) {
                         dispatch(addNewsToFavorites(article))
                     } else {
@@ -51,7 +44,7 @@
                 }
 
             } catch (err) {
-                throw new Error(err);
+                throw new Error(JSON.stringify(err));
                 // console.error("FavoritesHelper ERROR err: " + JSON.stringify(err))
             }
 

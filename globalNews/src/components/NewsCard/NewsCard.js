@@ -28,7 +28,7 @@ import { onClickFavoriteIcon } from '../../screens/Favorites/FavoritesHelper';
 const NewsCard = (props) => {
 
     const { article, navigation, route } = props
-    const { title, /*thumbnail*/image_url, source, created_utc, article_id, author } = article
+    const { title, /*thumbnail*/image_url, source, created_utc, id, author } = article
     // console.log("route: " + JSON.stringify(route))
     // console.log("props: " + JSON.stringify(props))
     // console.log("name: " + props.route ? props.route.name : 'undef')
@@ -36,7 +36,7 @@ const NewsCard = (props) => {
     const dispatch = useDispatch();
     const isUserConnected = useSelector(isUserConnectedSelector);
     const favorites = useSelector(favoritesSelector);
-    const isInFavorites = isUserConnected && favorites.findIndex(f => f.article_id === article_id) !== -1
+    const isInFavorites = isUserConnected && favorites.findIndex(f => f.id === id) !== -1
     const userData = useSelector(getUserDataSelector);
     // const noImageAvailable = 'https://www.bengi.nl/wp-content/uploads/2014/10/no-image-available1.png'
 
@@ -64,7 +64,7 @@ const NewsCard = (props) => {
                         category: (props.route) ? props.route.name : '',
                         created_utc: props.article.created_utc,
                         author: props.article.author,
-                        article_id: props.article.article_id,
+                        reddit_article_id: props.article.reddit_article_id,
                         url: props.article.url,
                     })}
                     rippleColor={Colors.black_opacity}

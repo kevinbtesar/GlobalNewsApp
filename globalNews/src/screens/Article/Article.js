@@ -17,11 +17,11 @@ import { createClient } from '@supabase/supabase-js'
 
 const Article = (props) => {
     const { route, navigation } = props
-    const { title, description, image_url, source, category, created_utc, author, article_id, url } = route.params
+    const { title, description, image_url, source, category, created_utc, author, reddit_article_id, url } = route.params
     const [currentURI, setURI] = useState(url);
     const isTablet = Device.isTablet();
     const webViewRef = useRef(null)
-    // let article = { title: title, article_id: article_id }
+    // let article = { title: title, reddit_article_id: reddit_article_id }
     canGoBack = false
     canGoForward = false
     // console.log("props: " + route.name)

@@ -15,7 +15,7 @@ import { Loader } from '..';
 import Colors from '../../utils/Colors';
 import Fonts from '../../utils/Fonts';
 import { loginModalVisible, loginUser, logoutUser } from '../../store/userStore/userStore.actions';
-import { addNewsToFavorites, removeAllFavorites } from '../../store/newsStore/newsStore.actions';
+import { addNewsToFavorites, removeAllFavorites, populateFavorites } from '../../store/newsStore/newsStore.actions';
 import { isLoginModalVisibleSelector, isUserConnectedSelector } from '../../store/userStore/userStore.selectors';
 import { TEXT_STRINGS } from '../../data/Enums';
 import { userAuth } from '../../utils/Api';
@@ -79,6 +79,8 @@ const Login = (props) => {
                                         Object.entries(login.favorites).forEach(([k, v], i) => {
                                             dispatch(addNewsToFavorites(login.favorites[i]));
                                         });
+                                        // categoriesArray = Object.keys(news['categories']).map(k => news['categories'][k]),
+                                        //     store.dispatch(populateCategories(categoriesArray))
                                     }
 
                                     setLoginState("You've logged in successfully! 👏")

@@ -21,10 +21,19 @@ const categoriesSelector = createSelector(
         return (news.categories)
     },
 );
+
+const notificationsSelector = createSelector(
+    baseNews,
+    (news) => {
+        return (news.notifications)
+    },
+);
+
 export {
     favoritesSelector,
     articlesSelector,
     categoriesSelector,
+    notificationsSelector,
 };
 
 

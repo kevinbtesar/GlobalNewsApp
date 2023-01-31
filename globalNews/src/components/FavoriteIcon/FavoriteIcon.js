@@ -10,11 +10,11 @@ import { onClickFavoriteIcon } from '../../screens/Favorites/FavoritesHelper';
 
 const FavoriteIcon = (props) => {
     const { article } = props
-    const { article_id } = article
+    const { id } = article
     const dispatch = useDispatch();
     const isUserConnected = useSelector(isUserConnectedSelector);
     const favorites = useSelector(favoritesSelector);
-    const isInFavorites = favorites.findIndex(f => f.article_id === article_id) !== -1
+    const isInFavorites = favorites.findIndex(f => f.id === id) !== -1
     const userData = useSelector(getUserDataSelector);
 
     return (
