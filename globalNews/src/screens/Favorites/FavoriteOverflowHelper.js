@@ -3,13 +3,13 @@
     import { loginModalVisible } from '../../store/userStore/userStore.actions';
     import { favorites } from '../../utils/Api';
   
-    export const onClickFavoriteIcon = async (props, isUserConnected, userData, dispatch, isInFavorites) => {
+    export const onClickFavoriteOverflowMenuOption = async (props, isUserConnected, userData, dispatch, isInFavorites) => {
         // console.log("route2: " + JSON.stringify(route))
-        console.log("props: " + JSON.stringify(props))
-        console.log("props.article: " + JSON.stringify(props.article))
+        // console.log("props: " + JSON.stringify(props))
+        // console.log("props.article: " + JSON.stringify(props.article))
 
         const { article, style, route } = props
-        const { id, reddit_article_id, title, image_url, created_utc, source, author, url, } = props.article
+        const { id, reddit_article_id, title, image_url, created_utc, source, author, url, } = article
 
 
         if (isUserConnected && userData.accessToken) {
@@ -21,7 +21,7 @@
                         action: 'delete',
                         id: id,
                     });
-                    console.log("favorite: " + JSON.stringify(favorite))
+                    // console.log("favorite: " + JSON.stringify(favorite))
                     if (favorite.success) {
                         dispatch(removeNewsFromFavorites(id))
                     } else {
@@ -29,13 +29,14 @@
                     }
 
                 } else {
-
+                    console.log("article: " + JSON.stringify(article))
+                    
                     const favorite = await favorites({
                         accessToken: userData.accessToken,
                         action: 'create',
                         id: id,
                     });
-                    console.log("favorite1: " + JSON.stringify(favorite))
+
                     if (favorite.success) {
                         dispatch(addNewsToFavorites(article))
                     } else {

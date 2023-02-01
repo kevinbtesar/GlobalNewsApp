@@ -3,7 +3,6 @@ import {
     REMOVE_FROM_FAVORITES,
     REMOVE_ALL_FAVORITES,
     POPULATE_ARTICLES,
-    POPULATE_FAVORITES,
     POPULATE_CATEGORIES,
     PURGE_ARTICLES,
     ADD_TO_NOTIFICATIONS,
@@ -14,13 +13,6 @@ import {
 export function addNewsToFavorites(news) {
     return {
         type: ADD_TO_FAVORITES,
-        payload: news
-    }
-}
-
-export function populateFavorites(news) {
-    return {
-        type: POPULATE_FAVORITES,
         payload: news
     }
 }

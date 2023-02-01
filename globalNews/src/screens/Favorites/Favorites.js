@@ -11,12 +11,12 @@ import Fonts from '../../utils/Fonts';
 import LinearGradient from 'react-native-linear-gradient';
 import { loginModalVisible } from '../../store/userStore/userStore.actions';
 import { isUserConnectedSelector, getUserDataSelector } from '../../store/userStore/userStore.selectors';
-import Api from '../../utils/Api';
+import { favorites } from '../../utils/Api';
 import { TEXT_STRINGS } from '../../data/Enums';
 
 const Favorites = (props) => {
     const dispatch = useDispatch();
-    const favorites = useSelector(favoritesSelector);
+    const reducerFavorites = useSelector(favoritesSelector);
     const isUserConnected = useSelector(isUserConnectedSelector);
     const userData = useSelector(getUserDataSelector);
 
@@ -32,7 +32,7 @@ const Favorites = (props) => {
         if (isUserConnected && userData.accessToken) {
             try {
   
-                const favorite = await Api.favorites({
+                const favorite = await favorites({
                     accessToken: userData.accessToken,
                     action: 'deleteAll',
                 });
@@ -61,9 +61,9 @@ const Favorites = (props) => {
         <>
             <LinearGradient start={{ x: 1, y: 1 }} end={{ x: 1, y: .7 }} colors={[Colors.off_white, Colors.yellow]} style={styles.toolBarLine}>
                 <View style={styles.toolBarTextContainer} >
-                    <Text style={styles.toolBarText}>{`You saved ${(favorites.length && isUserConnected) ? favorites.length : 0} articles`}</Text>
+                    <Text style={styles.toolBarText}>{`You saved ${(reducerFavorites.length && isUserConnected) ? reducerFavorites.length : 0} articles`}</Text>
                 </View>
-                <TouchableOpacity style={[styles.toolBarButton, !favorites.length && { backgroundColor: Colors.black_opacity }]} onPress={() => onClickDeleteAll()} disabled={!favorites.length}>
+                <TouchableOpacity style={[styles.toolBarButton, !reducerFavorites.length && { backgroundColor: Colors.black_opacity }]} onPress={() => onClickDeleteAll()} disabled={!favorites.length}>
                     <Text style={styles.toolBarText}>{`🗑 Delete All`}</Text>
                 </TouchableOpacity>
             </LinearGradient>
@@ -76,13 +76,13 @@ const Favorites = (props) => {
                     </View>
                 </TouchableWithoutFeedback>
 
-            : favorites.length > 0  ?
+            : reducerFavorites.length > 0  ?
 
-                <NewsCardList news={favorites} navigation={props.navigation} />
+                <NewsCardList favorites={reducerFavorites} navigation={props.navigation} />
             :
                 <NoResults text={'You have no favorite news'} fontSize={26} color={Colors.yellow}>
-                    <TouchableOpacity style={styles.navigateButton} onPress={() => props.navigation.navigate('Categories')} >
-                        <Text style={styles.navigateButtonText}>{'Go to Select Favorite News'}</Text>
+                    <TouchableOpacity style={styles.navigateButton} onPress={() => props.navigation.navigate('Home')} >
+                        <Text style={styles.navigateButtonText}>{'Go to Home Screen'}</Text>
                     </TouchableOpacity>
                 </NoResults>
             }

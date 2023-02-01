@@ -15,7 +15,7 @@ import { Loader } from '..';
 import Colors from '../../utils/Colors';
 import Fonts from '../../utils/Fonts';
 import { loginModalVisible, loginUser, logoutUser } from '../../store/userStore/userStore.actions';
-import { addNewsToFavorites, removeAllFavorites, populateFavorites } from '../../store/newsStore/newsStore.actions';
+import { addNewsToFavorites, removeAllFavorites } from '../../store/newsStore/newsStore.actions';
 import { isLoginModalVisibleSelector, isUserConnectedSelector } from '../../store/userStore/userStore.selectors';
 import { TEXT_STRINGS } from '../../data/Enums';
 import { userAuth } from '../../utils/Api';
@@ -77,10 +77,10 @@ const LoginModal = (props) => {
                                         dispatch(removeAllFavorites());
 
                                         Object.entries(login.favorites).forEach(([k, v], i) => {
-                                            dispatch(addNewsToFavorites(login.favorites[i]));
+                                            console.log("HERE login.favorites[i].article_data: " + JSON.stringify(login.favorites[i].article_data))
+                                            dispatch(addNewsToFavorites(login.favorites[i].article_data));
                                         });
-                                        // categoriesArray = Object.keys(news['categories']).map(k => news['categories'][k]),
-                                        //     store.dispatch(populateCategories(categoriesArray))
+               
                                     }
 
                                     setLoginState("You've logged in successfully! 👏")
@@ -141,7 +141,7 @@ const LoginModal = (props) => {
 
                 if (login.success) 
                 {
-                    OneSignal.setExternalUserId(login.user.id.toString());
+                    // OneSignal.setExternalUserId(login.user.id.toString());
                     OneSignal.setEmail(login.user.email);
                     
                     dispatch(loginUser({ accessToken: login.accessToken, name: userInfo.user.name, image: userInfo.user.photo }))

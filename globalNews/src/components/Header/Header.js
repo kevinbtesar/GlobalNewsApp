@@ -2,7 +2,8 @@ import React, { useState } from 'react'
 import { TouchableOpacity, View, StyleSheet, Text, Image } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';;
 import { useDispatch, useSelector } from 'react-redux';
-import { getFocusedRouteNameFromRoute, useNavigation } from '@react-navigation/native';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import OneSignal from 'react-native-onesignal';
 
 import { isUserConnectedSelector, getUserDataSelector } from '../../store/userStore/userStore.selectors';
 import Colors from '../../utils/Colors';
@@ -10,6 +11,8 @@ import { loginModalVisible } from '../../store/userStore/userStore.actions';
 import { getArticlesHelper } from '../../utils/Api';
 import { ActivityIndicator } from 'react-native-paper';
 import GLOBAL from '../../store/globalStore';
+import { KEYS } from '../../data/Enums';
+import { addNewsToNotifications } from '../../store/newsStore/newsStore.actions';
 
 const Header = (props) => {
 
@@ -20,6 +23,48 @@ const Header = (props) => {
     const userData = useSelector(getUserDataSelector);
     const { navigation, navigationRef } = props;
     const [refreshing, setRefreshing] = useState('none');
+
+
+    const initialOnesignal = async () => {
+
+
+        // OneSignal Initialization
+        OneSignal.setRequiresUserPrivacyConsent(false);
+        OneSignal.setAppId(KEYS.ONESIGNAL_APP_ID);
+        //   OneSignal.setLogLevel(6, 0);
+
+        //Method for handling notifications opened
+        OneSignal.setNotificationOpenedHandler(notification => {
+            // console.log('OneSignal: notification opened: ', JSON.stringify(notification.notification?.additionalData));
+            // console.log('OneSignal: notification opened: ', JSON.stringify(notification.notification?.additionalData.title));
+
+            if(notification.notification.additionalData){
+                const article = {
+                    title: notification.notification?.additionalData.title,
+                    image_url: notification.notification?.additionalData.image_url,
+                    source: notification.notification?.additionalData.source,
+                    app_category: notification.notification?.additionalData.app_category,
+                    created_utc: notification.notification?.additionalData.created_utc,
+                    url: notification.notification?.additionalData.url,
+                    reddit_article_id: notification.notification?.additionalData.reddit_article_id,
+                    id: notification.notification?.additionalData.id,
+                };
+
+                // console.log("header article: " + JSON.stringify(article))
+
+                dispatch(addNewsToNotifications(article))
+
+                navigation.navigate('Notifications')
+            } else {
+                // TODO: Show error message
+            }
+    
+            
+        });
+
+        // let state = await OneSignal.getDeviceState();
+        // console.log("state: " + JSON.stringify(state))
+    };
 
     const onRefresh = async () => {
         setRefreshing('flex')
@@ -58,8 +103,7 @@ const Header = (props) => {
 
     }
 
-    if (navigationRef.isReady())
-    {
+    if (navigationRef.isReady()) {
         // console.log("HERE topTabNavigationRefState:  " +JSON.stringify(navigationRef.current))
         const topTabNavigationRefState = navigationRef.getRootState().routes[0].state.routes[0].state
         // const routeName = topTabNavigationRefState?.routeNames[topTabNavigationRefState.index] ?? 'Home'
@@ -70,6 +114,8 @@ const Header = (props) => {
         // console.log("HERE navigation.getState():  " +JSON.stringify(navigation.getState()))
         // console.log("HERE navigation.getState().routNames[index]:  " +JSON.stringify(navigation.getState().routeNames[navigation.getState().index]))
         // console.log("refreshing0 : " + refreshing)
+
+        initialOnesignal();
 
         if (props.side == 'right') {
             return (
@@ -109,7 +155,7 @@ const Header = (props) => {
                             }
                         </Text>
 
-                        {(routeName != 'Favorites' && routeName != 'Settings') ? (
+                        {(routeName != 'Favorites' && routeName != 'Settings' && routeName != 'Notifications') ? (
                             <>
                                 <ActivityIndicator display={refreshing} style={styles.activityIndicator} />
 
@@ -131,7 +177,11 @@ const Header = (props) => {
             )
         }
     }
+
+
+
 }
+
 
 
 

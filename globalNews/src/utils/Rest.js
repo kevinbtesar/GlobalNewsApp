@@ -23,7 +23,7 @@ export const getRest = async (url, params) => {
 export const postRest = async (url, params) => {
 
   // console.log("url: " + url)
-  // console.log("params: " + JSON.stringify(params))
+  console.log("params: " + JSON.stringify(params))
 
   try {
     const res = await fetch(url, {

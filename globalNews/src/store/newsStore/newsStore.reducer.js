@@ -1,4 +1,4 @@
-import { ADD_TO_FAVORITES, POPULATE_FAVORITES, REMOVE_FROM_FAVORITES, REMOVE_ALL_FAVORITES, POPULATE_ARTICLES, POPULATE_CATEGORIES, PURGE_ARTICLES,
+import { ADD_TO_FAVORITES, REMOVE_FROM_FAVORITES, REMOVE_ALL_FAVORITES, POPULATE_ARTICLES, POPULATE_CATEGORIES, PURGE_ARTICLES,
     ADD_TO_NOTIFICATIONS, REMOVE_FROM_NOTIFICATIONS, REMOVE_ALL_NOTIFICATIONS} from './newsStore.types';
 
 const initialState = {
@@ -16,15 +16,9 @@ const newsReducer = (state = initialState, action) => {
                 ...state,
                 favorites: [...state.favorites, action.payload]
             };
-        case POPULATE_FAVORITES:
-            return {
-                ...state,
-                favorites: [action.payload]
-            };
         case REMOVE_FROM_FAVORITES:
             return {
                 ...state,
-                // favorites: [...state.favorites.filter(favorite => favorite.title !== action.payload)]
                 favorites: [...state.favorites.filter(favorite => favorite.id !== action.payload)]
             };
         case REMOVE_ALL_FAVORITES:
@@ -36,7 +30,6 @@ const newsReducer = (state = initialState, action) => {
                 return {
                 ...state,
                 articles: action.payload,
-                // articles: [...state.favorites.filter(article => article.app_category === action.payload)]
             };
         case POPULATE_CATEGORIES:
                 return {
@@ -51,7 +44,7 @@ const newsReducer = (state = initialState, action) => {
         case ADD_TO_NOTIFICATIONS:
             return {
                 ...state,
-                favorites: [...state.notifications, action.payload]
+                notifications: [...state.notifications.filter(notification => notification.id !== action.payload.id), action.payload]
             };
         case REMOVE_FROM_NOTIFICATIONS:
             return {

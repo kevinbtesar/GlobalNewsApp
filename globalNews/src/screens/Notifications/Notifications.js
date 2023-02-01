@@ -3,70 +3,37 @@ import { TouchableOpacity, StyleSheet, View, Text, TouchableWithoutFeedback } fr
 import { useDispatch, useSelector } from 'react-redux';
 import { Button } from 'react-native-paper';
 
-import { re } from '../../store/newsStore/newsStore.actions';
-import { favoritesSelector } from '../../store/newsStore/newsStore.selectors';
+import { removeAllNotifications } from '../../store/newsStore/newsStore.actions';
+import { notificationsSelector } from '../../store/newsStore/newsStore.selectors';
 import { NewsCardList, NoResults } from '../../components';
 import Colors from '../../utils/Colors';
 import Fonts from '../../utils/Fonts';
 import LinearGradient from 'react-native-linear-gradient';
-import { loginModalVisible } from '../../store/userStore/userStore.actions';
-import { isUserConnectedSelector, getUserDataSelector } from '../../store/userStore/userStore.selectors';
-import Api from '../../utils/Api';
 import { TEXT_STRINGS } from '../../data/Enums';
 
 const Notifications = (props) => {
     const dispatch = useDispatch();
-    const favorites = useSelector(favoritesSelector);
-    const isUserConnected = useSelector(isUserConnectedSelector);
-    const userData = useSelector(getUserDataSelector);
-
-    state = {
-        isLoading: true,
-        error: false,
-    };
-
+    const notifications = useSelector(notificationsSelector);
+    console.log("props: " + JSON.stringify(props))
+    console.log("notifications: " + JSON.stringify(notifications))
     const onClickDeleteAll = async () => {
         // console.log("route2: " + JSON.stringify(route))
-        console.log("props.article: " + JSON.stringify(props.article))
-
-        if (isUserConnected && userData.accessToken) {
-            try {
-  
-                const favorite = await Api.favorites({
-                    accessToken: userData.accessToken,
-                    action: 'deleteAll',
-                });
-
-                if (favorite.success) 
-                {
-                    dispatch(removeAllFavorites())
-                } else {
-                    throw new Error(favorite);
-                }
-
-      
-            } catch (err) {
-                console.error("Favorites ERROR err: " + JSON.stringify(err))
-            }
-        } else {
-            dispatch(loginModalVisible(true))
-        }
-    }
-
-    const onPressSignInButton = () => {
-        dispatch(loginModalVisible(true))
+        // console.log("props.article: " + JSON.stringify(props.article))
+        dispatch(removeAllNotifications())
     }
 
     return (
         <>
             <LinearGradient start={{ x: 1, y: 1 }} end={{ x: 1, y: .7 }} colors={[Colors.off_white, Colors.yellow]} style={styles.toolBarLine}>
-                <View style={styles.toolBarTextContainer} >
-                    <Text style={styles.toolBarText}>{`You saved ${(favorites.length && isUserConnected) ? favorites.length : 0} articles`}</Text>
-                </View>
-                <TouchableOpacity style={[styles.toolBarButton, !favorites.length && { backgroundColor: Colors.black_opacity }]} onPress={() => onClickDeleteAll()} disabled={!favorites.length}>
-                    <Text style={styles.toolBarText}>{`🗑 Delete All`}</Text>
+                {/* <View style={styles.toolBarTextContainer} >
+                    <Text style={styles.toolBarText}>{`You saved ${notifications.length ? notifications.length : 0} articles`}</Text>
+                </View> */}
+                <TouchableOpacity style={[styles.toolBarButton, !notifications.length && { backgroundColor: Colors.black_opacity }]} onPress={() => onClickDeleteAll()} disabled={!notifications.length}>
+                    <Text style={styles.toolBarText}>{`🗑 Remove All Notifications`}</Text>
                 </TouchableOpacity>
             </LinearGradient>
+            
+            {/* Keep as placeholder. Change to if user has not subscribed to notifications
             
             {!isUserConnected ?
                 <TouchableWithoutFeedback onPress={onPressSignInButton} style={{flexDirection:'row', marginTop:30, alignItems:'center', alignSelf:'center'}}>
@@ -74,15 +41,15 @@ const Notifications = (props) => {
                         <Button style={{width:118}} mode="contained" >{TEXT_STRINGS.FAVORITES_TEXT_FIRST}</Button>
                         <Text >{TEXT_STRINGS.FAVORITES_TEXT_SECOND}</Text>
                     </View>
-                </TouchableWithoutFeedback>
+            </TouchableWithoutFeedback> 
 
-            : favorites.length > 0  ?
+            :*/}{ notifications.length > 0  ?
 
-                <NewsCardList news={favorites} navigation={props.navigation} />
+                <NewsCardList notifications={notifications} navigation={props.navigation} />
             :
-                <NoResults text={'You have no favorite news'} fontSize={26} color={Colors.yellow}>
-                    <TouchableOpacity style={styles.navigateButton} onPress={() => props.navigation.navigate('Categories')} >
-                        <Text style={styles.navigateButtonText}>{'Go to Select Favorite News'}</Text>
+                <NoResults text={'You have no new notifications'} fontSize={26} color={Colors.yellow}>
+                    <TouchableOpacity style={styles.navigateButton} onPress={() => props.navigation.navigate('Home')} >
+                        <Text style={styles.navigateButtonText}>{'Go to Home Screen'}</Text>
                     </TouchableOpacity>
                 </NoResults>
             }

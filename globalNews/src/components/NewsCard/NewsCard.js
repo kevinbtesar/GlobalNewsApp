@@ -9,6 +9,7 @@ import moment from 'moment';
 // import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useDispatch, useSelector } from 'react-redux';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 import Fonts from '../../utils/Fonts';
 import Colors from '../../utils/Colors';
@@ -17,21 +18,23 @@ import { OverflowMenu } from '..';
 import { initializeShare } from '../../utils/Share';
 // import { onClickFavoriteIcon } from '../FavoriteIcon/FavoriteIcon';
 
-import { addNewsToFavorites, removeNewsFromFavorites } from '../../store/newsStore/newsStore.actions';
+import { removeNewsFromNotifications } from '../../store/newsStore/newsStore.actions';
 import { favoritesSelector } from '../../store/newsStore/newsStore.selectors';
 import { loginModalVisible } from '../../store/userStore/userStore.actions';
 import { isUserConnectedSelector, getUserDataSelector } from '../../store/userStore/userStore.selectors';
 import Api from '../../utils/Api';
-import { onClickFavoriteIcon } from '../../screens/Favorites/FavoritesHelper';
+import { onClickFavoriteOverflowMenuOption } from '../../screens/Favorites/FavoriteOverflowHelper';
 
 
 const NewsCard = (props) => {
 
-    const { article, navigation, route } = props
-    const { title, /*thumbnail*/image_url, source, created_utc, id, author } = article
-    // console.log("route: " + JSON.stringify(route))
+    const { article, navigation } = props
+    const { title, image_url, source, created_utc, id } = article
     // console.log("props: " + JSON.stringify(props))
-    // console.log("name: " + props.route ? props.route.name : 'undef')
+    // const navigationState = navigation.getState()
+    // console.log("name1: " + (props.route ? JSON.stringify(props.route.name) : ''))
+    // console.log("name2: " + JSON.stringify(navigationState.routes[navigationState.index].name))
+
     const overflowDotsIcon = (<MaterialCommunityIcons name="dots-vertical" size={28} />)
     const dispatch = useDispatch();
     const isUserConnected = useSelector(isUserConnectedSelector);
@@ -40,11 +43,18 @@ const NewsCard = (props) => {
     const userData = useSelector(getUserDataSelector);
     // const noImageAvailable = 'https://www.bengi.nl/wp-content/uploads/2014/10/no-image-available1.png'
 
-
     let options = ["Add Favorite", "Share Article", "Report Article"]
     if (isInFavorites) {
         options = ["Remove Favorite", "Share Article", "Report Article"]
     }
+    if(props.notifications){
+        options = [ 'Remove Notification', ...options,]
+    }
+
+    const removeNotificationArticle = () => {
+        dispatch(removeNewsFromNotifications(id))
+        console.log("props.article: " + JSON.stringify(id))
+    };
     
 
     /**
@@ -57,14 +67,6 @@ const NewsCard = (props) => {
             <Card style={styles.cardContainer}>
                 <TouchableRipple
                     onPress={() => navigation.navigate('Article', {
-                        title: props.article.title,
-                        description: props.article.description,
-                        image_url: props.article.image_url,
-                        source: props.article.source,
-                        category: (props.route) ? props.route.name : '',
-                        created_utc: props.article.created_utc,
-                        author: props.article.author,
-                        reddit_article_id: props.article.reddit_article_id,
                         url: props.article.url,
                     })}
                     rippleColor={Colors.black_opacity}
@@ -104,9 +106,10 @@ const NewsCard = (props) => {
                                             //  actions={[blockSource, reportArticle]}
                                             // actions={[() => onClickFavoriteIcon(props), () => initializeShare(props.article.title, props.article.source)]}
                                             actions={[
-                                                () => onClickFavoriteIcon(props, isUserConnected, userData, dispatch, isInFavorites), 
+                                                ()=> removeNotificationArticle(),
+                                                () => onClickFavoriteOverflowMenuOption(props, isUserConnected, userData, dispatch, isInFavorites), 
                                                 () => initializeShare(props.article.title, props.article.source), 
-                                                ()=>{}
+                                                ()=>{}, // TODO: make report feature work
                                             ]}
                                         />
                                     </View>

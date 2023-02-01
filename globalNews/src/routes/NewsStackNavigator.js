@@ -52,14 +52,14 @@ CreateRootStack = () => {
 
     <NavigationContainer
       theme={theme}
-      initialRouteName={'BottomTabs'}
       ref={navigationRef}
+      key={"RootStack"}
+      
     >
       <Stack.Navigator screenOptions={{ screenOptions, presentation: 'modal' }}>
 
         <Stack.Screen
           name={'BottomTabs'}
-          key="BottomTabs"
           options={(props) => ({
             ...stackScreenOptions(props, navigationRef), headerShown: true, headerTitle: ''
           })}

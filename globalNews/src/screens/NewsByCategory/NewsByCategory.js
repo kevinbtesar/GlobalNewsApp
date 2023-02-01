@@ -142,7 +142,7 @@ class NewsByCategory extends Component {
                 } */}
 
                 {!isLoading ?
-                    <NewsCardList categories={categories} news={news} state={this.state} navigation={navigation} route={route} />
+                    <NewsCardList state={this.state} navigation={navigation} route={route} />
                     :
                     <Loader />
                 }
