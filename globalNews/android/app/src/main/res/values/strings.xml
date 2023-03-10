@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">Global News</string>
-    <string name="facebook_app_id">1128068298081313</string>
-    <string name="fb_login_protocol_scheme">fb1128068298081313</string>
-    <string name="facebook_client_token">9f3d5e4900b620bd07ee8af827b645bd</string>
+    <string name="facebook_app_id">112806829808131</string>
+    <string name="fb_login_protocol_scheme">fb112806829808131</string>
+    <string name="facebook_client_token">9f3d5e4900b620bd07ee8af827b645b</string>
 </resources>
+<!-- key -->
+<!-- fpi: 12 -->
+<!-- flps: 12 -->
+<!-- fct: abc -->
