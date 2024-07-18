@@ -1,7 +1,7 @@
 
 
 export const ZEN_SERVER = {
-    LOCAL: 'https://local.zendigital.tech:8000/api/',
+    LOCAL: 'https://local.zendigital.tech/api/',
     REMOTE: 'https://rtddigitalmedia.com/api/',
 }
 export const GET_ARTICLES = 'getArticles'
