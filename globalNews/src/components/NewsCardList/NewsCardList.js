@@ -95,7 +95,7 @@ const NewsCardList = (props) =>
 
             <FlatList
                 horizontal={false}
-                style={{ paddingTop: 0 }}
+                style={{ paddingTop: 10 }}
                 data={articles}
                 extraData={favorites}
                 initialNumToRender={5}

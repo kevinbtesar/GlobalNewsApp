@@ -1,7 +1,8 @@
 
 
 export const ZEN_SERVER = {
-    LOCAL: 'https://local.zendigital.tech/api/',
+    LOCAL: 'http://local.zendigital.tech:8000/api/',
+    LOCAL_SSL: 'https://tahr-super-eminently.ngrok-free.app/api/',
     REMOTE: 'https://rtddigitalmedia.com/api/',
 }
 export const GET_ARTICLES = 'getArticles'

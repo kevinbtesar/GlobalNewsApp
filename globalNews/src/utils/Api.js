@@ -11,12 +11,12 @@ import { store } from './../store';
 // import GLOBAL from './../store/globalStore'
 
 
-// this.newsUrl = `${ZEN_SERVER.LOCAL}${GET_ARTICLES}`
-// this.userAuthUrl = `${ZEN_SERVER.LOCAL}${USER_AUTH}`
-// this.favoriteUrl = `${ZEN_SERVER.LOCAL}${FAVORITES}`
-let newsUrl = `${ZEN_SERVER.LOCAL}${GET_ARTICLES}`
-let userAuthUrl = `${ZEN_SERVER.LOCAL}${USER_AUTH}`
-let favoriteUrl = `${ZEN_SERVER.LOCAL}${FAVORITES}`
+this.newsUrl = `${ZEN_SERVER.LOCAL_SSL}${GET_ARTICLES}`
+this.userAuthUrl = `${ZEN_SERVER.LOCAL_SSL}${USER_AUTH}`
+this.favoriteUrl = `${ZEN_SERVER.LOCAL_SSL}${FAVORITES}`
+// let newsUrl = `${ZEN_SERVER.LOCAL}${GET_ARTICLES}`
+// let userAuthUrl = `${ZEN_SERVER.LOCAL}${USER_AUTH}`
+// let favoriteUrl = `${ZEN_SERVER.LOCAL}${FAVORITES}`
 
 function getArticles(params) {
     return getRest(newsUrl, params)
@@ -34,36 +34,32 @@ export function favorites(params) {
 export async function getArticlesHelper() {
     try {
 
-        console.log("HERE");
+        
         const news = await getArticles({ appName: DeviceInfo.getApplicationName() });
         // const news = await api.getArticles({ category: category ?? 'Home', appName: DeviceInfo.getApplicationName() });
-
-       console.log(JSON.stringify(news));
+        // console.log("HERE getArticlesHelper news: " + JSON.stringify(news));
         if (news && news.error) {
             
             throw new Error(news.error);
         } else if (!news) {
             throw new Error("API.js Error")
         } else {
-            console.log("HERE1");
-
-            console.log("news: " + JSON.stringify(news))
+            // console.log("news: " + JSON.stringify(news))
             newsArray = Object.keys(news['articles']).map(k => news['articles'][k])
             store.dispatch(purgeArticles()),
             store.dispatch(populateArticles(newsArray))
 
-        categoriesArray = Object.keys(news['categories']).map(k => news['categories'][k]),
+            categoriesArray = Object.keys(news['categories']).map(k => news['categories'][k]),
             store.dispatch(populateCategories(categoriesArray))
-        // GLOBAL.categories = categoriesArray;
 
         }
 
   
         return news;
     } catch (e) {
-        let er = 'API.js Error: ' + JSON.stringify(e)
-        console.error(er);
-        return er
+        let er = 'API.js Error: ' + e
+        console.log(er);
+        return e
     }
 }
 

@@ -16,10 +16,12 @@ export const showModal = (inputText, buttonText) => {
 
 export const hideModal = (modalId) => {
 
-    ModalService.hide(modalId);
+    if(modalId){
+        ModalService.hide(modalId);
+    }
     
     // Commenting this line will force noInternetModal to stay on screen until there is a connection
-    ModalService.hide(GLOBAL.noInternetModalId); 
+    // ModalService.hide(GLOBAL.noInternetModalId); 
 };
 
 const renderModalContentElement = (displayText, buttonText) => {

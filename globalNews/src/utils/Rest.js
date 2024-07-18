@@ -3,23 +3,22 @@ export const getRest = async (url, params) => {
   if (params) {
     apiUrl = withQuery(url, params);
   }
-  console.log(`${apiUrl}`)
   try {
+    console.log(`apiUrl: ${apiUrl}`)
+
     const res = await fetch(apiUrl, {
       method: "GET",
       headers: {
-        Accept: "application/json",
+        'Accept': 'application/json',
         'Content-Type': 'application/json'
       }
     });
-    console.log("res:");
-    console.log(JSON.stringify(res));
 
+    // console.log("res:\n" + JSON.stringify(res));
     const data = await res.json();
-    console.log("data:");
-    console.log(JSON.stringify(data));
-
+    // console.log("data:\n" + JSON.stringify(data));
     return data;
+    
   } catch (error) {
     console.log("getRest error: " + error);
   }

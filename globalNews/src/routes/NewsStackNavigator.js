@@ -131,7 +131,7 @@ TopTabs = props => {
               async function callGetArticlesHelper() {
                 try {
                   const news = await getArticlesHelper();
-                  console.log(JSON.stringify(news));
+                  // console.log('callGetArticlesHelper - news: ' + JSON.stringify(news));
 
                   if (news && news['articles']) 
                   {
@@ -143,6 +143,7 @@ TopTabs = props => {
                   }
                 }
                 catch (e) {
+                  console.log(`callGetArticlesHelper error: ${e}`)
                   return false
                 }
               }
