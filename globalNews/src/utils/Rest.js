@@ -12,7 +12,13 @@ export const getRest = async (url, params) => {
         'Content-Type': 'application/json'
       }
     });
+    console.log("res:");
+    console.log(JSON.stringify(res));
+
     const data = await res.json();
+    console.log("data:");
+    console.log(JSON.stringify(data));
+
     return data;
   } catch (error) {
     console.log("getRest error: " + error);

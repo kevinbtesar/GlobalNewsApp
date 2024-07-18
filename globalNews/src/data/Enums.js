@@ -1,13 +1,12 @@
 
 
-export const RTD_SERVER = {
-    LOCAL: 'http://192.168.0.53/rtddigitalmedia.com/public/api',
-    REMOTE: 'https://rtddigitalmedia.com/api',
-    ARTISAN: 'http://192.168.0.53:8000/api'
+export const ZEN_SERVER = {
+    LOCAL: 'https://local.zendigital.tech:8000/api/',
+    REMOTE: 'https://rtddigitalmedia.com/api/',
 }
-export const GET_ARTICLES = '/getArticles'
-export const USER_AUTH = '/userAuth'
-export const FAVORITES = '/favorites'
+export const GET_ARTICLES = 'getArticles'
+export const USER_AUTH = 'userAuth'
+export const FAVORITES = 'favorites'
 
 
 

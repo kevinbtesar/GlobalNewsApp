@@ -131,7 +131,7 @@ TopTabs = props => {
               async function callGetArticlesHelper() {
                 try {
                   const news = await getArticlesHelper();
-                  // console.log(JSON.stringify(news));
+                  console.log(JSON.stringify(news));
 
                   if (news && news['articles']) 
                   {

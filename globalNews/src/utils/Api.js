@@ -2,7 +2,7 @@ import DeviceInfo from 'react-native-device-info';
 import { getRest, postRest } from "./Rest"
 import {
     GET_ARTICLES,
-    RTD_SERVER,
+    ZEN_SERVER,
     USER_AUTH,
     FAVORITES,
 } from '../data/Enums';
@@ -11,12 +11,12 @@ import { store } from './../store';
 // import GLOBAL from './../store/globalStore'
 
 
-// this.newsUrl = `${RTD_SERVER.LOCAL}${GET_ARTICLES}`
-// this.userAuthUrl = `${RTD_SERVER.LOCAL}${USER_AUTH}`
-// this.favoriteUrl = `${RTD_SERVER.LOCAL}${FAVORITES}`
-let newsUrl = `${RTD_SERVER.LOCAL}${GET_ARTICLES}`
-let userAuthUrl = `${RTD_SERVER.LOCAL}${USER_AUTH}`
-let favoriteUrl = `${RTD_SERVER.LOCAL}${FAVORITES}`
+// this.newsUrl = `${ZEN_SERVER.LOCAL}${GET_ARTICLES}`
+// this.userAuthUrl = `${ZEN_SERVER.LOCAL}${USER_AUTH}`
+// this.favoriteUrl = `${ZEN_SERVER.LOCAL}${FAVORITES}`
+let newsUrl = `${ZEN_SERVER.LOCAL}${GET_ARTICLES}`
+let userAuthUrl = `${ZEN_SERVER.LOCAL}${USER_AUTH}`
+let favoriteUrl = `${ZEN_SERVER.LOCAL}${FAVORITES}`
 
 function getArticles(params) {
     return getRest(newsUrl, params)
@@ -32,21 +32,23 @@ export function favorites(params) {
 // }
 
 export async function getArticlesHelper() {
-    // console.log("category: " + category);
     try {
 
+        console.log("HERE");
         const news = await getArticles({ appName: DeviceInfo.getApplicationName() });
         // const news = await api.getArticles({ category: category ?? 'Home', appName: DeviceInfo.getApplicationName() });
 
-        // console.log(JSON.stringify(news));
+       console.log(JSON.stringify(news));
         if (news && news.error) {
-            // console.log("news: " + JSON.stringify(news))
-            throw new Error(news);
+            
+            throw new Error(news.error);
         } else if (!news) {
             throw new Error("API.js Error")
-        }
+        } else {
+            console.log("HERE1");
 
-        newsArray = Object.keys(news['articles']).map(k => news['articles'][k])
+            console.log("news: " + JSON.stringify(news))
+            newsArray = Object.keys(news['articles']).map(k => news['articles'][k])
             store.dispatch(purgeArticles()),
             store.dispatch(populateArticles(newsArray))
 
@@ -54,6 +56,9 @@ export async function getArticlesHelper() {
             store.dispatch(populateCategories(categoriesArray))
         // GLOBAL.categories = categoriesArray;
 
+        }
+
+  
         return news;
     } catch (e) {
         let er = 'API.js Error: ' + JSON.stringify(e)
