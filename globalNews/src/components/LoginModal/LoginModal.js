@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LoginManager, GraphRequest, GraphRequestManager, AccessToken } from 'react-native-fbsdk-next';
+import { LoginManager, GraphRequest, GraphRequestManager, AccessToken, Settings } from 'react-native-fbsdk-next';
 import { useDispatch, useSelector } from 'react-redux';
 import Modal from 'react-native-modal';
 import { TouchableOpacity, StyleSheet, Text, View, TextInput, Button, Alert } from 'react-native';
@@ -43,16 +43,23 @@ const LoginModal = (props) => {
 
     const facebookButton = async () => {
         setLoginState('loading')
+        console.log("HERE facebookButton");
+
+        Settings.setAppID(KEYS.FACEBOOK_APP_ID);
 
         try {
             const result = await LoginManager.logInWithPermissions([
                 'public_profile',
             ]);
+            const data = await AccessToken.getCurrentAccessToken();
+
+            // console.log("HERE2 facebookButton data: " +JSON.stringify(data));
+
             if (result.isCancelled) {
                 setLoginState(null)
             } else {
                 try {
-                    const data = await AccessToken.getCurrentAccessToken();
+                    // const data = await AccessToken.getCurrentAccessToken();
 
                     const responseInfoCallback = async (error, res) => {
                         if (error) {
@@ -62,18 +69,17 @@ const LoginModal = (props) => {
                         } else {
                             try {
                             
-                                const login = await userAuth({ email: res.email, userAuth: 'true', name: res.name, deviceId: DeviceInfo.getDeviceId(), appId: DeviceInfo.getBundleId()});
-                                // console.log("res", JSON.stringify(res))
+                                const login = userAuth({ email: res.email, userAuth: 'true', name: res.name, deviceId: DeviceInfo.getDeviceId(), appId: DeviceInfo.getBundleId()});
                                 console.log("login", JSON.stringify(login))
 
-                                if (login.success) {
+                                if (Object.hasOwn(res, 'id')) {
 
-                                    OneSignal.setExternalUserId(login.user.id.toString());
-                                    OneSignal.setEmail(login.user.email);
+                                    // OneSignal.setExternalUserId(login.user.id.toString());
+                                    // OneSignal.setEmail(login.user.email);
 
                                     dispatch(loginUser({ accessToken: login.accessToken, name: res.name, image: res.picture.data.url }))
 
-                                    if (login.favorites.length > 0) {
+                                    if (login.favorites && login.favorites.length > 0) {
                                         dispatch(removeAllFavorites());
 
                                         Object.entries(login.favorites).forEach(([k, v], i) => {
@@ -107,6 +113,7 @@ const LoginModal = (props) => {
                         },
                         responseInfoCallback,
                     );
+
                     new GraphRequestManager().addRequest(infoRequest).start();
 
                 } catch (err) {

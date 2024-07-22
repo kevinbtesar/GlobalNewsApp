@@ -42,7 +42,6 @@ export const KEYS = {
     ONESIGNAL_APP_ID: '164548bb-bc7c-4b8a-ae09-91afb5865e5f',
     GOOGLE_SIGN_IN_ANDROID_CLIENT_ID: '260894939219-623mta5qv66n16kde1gf77pqpofs3906.apps.googleusercontent.com',
     GOOGLE_SIGN_IN_IOS_CLIENT_ID: '43023367729-h888o3pfeutvs4n63vqrqgb2h38fivsd.apps.googleusercontent.com',
-
+    FACEBOOK_APP_ID: '1128068298081313',
 }
 
-//oai: abcde

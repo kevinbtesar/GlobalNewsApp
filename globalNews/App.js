@@ -44,7 +44,8 @@ const App = () => {
 
   React.useEffect(() => {
 
-    setTimeout(() => setReady(true), 3000) // for splash screen
+    // setTimeout(() => setReady(true), 3000) // for splash screen
+    setTimeout(() => setReady(true), 300) // for splash screen
 
   }, [])
 

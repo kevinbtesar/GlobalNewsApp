@@ -1,0 +1,13 @@
+{
+  "configurations": [
+    {
+      "name": "Attach Direct",
+      "port": 8081,
+      "request": "attach",
+      "skipFiles": ["<node_internals>/**"],
+      "type": "reactnativedirect",
+      "cwd": "${workspaceFolder}",
+    },
+
+  ]
+}
