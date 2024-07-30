@@ -75,5 +75,4 @@ yarn-error.log
 
 
 # Addresses the vulnerability concern sent by Github
-
-**/globalNews/*.package-lock
+*.package-lock
