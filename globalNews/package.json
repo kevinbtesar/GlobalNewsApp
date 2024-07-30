@@ -16,7 +16,7 @@
   "dependencies": {
     "@eva-design/eva": "^2.2.0",
     "@react-native-async-storage/async-storage": "^1.17.10",
-    "@react-native-community/cli": "^12.0.0",
+    "@react-native-community/cli": "^13.6.5",
     "@react-native-community/netinfo": "^9.3.7",
     "@react-native-google-signin/google-signin": "^8.1.0",
     "@react-native-masked-view/masked-view": "^0.2.8",
