@@ -5,6 +5,8 @@
 		}
 	],
 	"settings": {
-		"react-native-tools.networkInspector.consoleLogsColorTheme": "Dark"
+		"react-native-tools.networkInspector.consoleLogsColorTheme": "Dark",
+		"java.compile.nullAnalysis.mode": "automatic",
+		"java.configuration.updateBuildConfiguration": "automatic"
 	}
 }

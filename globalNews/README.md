@@ -24,4 +24,6 @@ News app in React Native
 
 ### To start run:
 
-`react-native run-android` or `react-native ios`
+`npx react-native run-android` (required for Android)
+
+`npx react-native run-ios` (for iOS)
