@@ -23,7 +23,8 @@ import NewsStackNavigator from './src/routes/NewsStackNavigator';
 import Splash from './src/components/Splash/Splash';
 
 const App = () => {
-  const [ready, setReady, isThemeDark, setIsThemeDark] = React.useState(false)
+  const [ready, setReady] = React.useState(false);
+  const [isThemeDark, setIsThemeDark] = React.useState(false);
   const isDarkMode = useColorScheme() === 'dark';
   const CombinedDefaultTheme = merge(MD3LightTheme, NavigationDefaultTheme);
   const CombinedDarkTheme = merge(MD3DarkTheme, NavigationDarkTheme);
