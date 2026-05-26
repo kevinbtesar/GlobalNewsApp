@@ -8,7 +8,6 @@ import {
     GoogleSigninButton,
     statusCodes,
 } from '@react-native-google-signin/google-signin';
-import OneSignal from 'react-native-onesignal';
 import DeviceInfo from 'react-native-device-info';
 
 import { Loader } from '..';
@@ -149,7 +148,7 @@ const LoginModal = (props) => {
                 if (login.success) 
                 {
                     // OneSignal.setExternalUserId(login.user.id.toString());
-                    OneSignal.setEmail(login.user.email);
+                    // OneSignal disabled temporarily for RN 0.85 compatibility.
                     
                     dispatch(loginUser({ accessToken: login.accessToken, name: userInfo.user.name, image: userInfo.user.photo }))
 

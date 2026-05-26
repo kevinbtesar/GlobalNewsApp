@@ -1,7 +1,6 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import { RefreshControl, FlatList, View } from "react-native";
 import { useSelector } from 'react-redux';
-import { useFocusEffect } from '@react-navigation/native';
 
 import { NewsCard } from '..';
 import { getArticlesHelper } from '../../utils/Api';
@@ -17,9 +16,10 @@ const NewsCardList = (props) =>
     const renderNewsCardItem = ({ item, index }) => 
         ( props.notifications ? (<NewsCard notifications={props.notifications} article={item} {...props} />) : (<NewsCard article={item} {...props} />) )
     const [refreshing, setRefreshing] = useState(false);
-    let favorites = useSelector(favoritesSelector);
-    let articles = filterArticles(useSelector(articlesSelector));
-    const [articlesState, setArticlesState] = useState(articlesState);
+    const favorites = useSelector(favoritesSelector);
+    const storeArticles = useSelector(articlesSelector) ?? [];
+    const articles = useMemo(() => filterArticles(storeArticles), [storeArticles, props.favorites, props.notifications, props.route]);
+
     const onRefresh = useCallback(async () => {
 
         try {
@@ -31,11 +31,6 @@ const NewsCardList = (props) =>
             } else if (!news) {
                 throw new Error("There was an issue getting article data");
             }
-
-            articlesArray = Object.keys(news['articles']).map(k => news['articles'][k])
-            
-            let returnArray = filterArticles(articlesArray)
-            setArticlesState(returnArray)
             setRefreshing(false)
 
         } catch (e) {
@@ -57,6 +52,8 @@ const NewsCardList = (props) =>
 
     function filterArticles(articlesArray)
     {
+        const sourceArticles = Array.isArray(articlesArray) ? articlesArray : [];
+
         if(props.favorites){
 
             return props.favorites
@@ -71,13 +68,13 @@ const NewsCardList = (props) =>
     
             // console.log('newscarelist articlesArray: ' + JSON.stringify(articlesArray))
             // console.log("newscarelist appCategory: " + props.route.name)
-            for (let i = 0; i <= articlesArray.length; i++) {
+            for (let i = 0; i < sourceArticles.length; i++) {
         
                 // console.log(' props.route.name: ' +  props.route.name)
-                if (articlesArray[i] && articlesArray[i].app_category && articlesArray[i].app_category == props.route.name) {
+                if (sourceArticles[i] && sourceArticles[i].app_category && sourceArticles[i].app_category == props.route.name) {
         
                     // console.log('newscarelist val: ' + articlesArray[i].app_category)
-                    returnArray.push(articlesArray[i])
+                    returnArray.push(sourceArticles[i])
                     // console.log('returnArray : ' + JSON.stringify(returnArray))
                 }
             }
@@ -85,7 +82,7 @@ const NewsCardList = (props) =>
             return returnArray
             
         } else {
-            return articlesArray
+            return sourceArticles
         }   
     }
 

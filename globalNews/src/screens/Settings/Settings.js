@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { isUserConnectedSelector, getUserDataSelector } from '../../store/userStore/userStore.selectors';
 import { List, MD3Colors, Switch, Button } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import OneSignal from 'react-native-onesignal';
 
 import Colors from '../../utils/Colors';
 import Fonts from '../../utils/Fonts';
@@ -24,86 +23,42 @@ const Settings = (props) => {
     const [ranNotificationOnceFlag, setRanNotificationOnceFlag] = useState(false);
     const [ranDarkModeOnceFlag, setRanDarkModeOnceFlag] = useState(false);
 
-    // const [isNotificationSwitchOn, setIsNotificationSwitchOn] = useState(false);
-    // const [isDarkModeSwitchOn, setIsDarkModeSwitchOn] = useState(false);
-    // const onToggleNotificationSwitch = () => setIsNotificationSwitchOn(!isNotificationSwitchOn);
-    // const onToggleDarkModeSwitch = () => setIsDarkModeSwitchOn(!isDarkModeSwitchOn);
-
     const onToggleNotificationSwitch = async () => {
-        // console.log("Desired: " + desiredSetting)
-        
-            let mNotificationSwitchStatus = !isNotificationSwitchOn 
-       
-            setNotificationSwitch(mNotificationSwitchStatus) // set the toggle switch to the desired setting
-            // console.log("isNotificationSwitchOn: " + mNotificationSwitchStatus)
-            
-            if (mNotificationSwitchStatus) {
-                // console.log("HERE")
-                try {
-                    const state = await OneSignal.getDeviceState();
+        let mNotificationSwitchStatus = !isNotificationSwitchOn
 
-                    if (!state.hasNotificationPermission) 
-                    {
-                        OneSignal.promptForPushNotificationsWithUserResponse(true, response => 
-                        {
-                            if (response)
-                            {
-                                // notifications permission was set to On
-                                OneSignal.disablePush(false);
-                                AsyncStorage.setItem('@notificationsSetting', "true")
+        setNotificationSwitch(mNotificationSwitchStatus)
 
-                            } else {
-                                setNotificationSwitch(false) // denied permission so set toggle back to Off
-                                AsyncStorage.setItem('@notificationsSetting', "false")
-                            }
-                        });
-                    } else {
-                        OneSignal.disablePush(false);
-                        await AsyncStorage.setItem('@notificationsSetting', "true")
-                    }
-                } catch (e) {
-                    setNotificationSwitch(false)  // there was an issue with Async or OneSignal, so set toggle back to Off
-                }
-
-            } else {
-                OneSignal.disablePush(true);
-                await AsyncStorage.setItem('@notificationsSetting', "false")
-            }
+        try {
+            await AsyncStorage.setItem('@notificationsSetting', mNotificationSwitchStatus ? "true" : "false")
+        } catch (e) {
+            setNotificationSwitch(false)
+        }
     };
 
     const onToggleDarkModeSwitch = async () => {
-        // let mDarkModeSwitchStatus = !isDarkModeSwitchOn
         setIsDarkModeSwitch(!isDarkModeSwitchOn)
         try {
-           
             await AsyncStorage.setItem('@darkModeSetting', !isDarkModeSwitchOn ? "true" : "false")
         } catch (e) {
             setIsDarkModeSwitch(false)
-            // saving error
         }
     };
 
 
-    async function getNotificationsSetting (){
+    async function getNotificationsSetting() {
         try {
             const notificationsSettingValue = await eval(AsyncStorage.getItem('@notificationsSetting')) ?? "true"
-            const state = await OneSignal.getDeviceState();
+            let notificationBool = !!notificationsSettingValue
 
-            // console.log("getNotificationsSetting state: " + JSON.stringify(state))
-            // console.log("getNotificationsSetting statnotificationsSetting: " + notificationsSettingValue)
-
-            // notificationBool must be initinized before return value can be used in setNotificationSwitch()
-            let notificationBool = (notificationsSettingValue && state.hasNotificationPermission && !state.isPushDisabled)
-            
-            if(!ranNotificationOnceFlag){
+            if (!ranNotificationOnceFlag) {
                 setNotificationSwitch(notificationBool)
                 setRanNotificationOnceFlag(true)
             }
-            
+
             return notificationBool
-            
+
         } catch (e) {
-            if(!ranNotificationOnceFlag){
+            if (!ranNotificationOnceFlag) {
                 setNotificationSwitch(false)
                 setRanNotificationOnceFlag(true)
             }
@@ -113,26 +68,26 @@ const Settings = (props) => {
     }
 
 
-    async function getDarkModeSetting () {
+    async function getDarkModeSetting() {
         try {
             let darkModeBool = await AsyncStorage.getItem('@darkModeSetting') ?? "false"
             darkModeBool = eval(darkModeBool)
-            if(!ranDarkModeOnceFlag){
+            if (!ranDarkModeOnceFlag) {
                 setIsDarkModeSwitch(darkModeBool)
                 setRanDarkModeOnceFlag(true)
-                
-            } 
-            
+
+            }
+
             return darkModeBool
         } catch (e) {
-            if(!ranDarkModeOnceFlag){
+            if (!ranDarkModeOnceFlag) {
                 setIsDarkModeSwitch(false)
                 setRanDarkModeOnceFlag(true)
             }
             return false
         }
     }
-  
+
 
     return (
 
@@ -148,8 +103,8 @@ const Settings = (props) => {
                         onPress={() => { dispatch(loginModalVisible(true)) }}
                         left={() => {
                             userData.image &&
-                                <Image style={{ width: 30, height: 30, borderRadius: 35 }}
-                                    source={{ uri: userData.image, cache: "force-cache" }} />
+                            <Image style={{ width: 30, height: 30, borderRadius: 35 }}
+                                source={{ uri: userData.image, cache: "force-cache" }} />
                         }
                         }
                     />
@@ -194,7 +149,6 @@ const Settings = (props) => {
                 <List.Item
                     title={"Rate " + DeviceInfo.getApplicationName()}
                     left={() => <List.Icon color={MD3Colors.tertiary70} icon="star" />}
-                // onPress={() => initializeShare(DeviceInfo.getApplicationName(), "TODO: Google or Apple url")}
                 />
                 <List.Item
                     title="Report Bug"

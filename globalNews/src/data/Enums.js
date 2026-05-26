@@ -1,10 +1,11 @@
 
 
 export const ZEN_SERVER = {
-    LOCAL: 'http://local.zendigital.tech:8000/api/',
-    LOCAL_SSL: 'https://tahr-super-eminently.ngrok-free.app/api/',
+    LOCAL: 'http://local.zendigital.tech/index.php/api/',
     REMOTE: 'https://rtddigitalmedia.com/api/',
 }
+export const API_ENV = 'LOCAL'
+export const API_BASE_URL = ZEN_SERVER[API_ENV] ?? ZEN_SERVER.LOCAL
 export const GET_ARTICLES = 'getArticles'
 export const USER_AUTH = 'userAuth'
 export const FAVORITES = 'favorites'

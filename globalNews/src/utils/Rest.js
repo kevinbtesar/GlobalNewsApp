@@ -14,8 +14,14 @@ export const getRest = async (url, params) => {
       }
     });
 
-    // console.log("res:\n" + JSON.stringify(res));
-    const data = await res.json();
+    const bodyText = await res.text();
+    let data;
+    try {
+      data = bodyText ? JSON.parse(bodyText) : null;
+    } catch (parseError) {
+      console.log("getRest error: Non-JSON response (" + res.status + ") " + bodyText.slice(0, 120));
+      return null;
+    }
     // console.log("data:\n" + JSON.stringify(data));
     return data;
     

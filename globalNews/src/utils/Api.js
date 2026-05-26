@@ -2,7 +2,7 @@ import DeviceInfo from 'react-native-device-info';
 import { getRest, postRest } from "./Rest"
 import {
     GET_ARTICLES,
-    ZEN_SERVER,
+    API_BASE_URL,
     USER_AUTH,
     FAVORITES,
 } from '../data/Enums';
@@ -11,15 +11,11 @@ import { store } from './../store';
 // import GLOBAL from './../store/globalStore'
 
 
-this.newsUrl = `${ZEN_SERVER.LOCAL_SSL}${GET_ARTICLES}`
-this.userAuthUrl = `${ZEN_SERVER.LOCAL_SSL}${USER_AUTH}`
-this.favoriteUrl = `${ZEN_SERVER.LOCAL_SSL}${FAVORITES}`
-// let newsUrl = `${ZEN_SERVER.LOCAL}${GET_ARTICLES}`
-// let userAuthUrl = `${ZEN_SERVER.LOCAL}${USER_AUTH}`
-// let favoriteUrl = `${ZEN_SERVER.LOCAL}${FAVORITES}`
+const userAuthUrl = `${API_BASE_URL}${USER_AUTH}`;
+const favoriteUrl = `${API_BASE_URL}${FAVORITES}`;
 
 function getArticles(params) {
-    return getRest(newsUrl, params)
+    return getRest(`${API_BASE_URL}${GET_ARTICLES}`, params)
 }
 export function userAuth(params) {
     return postRest(userAuthUrl, params)
@@ -33,8 +29,6 @@ export function favorites(params) {
 
 export async function getArticlesHelper() {
     try {
-
-        
         const news = await getArticles({ appName: DeviceInfo.getApplicationName() });
         // const news = await api.getArticles({ category: category ?? 'Home', appName: DeviceInfo.getApplicationName() });
         // console.log("HERE getArticlesHelper news: " + JSON.stringify(news));
@@ -45,12 +39,18 @@ export async function getArticlesHelper() {
             throw new Error("API.js Error")
         } else {
             // console.log("news: " + JSON.stringify(news))
-            newsArray = Object.keys(news['articles']).map(k => news['articles'][k])
-            store.dispatch(purgeArticles()),
-            store.dispatch(populateArticles(newsArray))
+            const newsArticles = news?.articles ?? [];
+            const newsCategories = news?.categories ?? [];
+            const newsArray = Array.isArray(newsArticles)
+                ? newsArticles
+                : Object.keys(newsArticles).map(k => newsArticles[k]);
+            const categoriesArray = Array.isArray(newsCategories)
+                ? newsCategories
+                : Object.keys(newsCategories).map(k => newsCategories[k]);
 
-            categoriesArray = Object.keys(news['categories']).map(k => news['categories'][k]),
-            store.dispatch(populateCategories(categoriesArray))
+            store.dispatch(purgeArticles());
+            store.dispatch(populateArticles(newsArray));
+            store.dispatch(populateCategories(categoriesArray));
 
         }
 
