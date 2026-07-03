@@ -12,7 +12,20 @@
           "package_name": "com.rtddigitalmedia.globalnews"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "260894939219-fnbgp4tm3hhfbqmd6ksol21l5adaps7v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rtddigitalmedia.globalnews",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "260894939219-50hka60ui27cm8ktrerhs0k7l0mkmvl5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDlMOIW4MDQot3-pQfN-PSJMDdP_qyFb1c"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "260894939219-50hka60ui27cm8ktrerhs0k7l0mkmvl5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
