@@ -18,6 +18,7 @@ import {
 import {
   GoogleSignin,
   GoogleSigninButton,
+  statusCodes,
 } from '@react-native-google-signin/google-signin';
 import DeviceInfo from 'react-native-device-info';
 import { Button, useTheme } from 'react-native-paper';
@@ -41,6 +42,31 @@ import {
 import { userAuth } from '../../utils/Api';
 import { KEYS } from '../../data/Enums';
 
+// Configure the native client once so sign-in is ready before the first tap.
+GoogleSignin.configure({
+  webClientId: KEYS.GOOGLE_SIGN_IN_WEB_CLIENT_ID,
+  iosClientId: KEYS.GOOGLE_SIGN_IN_IOS_CLIENT_ID,
+});
+
+const getLoginErrorMessage = (error) => {
+  const code = String(error?.code ?? '');
+  const message = typeof error === 'string' ? error : error?.message ?? '';
+
+  if (code === String(statusCodes.SIGN_IN_CANCELLED)) {
+    return null;
+  }
+
+  if (code === String(statusCodes.PLAY_SERVICES_NOT_AVAILABLE)) {
+    return 'Google Play Services is not available or needs an update.';
+  }
+
+  if (code === '10' || /DEVELOPER_ERROR/i.test(message)) {
+    return 'Google sign-in is not configured for this Android build. Check the package name, SHA-1, and Google Services setup.';
+  }
+
+  return message || 'An error occurred. Please try again.';
+};
+
 const LoginModal = (props) => {
   const theme = useTheme();
   const dispatch = useDispatch();
@@ -48,11 +74,15 @@ const LoginModal = (props) => {
   const isUserConnected = useSelector(isUserConnectedSelector);
   const [loginState, setLoginState] = React.useState(null);
 
-  const syncFavorites = React.useCallback((favoritesList) => {
+  const syncFavorites = React.useCallback((favoritesList = []) => {
     dispatch(removeAllFavorites());
 
-    favoritesList.forEach((favorite) => {
-      dispatch(addNewsToFavorites(favorite.article_data ?? favorite));
+    favoritesList.filter(Boolean).forEach((favorite) => {
+      const favoriteArticle = favorite.article_data ?? favorite;
+
+      if (favoriteArticle) {
+        dispatch(addNewsToFavorites(favoriteArticle));
+      }
     });
   }, [dispatch]);
 
@@ -148,41 +178,59 @@ const LoginModal = (props) => {
     setLoginState('loading');
 
     try {
-      GoogleSignin.configure({
-        androidClientId: KEYS.GOOGLE_SIGN_IN_ANDROID_CLIENT_ID,
-        iosClientId: KEYS.GOOGLE_SIGN_IN_IOS_CLIENT_ID,
-      });
-
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
+      const googleUser = userInfo?.user ?? userInfo;
+      const fallbackName = [googleUser?.givenName, googleUser?.familyName]
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+      const displayName = googleUser?.name || fallbackName || googleUser?.email || '';
+      if (!googleUser?.email) {
+        throw new Error('Google account email was not returned.');
+      }
       const login = await userAuth({
-        email: userInfo.user.email,
+        email: googleUser.email,
         userAuth: 'true',
-        name: userInfo.user.name,
+        name: displayName,
         deviceId: DeviceInfo.getDeviceId(),
         appId: DeviceInfo.getBundleId(),
       });
 
-      if (!login?.success && !login?.accessToken) {
-        throw new Error(login?.error || 'Google login failed');
+      const accessToken = login?.accessToken
+        ?? login?.token
+        ?? login?.access_token
+        ?? login?.data?.accessToken
+        ?? login?.data?.token
+        ?? login?.data?.access_token;
+
+      if (!accessToken) {
+        throw new Error(login?.error || login?.message || 'Google login did not return an access token');
       }
 
       dispatch(
         loginUser({
-          accessToken: login.accessToken,
-          name: userInfo.user.name,
-          image: userInfo.user.photo || '',
+          accessToken,
+          name: displayName,
+          image: googleUser?.photo || '',
         })
       );
 
-      if (Array.isArray(login.favorites) && login.favorites.length > 0) {
-        syncFavorites(login.favorites);
+      const favoritesList = login?.favorites ?? login?.data?.favorites ?? [];
+      if (Array.isArray(favoritesList) && favoritesList.length > 0) {
+        syncFavorites(favoritesList);
       }
 
       setLoginState("You've logged in successfully!");
     } catch (error) {
       console.error('Google login failed', error);
-      setLoginState('An error occurred. Please try again.');
+      const message = getLoginErrorMessage(error);
+      if (message === null) {
+        setLoginState(null);
+        return;
+      }
+
+      setLoginState(message);
     }
   }, [dispatch, syncFavorites]);
 
