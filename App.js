@@ -1,81 +1,115 @@
 import React from 'react';
-import { View, StatusBar, useColorScheme } from 'react-native';
+import { StatusBar, useColorScheme } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
-import {
-  DarkTheme as NavigationDarkTheme,
-  DefaultTheme as NavigationDefaultTheme,
-} from '@react-navigation/native';
-import {
-  MD3LightTheme,
-  MD3DarkTheme,
-  Provider as PaperProvider,
-} from 'react-native-paper';
-import merge from 'deepmerge';
-import * as eva from '@eva-design/eva';
-import { ApplicationProvider } from '@ui-kitten/components';
+import { NavigationContainer } from '@react-navigation/native';
+import { PaperProvider } from 'react-native-paper';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { PreferencesContext } from './src/utils/PreferencesContext';
 import { store, persistor } from './src/store';
-import Colors from './src/utils/Colors';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { buildAppThemes } from './src/theme/appTheme';
 import NewsStackNavigator from './src/routes/NewsStackNavigator';
 import Splash from './src/components/Splash/Splash';
 
+const DARK_MODE_KEY = '@darkModeSetting';
+
 const App = () => {
-  const [ready, setReady] = React.useState(false);
-  const [isThemeDark, setIsThemeDark] = React.useState(false);
-  const isDarkMode = useColorScheme() === 'dark';
-  const CombinedDefaultTheme = merge(MD3LightTheme, NavigationDefaultTheme);
-  const CombinedDarkTheme = merge(MD3DarkTheme, NavigationDarkTheme);
-  const theme = isThemeDark ? CombinedDarkTheme : CombinedDefaultTheme;
- 
+  const systemColorScheme = useColorScheme();
+  const [isThemeDark, setIsThemeDark] = React.useState(systemColorScheme === 'dark');
+  const [preferencesReady, setPreferencesReady] = React.useState(false);
+
+  React.useEffect(() => {
+    let isMounted = true;
+
+    const hydratePreferences = async () => {
+      try {
+        const storedDarkMode = await AsyncStorage.getItem(DARK_MODE_KEY);
+
+        if (!isMounted) {
+          return;
+        }
+
+        if (storedDarkMode === null) {
+          setIsThemeDark(systemColorScheme === 'dark');
+        } else {
+          setIsThemeDark(storedDarkMode === 'true');
+        }
+      } catch (error) {
+        if (isMounted) {
+          setIsThemeDark(systemColorScheme === 'dark');
+        }
+      } finally {
+        if (isMounted) {
+          setPreferencesReady(true);
+        }
+      }
+    };
+
+    hydratePreferences();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [systemColorScheme]);
+
+  const setThemeDark = React.useCallback(async (nextValue) => {
+    const normalizedValue = Boolean(nextValue);
+    setIsThemeDark(normalizedValue);
+
+    try {
+      await AsyncStorage.setItem(DARK_MODE_KEY, normalizedValue ? 'true' : 'false');
+    } catch (error) {
+      console.warn('Unable to persist theme preference', error);
+    }
+  }, []);
 
   const toggleTheme = React.useCallback(() => {
-    return setIsThemeDark(!isThemeDark);
-  }, [isThemeDark]);
+    setThemeDark(!isThemeDark);
+  }, [isThemeDark, setThemeDark]);
 
   const preferences = React.useMemo(
     () => ({
-      toggleTheme,
       isThemeDark,
+      setThemeDark,
+      toggleTheme,
+      isPreferencesReady: preferencesReady,
     }),
-    [toggleTheme, isThemeDark]
+    [isThemeDark, setThemeDark, toggleTheme, preferencesReady]
   );
 
-  React.useEffect(() => {
+  const { paperTheme, navigationTheme } = React.useMemo(
+    () => buildAppThemes(isThemeDark),
+    [isThemeDark]
+  );
 
-    // setTimeout(() => setReady(true), 3000) // for splash screen
-    setTimeout(() => setReady(true), 300) // for splash screen
-
-  }, [])
-
+  if (!preferencesReady) {
+    return <Splash />;
+  }
 
   return (
-
-    <>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={Colors.yellow} />
-
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <Provider store={store}>
-        <PersistGate loading={<View />} persistor={persistor}>
-          {ready ?
-            <PreferencesContext.Provider value={preferences}>
-              <SafeAreaProvider>
-                <ApplicationProvider {...eva} theme={eva.light}>
-                  <PaperProvider theme={theme}>
-                    <NewsStackNavigator />
-                  </PaperProvider>
-                </ApplicationProvider>
-              </SafeAreaProvider>
-            </PreferencesContext.Provider>
-            :
-            <Splash />}
+        <PersistGate loading={<Splash />} persistor={persistor}>
+          <PreferencesContext.Provider value={preferences}>
+            <SafeAreaProvider>
+              <PaperProvider theme={paperTheme}>
+                <NavigationContainer theme={navigationTheme}>
+                  <StatusBar
+                    barStyle={isThemeDark ? 'light-content' : 'dark-content'}
+                    backgroundColor={navigationTheme.colors.card}
+                  />
+                  <NewsStackNavigator />
+                </NavigationContainer>
+              </PaperProvider>
+            </SafeAreaProvider>
+          </PreferencesContext.Provider>
         </PersistGate>
       </Provider>
-
-    </>
+    </GestureHandlerRootView>
   );
 };
-
 
 export default App;

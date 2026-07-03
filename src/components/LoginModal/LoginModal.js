@@ -1,383 +1,425 @@
-import React, { useState } from 'react';
-import { LoginManager, GraphRequest, GraphRequestManager, AccessToken, Settings } from 'react-native-fbsdk-next';
-import { useDispatch, useSelector } from 'react-redux';
-import Modal from 'react-native-modal';
-import { TouchableOpacity, StyleSheet, Text, View, TextInput, Button, Alert } from 'react-native';
+import React from 'react';
 import {
-    GoogleSignin,
-    GoogleSigninButton,
-    statusCodes,
+  AccessToken,
+  GraphRequest,
+  GraphRequestManager,
+  LoginManager,
+  Settings,
+} from 'react-native-fbsdk-next';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {
+  GoogleSignin,
+  GoogleSigninButton,
 } from '@react-native-google-signin/google-signin';
 import DeviceInfo from 'react-native-device-info';
+import { Button, useTheme } from 'react-native-paper';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { Loader } from '..';
 import Colors from '../../utils/Colors';
-import Fonts from '../../utils/Fonts';
-import { loginModalVisible, loginUser, logoutUser } from '../../store/userStore/userStore.actions';
-import { addNewsToFavorites, removeAllFavorites } from '../../store/newsStore/newsStore.actions';
-import { isLoginModalVisibleSelector, isUserConnectedSelector } from '../../store/userStore/userStore.selectors';
-import { TEXT_STRINGS } from '../../data/Enums';
+import {
+  loginModalVisible,
+  loginUser,
+  logoutUser,
+} from '../../store/userStore/userStore.actions';
+import {
+  addNewsToFavorites,
+  removeAllFavorites,
+} from '../../store/newsStore/newsStore.actions';
+import {
+  isLoginModalVisibleSelector,
+  isUserConnectedSelector,
+} from '../../store/userStore/userStore.selectors';
 import { userAuth } from '../../utils/Api';
 import { KEYS } from '../../data/Enums';
 
-
 const LoginModal = (props) => {
-    const dispatch = useDispatch();
-    const isModalVisible = useSelector(isLoginModalVisibleSelector);
-    const isUserConnected = useSelector(isUserConnectedSelector);
-    const [loginState, setLoginState] = useState(null)
+  const theme = useTheme();
+  const dispatch = useDispatch();
+  const isModalVisible = useSelector(isLoginModalVisibleSelector);
+  const isUserConnected = useSelector(isUserConnectedSelector);
+  const [loginState, setLoginState] = React.useState(null);
 
-    const onCloseModal = () => {
-        dispatch(loginModalVisible(false))
-        setTimeout(() => {
-            setLoginState(null)
-        }, 1000)
-    }
+  const syncFavorites = React.useCallback((favoritesList) => {
+    dispatch(removeAllFavorites());
 
-    const onLogout = () => {
-        dispatch(logoutUser())
-        dispatch(loginModalVisible(false))
-    }
+    favoritesList.forEach((favorite) => {
+      dispatch(addNewsToFavorites(favorite.article_data ?? favorite));
+    });
+  }, [dispatch]);
 
+  const onCloseModal = React.useCallback(() => {
+    dispatch(loginModalVisible(false));
+    setTimeout(() => {
+      setLoginState(null);
+    }, 250);
+  }, [dispatch]);
 
-    const facebookButton = async () => {
-        setLoginState('loading')
-        console.log("HERE facebookButton");
+  const onLogout = React.useCallback(() => {
+    dispatch(logoutUser());
+    dispatch(loginModalVisible(false));
+    setLoginState(null);
+  }, [dispatch]);
 
-        Settings.setAppID(KEYS.FACEBOOK_APP_ID);
+  const facebookButton = React.useCallback(async () => {
+    setLoginState('loading');
+    Settings.setAppID(KEYS.FACEBOOK_APP_ID);
 
-        try {
-            const result = await LoginManager.logInWithPermissions([
-                'public_profile',
-            ]);
-            const data = await AccessToken.getCurrentAccessToken();
+    try {
+      const result = await LoginManager.logInWithPermissions([
+        'public_profile',
+        'email',
+      ]);
 
-            // console.log("HERE2 facebookButton data: " +JSON.stringify(data));
+      if (result.isCancelled) {
+        setLoginState(null);
+        return;
+      }
 
-            if (result.isCancelled) {
-                setLoginState(null)
-            } else {
-                try {
-                    // const data = await AccessToken.getCurrentAccessToken();
+      const data = await AccessToken.getCurrentAccessToken();
+      if (!data?.accessToken) {
+        throw new Error('Facebook access token missing');
+      }
 
-                    const responseInfoCallback = async (error, res) => {
-                        if (error) {
-                            setLoginState('An error occurred, please try again later 😔')
-                            throw new Error("facebookButton ERROR: " + JSON.stringify(error));
-
-                        } else {
-                            try {
-                            
-                                const login = userAuth({ email: res.email, userAuth: 'true', name: res.name, deviceId: DeviceInfo.getDeviceId(), appId: DeviceInfo.getBundleId()});
-                                console.log("login", JSON.stringify(login))
-
-                                if (Object.hasOwn(res, 'id')) {
-
-                                    // OneSignal.setExternalUserId(login.user.id.toString());
-                                    // OneSignal.setEmail(login.user.email);
-
-                                    dispatch(loginUser({ accessToken: login.accessToken, name: res.name, image: res.picture.data.url }))
-
-                                    if (login.favorites && login.favorites.length > 0) {
-                                        dispatch(removeAllFavorites());
-
-                                        Object.entries(login.favorites).forEach(([k, v], i) => {
-                                            console.log("HERE login.favorites[i].article_data: " + JSON.stringify(login.favorites[i].article_data))
-                                            dispatch(addNewsToFavorites(login.favorites[i].article_data));
-                                        });
-               
-                                    }
-
-                                    setLoginState("You've logged in successfully! 👏")
-
-                                } else {
-                                    throw new Error("facebookButton 0 ERROR: " + JSON.stringify(login.error));
-                                }
-                            
-                            } catch (err) {
-                                throw new Error("facebookButton 1 ERROR: " + JSON.stringify(err));
-                            }
-                        }
-                    };
-
-                    const infoRequest = new GraphRequest(
-                        '/me',
-                        {
-                            accessToken: data.accessToken,
-                            parameters: {
-                                fields: {
-                                    string: 'email,name,picture',
-                                },
-                            },
-                        },
-                        responseInfoCallback,
-                    );
-
-                    new GraphRequestManager().addRequest(infoRequest).start();
-
-                } catch (err) {
-                    throw new Error("facebookButton 2 ERROR: " + JSON.stringify(err));
-                }
+      const responseInfo = await new Promise((resolve, reject) => {
+        const request = new GraphRequest(
+          '/me',
+          {
+            accessToken: data.accessToken,
+            parameters: {
+              fields: {
+                string: 'email,name,picture',
+              },
+            },
+          },
+          (error, response) => {
+            if (error) {
+              reject(error);
+              return;
             }
 
-        } catch (err) {
-            setLoginState('An error occurred, please try again later 😔')
-            console.log('[Facebook Error]' + err);
-        }
-    };
+            resolve(response);
+          }
+        );
 
+        new GraphRequestManager().addRequest(request).start();
+      });
 
+      const login = await userAuth({
+        email: responseInfo.email,
+        userAuth: 'true',
+        name: responseInfo.name,
+        deviceId: DeviceInfo.getDeviceId(),
+        appId: DeviceInfo.getBundleId(),
+      });
 
-    const googleButton = async () => {
-        GoogleSignin.configure({
-            androidClientId: KEYS.GOOGLE_SIGN_IN_ANDROID_CLIENT_ID,
-            iosClientId: KEYS.GOOGLE_SIGN_IN_IOS_CLIENT_ID,
+      if (!login?.accessToken) {
+        throw new Error(login?.error || 'Facebook login failed');
+      }
+
+      dispatch(
+        loginUser({
+          accessToken: login.accessToken,
+          name: responseInfo.name,
+          image: responseInfo.picture?.data?.url || '',
         })
+      );
 
-        setLoginState('loading')
+      if (Array.isArray(login.favorites) && login.favorites.length > 0) {
+        syncFavorites(login.favorites);
+      }
 
-        try {
-            await GoogleSignin.hasPlayServices()
-            const userInfo = await GoogleSignin.signIn();
+      setLoginState("You've logged in successfully!");
+    } catch (error) {
+      console.error('Facebook login failed', error);
+      setLoginState('An error occurred. Please try again.');
+    }
+  }, [dispatch, syncFavorites]);
 
-            try {
-                const login = await userAuth({ email: userInfo.user.email, userAuth: 'true', name: userInfo.user.name, deviceId: DeviceInfo.getDeviceId(), appId: DeviceInfo.getBundleId() });
-                
-                // console.log(login);
+  const googleButton = React.useCallback(async () => {
+    setLoginState('loading');
 
-                if (login.success) 
-                {
-                    // OneSignal.setExternalUserId(login.user.id.toString());
-                    // OneSignal disabled temporarily for RN 0.85 compatibility.
-                    
-                    dispatch(loginUser({ accessToken: login.accessToken, name: userInfo.user.name, image: userInfo.user.photo }))
+    try {
+      GoogleSignin.configure({
+        androidClientId: KEYS.GOOGLE_SIGN_IN_ANDROID_CLIENT_ID,
+        iosClientId: KEYS.GOOGLE_SIGN_IN_IOS_CLIENT_ID,
+      });
 
-                    if (login.favorites.length > 0) {
-                        dispatch(removeAllFavorites());
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      const login = await userAuth({
+        email: userInfo.user.email,
+        userAuth: 'true',
+        name: userInfo.user.name,
+        deviceId: DeviceInfo.getDeviceId(),
+        appId: DeviceInfo.getBundleId(),
+      });
 
-                        Object.entries(login.favorites).forEach(([k, v], i) => {
-                            dispatch(addNewsToFavorites(login.favorites[i]));
-                        });
-                    }
+      if (!login?.success && !login?.accessToken) {
+        throw new Error(login?.error || 'Google login failed');
+      }
 
-                    setLoginState("You've logged in successfully! 👏")
+      dispatch(
+        loginUser({
+          accessToken: login.accessToken,
+          name: userInfo.user.name,
+          image: userInfo.user.photo || '',
+        })
+      );
 
-                } else {
-                    setLoginState('An error occurred, please try again later 😔')
-                    throw new Error("googleButton()0 -> Api.rtdServerLoginWithGrant ERROR: " + JSON.stringify(login.error));
-                }
+      if (Array.isArray(login.favorites) && login.favorites.length > 0) {
+        syncFavorites(login.favorites);
+      }
 
-            } catch (err) {
-                setLoginState('An error occurred, please try again later 😔')
-                console.log('googleButton1 Error: ' + JSON.stringify(err))
-            }
+      setLoginState("You've logged in successfully!");
+    } catch (error) {
+      console.error('Google login failed', error);
+      setLoginState('An error occurred. Please try again.');
+    }
+  }, [dispatch, syncFavorites]);
 
-        } catch (err) {
-            setLoginState('An error occurred, please try again later 😔')
-            console.log('googleButton2 Error: ' + JSON.stringify(err))
-        }
+  const ModalContent = () => {
+    if (isUserConnected && !loginState) {
+      return (
+        <>
+          <View style={styles.modalHolderHeader}>
+            <View style={[styles.iconBadge, { backgroundColor: theme.colors.primary }]}>
+              <MaterialCommunityIcons name="logout" size={22} color="#fff" />
+            </View>
+            <Text style={[styles.modalHeaderTitle, { color: theme.colors.text }]}>
+              Do you want to log out?
+            </Text>
+            <Text style={[styles.modalBodyText, { color: theme.colors.onSurfaceVariant }]}>
+              You will stay signed in on this device until you confirm.
+            </Text>
+          </View>
+
+          <View style={styles.logoutContainer}>
+            <Button mode="outlined" onPress={onCloseModal} style={styles.logoutAction}>
+              Cancel
+            </Button>
+            <Button mode="contained" onPress={onLogout} style={styles.logoutAction}>
+              Log out
+            </Button>
+          </View>
+        </>
+      );
     }
 
+    if (loginState === 'loading') {
+      return (
+        <View style={styles.loadingState}>
+          <Loader label="Connecting your account" />
+        </View>
+      );
+    }
 
-    // const loginManualButton = async () => 
-    // {
-    //     setLoginState('loading')
-    //     try {
-    //         const login = await Api.userAuth({ email: this.email, password: this.password, userAuth: 'false' });
-    //         if (login.success) {
-    //             dispatch(loginUser({ accessToken: login.api_token, name: login.user.name, image: '', }))
-    //    if(login.favorites.length>0)
-    //    {
-    //         Object.entries(login.favorites).forEach(([k, v], i) =>
-    //         {
-    //             dispatch(addNewsToFavorites(login.favorites[i]));
-    //         });
-    //    }
-
-    //             setLoginState("You've logged in successfully! 👏")
-    //         } else {
-    //             throw new Error(login);
-    //         }
-    //     } catch (err) {
-    //         console.log('loginManualButton Error: ' + JSON.stringify(err))
-    //     }
-
-    // }
-
-    const ModalContent = () => {
-        if (isUserConnected && !loginState) {
-            return (
-                <>
-                    <View style={styles.modalHolderHeader}>
-                        <Text style={styles.modalHeaderTitle}>{'Do you want to log out?'}</Text>
-                    </View>
-                    <View style={styles.logoutContainer}>
-                        <TouchableOpacity style={styles.logoutButton} onPress={onLogout}>
-                            <Text style={styles.logoutButtonText}>{'Yes'}</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.logoutButton} onPress={onCloseModal}>
-                            <Text style={styles.logoutButtonText}>{'No'}</Text>
-                        </TouchableOpacity>
-                    </View>
-                </>
-            )
-        } else {
-            return (
-                <>
-                    <View style={styles.modalHolderHeader}>
-                        <Text style={styles.modalHeaderTitle}>{props.message}</Text>
-                    </View>
-
-                    {!loginState ?
-                        <View>
-                            <TouchableOpacity style={styles.facebookLoginButton} onPress={() => facebookButton()}>
-                                <Text style={styles.facebookLoginButtonText}>{'Login with Facebook'}</Text>
-                            </TouchableOpacity>
-
-                            <GoogleSigninButton
-                                style={styles.googleSigninButton}
-                                size={GoogleSigninButton.Size.Wide}
-                                color={GoogleSigninButton.Color.Dark}
-                                title={'Sign in with Google'} onPress={() => googleButton()}
-                            />
-
-                            {/* <Text style={styles.modalHolderHeader}>{TEXT_STRINGS.LOGIN_MANUALLY}</Text> */}
-
-                            {/* <TextInput
-                                style={styles.input}
-                                placeholder="Email"
-                                onChangeText={(text) => this.email = text}
-                                value="test5@test.com"
-                            />
-                            <TextInput
-                                style={styles.input}
-                                secureTextEntry={true}
-                                placeholder="Password"
-                                onChangeText={(text) => this.password = text}
-                                value="326tesar"
-                            />
-                            <Button
-                                title='Login/Register'
-                                onPress={loginManualButton}
-                            /> */}
-                        </View>
-                        :
-                        loginState == 'loading' ? <View style={styles.loginStateText}><Loader /></View> : <Text style={styles.loginStateText}>{loginState}</Text>
-                    }
-                </>
-            )
-        }
+    if (loginState) {
+      return (
+        <View style={styles.loginStateWrap}>
+          <Text style={[styles.loginStateText, { color: theme.colors.text }]}>
+            {loginState}
+          </Text>
+          <Button mode="contained" onPress={onCloseModal} style={styles.continueButton}>
+            Continue
+          </Button>
+        </View>
+      );
     }
 
     return (
-        <Modal
-            isVisible={isModalVisible}
-            onRequestClose={onCloseModal}
-            onBackdropPress={onCloseModal}
-        >
-            <View style={styles.modalHolder}>
-                <TouchableOpacity
-                    style={styles.modalCloseButton}
-                    onPress={onCloseModal}>
-                    <Text style={styles.modalCloseIcon}>𝖷</Text>
-                </TouchableOpacity>
-                <ModalContent />
-            </View>
-        </Modal>
+      <>
+        <View style={styles.modalHolderHeader}>
+          <View style={[styles.iconBadge, { backgroundColor: theme.colors.primary }]}>
+            <MaterialCommunityIcons name="account-circle-outline" size={22} color="#fff" />
+          </View>
+          <Text style={[styles.modalHeaderTitle, { color: theme.colors.text }]}>
+            {props.message}
+          </Text>
+          <Text style={[styles.modalBodyText, { color: theme.colors.onSurfaceVariant }]}>
+            Sign in to save favorites, keep notifications in sync, and restore your account.
+          </Text>
+        </View>
+
+        <View style={styles.loginActions}>
+          <Button
+            mode="contained"
+            icon="facebook"
+            onPress={facebookButton}
+            style={[styles.providerButton, { backgroundColor: '#4267B2' }]}
+            labelStyle={styles.providerButtonLabel}
+          >
+            Facebook
+          </Button>
+
+          <GoogleSigninButton
+            style={styles.googleSigninButton}
+            size={GoogleSigninButton.Size.Wide}
+            color={GoogleSigninButton.Color.Dark}
+            title="Sign in with Google"
+            onPress={googleButton}
+          />
+        </View>
+      </>
     );
-}
+  };
+
+  return (
+    <Modal
+      transparent
+      visible={isModalVisible}
+      animationType="fade"
+      onRequestClose={onCloseModal}
+      statusBarTranslucent
+    >
+      <View style={styles.backdrop}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={onCloseModal} />
+        <View
+          style={[
+            styles.modalHolder,
+            {
+              backgroundColor: theme.colors.card,
+              borderColor: theme.colors.outline || Colors.border,
+            },
+          ]}
+        >
+          <TouchableOpacity
+            style={[
+              styles.modalCloseButton,
+              { backgroundColor: theme.colors.card },
+            ]}
+            onPress={onCloseModal}
+            accessibilityRole="button"
+            accessibilityLabel="Close modal"
+          >
+            <MaterialCommunityIcons
+              name="close"
+              color={theme.colors.text}
+              size={20}
+            />
+          </TouchableOpacity>
+          <ModalContent />
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
 const styles = StyleSheet.create({
-    modalHolder: {
-        backgroundColor: Colors.off_white,
-        borderRadius: 5,
-        overflow: 'hidden',
-        paddingTop: 10,
-    },
-    modalHolderHeader: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 15,
-        marginTop: '5%'
-    },
-    modalHeaderTitle: {
-        fontWeight: '500',
-        color: Colors.black,
-        fontSize: 20,
-        lineHeight: 26,
-        fontFamily: Fonts.KBWriter,
-    },
-    modalCloseButton: {
-        position: 'absolute',
-        alignItems: 'center',
-        borderRadius: 4,
-        top: 2,
-        left: 0,
-        width: 42,
-        height: 42,
-        backgroundColor: Colors.off_white,
-        zIndex: 0
-    },
-    modalCloseIcon: {
-        color: Colors.grey_green,
-        fontSize: 24
-    },
-    facebookLoginButton: {
-        backgroundColor: '#4267B2',
-        borderRadius: 4,
-        margin: 5,
-        marginTop: 25,
-        width: 220,
-        height: 50,
-        justifyContent: 'center',
-        paddingHorizontal: 10,
-
-        alignSelf: 'center'
-    },
-    googleSigninButton: {
-        alignSelf: 'center',
-        borderRadius: 4,
-        height: 50,
-        width: 230,
-        marginBottom: 25,
-    },
-    facebookLoginButtonText: {
-        color: '#FFF',
-        fontSize: 18,
-        fontWeight: '500',
-        textAlign: 'center'
-    },
-    loginStateText: {
-        fontSize: 20,
-        fontWeight: '500',
-        textAlign: 'center',
-        paddingHorizontal: 10,
-        marginVertical: '12%'
-    },
-    logoutContainer: {
-        flexDirection: 'row',
-        paddingVertical: 25,
-        borderBottomColor: Colors.grey_green,
-        justifyContent: 'space-around',
-    },
-    logoutButton: {
-        borderColor: Colors.black_opacity,
-        backgroundColor: Colors.black_opacity,
-        borderWidth: 1,
-        borderBottomWidth: 2,
-        borderRightWidth: 2,
-        borderRadius: 4,
-        padding: 8,
-    },
-    logoutButtonText: {
-        fontSize: 20,
-    },
-    input: {
-        height: 40,
-        margin: 12,
-        borderWidth: 1,
-        padding: 10,
-    },
+  backdrop: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    backgroundColor: 'rgba(12, 16, 24, 0.58)',
+  },
+  modalRoot: {
+    margin: 0,
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+  },
+  modalHolder: {
+    width: '100%',
+    borderRadius: 28,
+    overflow: 'hidden',
+    paddingTop: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  modalHolderHeader: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 26,
+    paddingBottom: 20,
+    gap: 12,
+  },
+  iconBadge: {
+    width: 56,
+    height: 56,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalHeaderTitle: {
+    fontSize: 22,
+    lineHeight: 28,
+    textAlign: 'center',
+    fontWeight: '800',
+    letterSpacing: -0.2,
+  },
+  modalBodyText: {
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  modalCloseButton: {
+    position: 'absolute',
+    right: 12,
+    top: 12,
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
+  },
+  loginActions: {
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+    gap: 12,
+  },
+  providerButton: {
+    borderRadius: 16,
+    paddingVertical: 4,
+  },
+  providerButtonLabel: {
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+  googleSigninButton: {
+    alignSelf: 'stretch',
+    borderRadius: 16,
+    height: 52,
+    width: '100%',
+  },
+  loadingState: {
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+  },
+  loginStateWrap: {
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+    gap: 14,
+  },
+  loginStateText: {
+    fontSize: 18,
+    fontWeight: '700',
+    lineHeight: 26,
+    textAlign: 'center',
+  },
+  continueButton: {
+    alignSelf: 'stretch',
+    borderRadius: 16,
+  },
+  logoutContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+  },
+  logoutAction: {
+    flex: 1,
+    borderRadius: 16,
+  },
 });
 
 export default LoginModal;

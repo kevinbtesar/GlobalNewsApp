@@ -1,218 +1,292 @@
-import React, { useState } from 'react'
-import { StyleSheet, View, Text, Image, ScrollView } from "react-native";
+import React from 'react';
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { isUserConnectedSelector, getUserDataSelector } from '../../store/userStore/userStore.selectors';
-import { List, MD3Colors, Switch, Button } from 'react-native-paper';
+import {
+  Button,
+  List,
+  Surface,
+  Switch,
+  useTheme,
+} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-import Colors from '../../utils/Colors';
-import Fonts from '../../utils/Fonts';
 import DeviceInfo from 'react-native-device-info';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
+import { isUserConnectedSelector, getUserDataSelector } from '../../store/userStore/userStore.selectors';
 import { loginModalVisible } from '../../store/userStore/userStore.actions';
+import Colors from '../../utils/Colors';
 import { initializeShare } from '../../utils/Share';
+import { PreferencesContext } from '../../utils/PreferencesContext';
 
-const Settings = (props) => {
-    const dispatch = useDispatch();
-    const isUserConnected = useSelector(isUserConnectedSelector);
-    const userData = useSelector(getUserDataSelector);
-    const [isNotificationSwitchOn, setNotificationSwitch] = useState(!getNotificationsSetting());
-    const [isDarkModeSwitchOn, setIsDarkModeSwitch] = useState(!getDarkModeSetting());
-    const reportBug = () => {
-        console.log("TODO: MAKE REPORTING SYSTEM")
-    };
-    const [ranNotificationOnceFlag, setRanNotificationOnceFlag] = useState(false);
-    const [ranDarkModeOnceFlag, setRanDarkModeOnceFlag] = useState(false);
+const NOTIFICATIONS_KEY = '@notificationsSetting';
 
-    const onToggleNotificationSwitch = async () => {
-        let mNotificationSwitchStatus = !isNotificationSwitchOn
+const Settings = () => {
+  const dispatch = useDispatch();
+  const theme = useTheme();
+  const { isThemeDark, setThemeDark } = React.useContext(PreferencesContext);
+  const isUserConnected = useSelector(isUserConnectedSelector);
+  const userData = useSelector(getUserDataSelector);
+  const [isNotificationSwitchOn, setNotificationSwitch] = React.useState(true);
+  const [settingsLoaded, setSettingsLoaded] = React.useState(false);
 
-        setNotificationSwitch(mNotificationSwitchStatus)
+  React.useEffect(() => {
+    let mounted = true;
 
-        try {
-            await AsyncStorage.setItem('@notificationsSetting', mNotificationSwitchStatus ? "true" : "false")
-        } catch (e) {
-            setNotificationSwitch(false)
-        }
-    };
+    const loadSettings = async () => {
+      try {
+        const storedNotifications = await AsyncStorage.getItem(NOTIFICATIONS_KEY);
 
-    const onToggleDarkModeSwitch = async () => {
-        setIsDarkModeSwitch(!isDarkModeSwitchOn)
-        try {
-            await AsyncStorage.setItem('@darkModeSetting', !isDarkModeSwitchOn ? "true" : "false")
-        } catch (e) {
-            setIsDarkModeSwitch(false)
-        }
-    };
-
-
-    async function getNotificationsSetting() {
-        try {
-            const notificationsSettingValue = await eval(AsyncStorage.getItem('@notificationsSetting')) ?? "true"
-            let notificationBool = !!notificationsSettingValue
-
-            if (!ranNotificationOnceFlag) {
-                setNotificationSwitch(notificationBool)
-                setRanNotificationOnceFlag(true)
-            }
-
-            return notificationBool
-
-        } catch (e) {
-            if (!ranNotificationOnceFlag) {
-                setNotificationSwitch(false)
-                setRanNotificationOnceFlag(true)
-            }
-            return false;
+        if (!mounted) {
+          return;
         }
 
+        setNotificationSwitch(storedNotifications === null ? true : storedNotifications === 'true');
+      } catch (error) {
+        if (mounted) {
+          setNotificationSwitch(true);
+        }
+      } finally {
+        if (mounted) {
+          setSettingsLoaded(true);
+        }
+      }
+    };
+
+    loadSettings();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const onToggleNotificationSwitch = React.useCallback(async () => {
+    const nextValue = !isNotificationSwitchOn;
+    setNotificationSwitch(nextValue);
+
+    try {
+      await AsyncStorage.setItem(NOTIFICATIONS_KEY, nextValue ? 'true' : 'false');
+    } catch (error) {
+      setNotificationSwitch(!nextValue);
     }
+  }, [isNotificationSwitchOn]);
 
-
-    async function getDarkModeSetting() {
-        try {
-            let darkModeBool = await AsyncStorage.getItem('@darkModeSetting') ?? "false"
-            darkModeBool = eval(darkModeBool)
-            if (!ranDarkModeOnceFlag) {
-                setIsDarkModeSwitch(darkModeBool)
-                setRanDarkModeOnceFlag(true)
-
-            }
-
-            return darkModeBool
-        } catch (e) {
-            if (!ranDarkModeOnceFlag) {
-                setIsDarkModeSwitch(false)
-                setRanDarkModeOnceFlag(true)
-            }
-            return false
-        }
+  const onToggleDarkModeSwitch = React.useCallback(async () => {
+    try {
+      await setThemeDark(!isThemeDark);
+    } catch (error) {
+      console.error('Unable to update theme setting', error);
     }
+  }, [isThemeDark, setThemeDark]);
 
+  const onPressLogin = React.useCallback(() => {
+    dispatch(loginModalVisible(true));
+  }, [dispatch]);
 
-    return (
+  const reportBug = React.useCallback(() => {
+    console.log('TODO: report bug flow');
+  }, []);
 
-        <ScrollView >
+  const appName = DeviceInfo.getApplicationName();
 
-            <List.Section>
-                <List.Subheader>Account</List.Subheader>
-                {isUserConnected ?
-
-                    <List.Item
-                        title={userData.name}
-                        description="Sign Out"
-                        onPress={() => { dispatch(loginModalVisible(true)) }}
-                        left={() => {
-                            userData.image &&
-                            <Image style={{ width: 30, height: 30, borderRadius: 35 }}
-                                source={{ uri: userData.image, cache: "force-cache" }} />
-                        }
-                        }
-                    />
-                    :
-                    <Button mode="contained" style={styles.navigateButton} onPress={() => { dispatch(loginModalVisible(true)) }}>
-                        Sign In
-                    </Button>
-
-                }
-            </List.Section>
-
-
-            <List.Section>
-
-                <List.Item
-
-                    title="Notifications"
-                    description="Allow one notification every other day"
-                    left={() => <List.Icon color={MD3Colors.tertiary70} icon="bell-outline" />}
-                    right={() => <Switch value={isNotificationSwitchOn} onValueChange={onToggleNotificationSwitch} />}
+  return (
+    <ScrollView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={[styles.heroCard, { backgroundColor: theme.colors.card }]}>
+        <View style={[styles.heroAccent, { backgroundColor: theme.colors.primary }]} />
+        <View style={styles.heroTopRow}>
+          <View style={styles.heroAvatarWrap}>
+            {isUserConnected && userData.image ? (
+              <Image
+                style={styles.heroAvatar}
+                source={{ uri: userData.image, cache: 'force-cache' }}
+              />
+            ) : (
+              <View style={[styles.heroAvatarFallback, { backgroundColor: theme.colors.primaryContainer }]}>
+                <MaterialCommunityIcons
+                  name={isUserConnected ? 'account' : 'account-outline'}
+                  color={theme.colors.onPrimaryContainer}
+                  size={28}
                 />
-            </List.Section>
+              </View>
+            )}
+          </View>
 
+          <View style={styles.heroCopy}>
+            <Text style={[styles.heroTitle, { color: theme.colors.text }]}>
+              {isUserConnected ? userData.name || 'Signed in' : 'Welcome back'}
+            </Text>
+            <Text style={[styles.heroSubtitle, { color: theme.colors.onSurfaceVariant }]}>
+              {isUserConnected
+                ? 'Your account, favorites, and alerts stay in sync.'
+                : 'Sign in to save stories and keep your profile in sync.'}
+            </Text>
+          </View>
+        </View>
 
-            <List.Section>
-                <List.Subheader>Theme</List.Subheader>
-                <List.Item
-                    title="Dark Mode"
-                    left={() => <List.Icon color={MD3Colors.tertiary70} icon="lightbulb-on-outline" />}
-                    right={() => <Switch value={isDarkModeSwitchOn} onValueChange={onToggleDarkModeSwitch} />}
-                />
-            </List.Section>
+        {isUserConnected ? (
+          <Button
+            mode="outlined"
+            icon="logout"
+            onPress={onPressLogin}
+            style={styles.heroAction}
+          >
+            Sign out
+          </Button>
+        ) : (
+          <Button
+            mode="contained"
+            icon="login"
+            onPress={onPressLogin}
+            style={styles.heroAction}
+          >
+            Sign in
+          </Button>
+        )}
+      </View>
 
+      <Surface style={[styles.sectionCard, { backgroundColor: theme.colors.card }]}>
+        <List.Section>
+          <List.Subheader>Preferences</List.Subheader>
+          <List.Item
+            title="Notifications"
+            description="Allow one notification every other day"
+            left={() => <List.Icon color={theme.colors.primary} icon="bell-outline" />}
+            right={() => (
+              <Switch value={isNotificationSwitchOn} onValueChange={onToggleNotificationSwitch} />
+            )}
+          />
+          <List.Item
+            title="Dark mode"
+            description={isThemeDark ? 'Using the dark theme' : 'Using the light theme'}
+            left={() => <List.Icon color={theme.colors.primary} icon="theme-light-dark" />}
+            right={() => <Switch value={isThemeDark} onValueChange={onToggleDarkModeSwitch} />}
+          />
+        </List.Section>
+      </Surface>
 
-            <List.Section>
-                <List.Subheader>Reach Out</List.Subheader>
-                <List.Item
-                    title={"Share " + DeviceInfo.getApplicationName()}
-                    left={() => <List.Icon color={MD3Colors.tertiary70} icon="share-variant" />}
-                    onPress={() => initializeShare(DeviceInfo.getApplicationName(), "TODO: Google or Apple url")}
-                />
-                <List.Item
-                    title={"Rate " + DeviceInfo.getApplicationName()}
-                    left={() => <List.Icon color={MD3Colors.tertiary70} icon="star" />}
-                />
-                <List.Item
-                    title="Report Bug"
-                    left={() => <List.Icon color={MD3Colors.tertiary70} icon="bug-outline" />}
-                    onPress={() => reportBug()}
-                />
-            </List.Section>
+      <Surface style={[styles.sectionCard, { backgroundColor: theme.colors.card }]}>
+        <List.Section>
+          <List.Subheader>Reach Out</List.Subheader>
+          <List.Item
+            title={`Share ${appName}`}
+            left={() => <List.Icon color={theme.colors.primary} icon="share-variant" />}
+            onPress={() => initializeShare(appName, 'TODO: Google or Apple url')}
+          />
+          <List.Item
+            title={`Rate ${appName}`}
+            left={() => <List.Icon color={theme.colors.primary} icon="star-outline" />}
+            onPress={() => console.log('TODO: rate app flow')}
+          />
+          <List.Item
+            title="Report Bug"
+            left={() => <List.Icon color={theme.colors.primary} icon="bug-outline" />}
+            onPress={reportBug}
+          />
+        </List.Section>
+      </Surface>
 
-            <List.Section>
+      <View style={styles.versionRow}>
+        <Text style={[styles.versionText, { color: theme.colors.onSurfaceVariant }]}>
+          v {DeviceInfo.getVersion()}.{DeviceInfo.getBuildNumber()}
+        </Text>
+      </View>
 
-                <List.Item title="" description={`v ${DeviceInfo.getVersion()}.${DeviceInfo.getBuildNumber()}`} />
-
-            </List.Section>
-
-        </ScrollView>
-
-    )
+      {!settingsLoaded ? null : <View style={{ height: 8 }} />}
+    </ScrollView>
+  );
 };
 
 const styles = StyleSheet.create({
-    toolBarLine: {
-        backgroundColor: Colors.yellow,
-        paddingTop: 10,
-        paddingBottom: 8,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-around'
-    },
-    toolBarButton: {
-        flex: 0.42,
-        borderColor: Colors.black_opacity,
-        backgroundColor: Colors.off_white,
-        borderWidth: 1,
-        borderBottomWidth: 2,
-        borderRightWidth: 2,
-        borderRadius: 4,
-        paddingVertical: 5,
-    },
-    toolBarTextContainer: {
-        flex: 0.42,
-        paddingVertical: 5,
-    },
-    toolBarText: {
-        fontSize: 16,
-        fontFamily: Fonts.KBWriterThin,
-        textAlign: 'center'
-    },
-    navigateButton: {
-        marginTop: 20,
-        alignSelf: 'center',
-        width: '50%',
-        borderColor: Colors.black_opacity,
-        backgroundColor: Colors.yellow,
-        borderWidth: 1,
-        borderBottomWidth: 4,
-        borderRightWidth: 3,
-        borderRadius: 4,
-        padding: 7,
-    },
-    navigateButtonText: {
-        fontSize: 20,
-        textAlign: 'center',
-        color: Colors.white
-    },
+  container: {
+    flex: 1,
+  },
+  contentContainer: {
+    padding: 16,
+    paddingBottom: 32,
+    gap: 14,
+  },
+  heroCard: {
+    borderRadius: 28,
+    padding: 18,
+    overflow: 'hidden',
+    gap: 18,
+    shadowColor: Colors.shadow,
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 3,
+  },
+  heroAccent: {
+    position: 'absolute',
+    top: 0,
+    right: -24,
+    width: 92,
+    height: 92,
+    borderRadius: 999,
+    opacity: 0.18,
+  },
+  heroTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  heroAvatarWrap: {
+    width: 64,
+    height: 64,
+  },
+  heroAvatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 22,
+  },
+  heroAvatarFallback: {
+    width: 64,
+    height: 64,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroCopy: {
+    flex: 1,
+  },
+  heroTitle: {
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: '900',
+    letterSpacing: -0.3,
+  },
+  heroSubtitle: {
+    marginTop: 6,
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '500',
+  },
+  heroAction: {
+    alignSelf: 'flex-start',
+    borderRadius: 16,
+  },
+  sectionCard: {
+    borderRadius: 24,
+    overflow: 'hidden',
+    elevation: 2,
+  },
+  versionRow: {
+    alignItems: 'center',
+    paddingTop: 4,
+  },
+  versionText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
 });
 
-export default Settings
+export default Settings;

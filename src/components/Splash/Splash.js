@@ -1,60 +1,164 @@
 import React from 'react';
-import { Animated, Easing, Text, Image } from 'react-native';
-import { createAnimation, createInterpolate } from '../../utils/Animation';
-import styles from './Style';
+import {
+  Animated,
+  Easing,
+  Image,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+
 import Colors from '../../utils/Colors';
 
-export default class Splash extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      opacity: new Animated.Value(0.1),
-      yValueTitle: new Animated.Value(0),
-      xValueSubtitle: new Animated.Value(0),
-      spinAnim: new Animated.Value(0.65),
+const Splash = () => {
+  const pulse = React.useRef(new Animated.Value(0)).current;
+  const float = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    const pulseLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, {
+          toValue: 1,
+          duration: 1800,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulse, {
+          toValue: 0,
+          duration: 1800,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    const floatLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(float, {
+          toValue: 1,
+          duration: 2200,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(float, {
+          toValue: 0,
+          duration: 2200,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    pulseLoop.start();
+    floatLoop.start();
+
+    return () => {
+      pulseLoop.stop();
+      floatLoop.stop();
     };
-    this.playAnimations();
-  }
+  }, [float, pulse]);
 
-  playAnimations = () => {
-    Animated.parallel([
-      createAnimation(this.state.opacity, 1, 1200, Easing.ease),
-      createAnimation(this.state.spinAnim, 1, 750, Easing.ease, 300, false),
-      createAnimation(this.state.yValueTitle, 1, 900, Easing.cubic, 150, false),
-      createAnimation(this.state.xValueSubtitle, 1, 700, Easing.linear, 150, false),
-    ]).start();
-  };
+  const scale = pulse.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.98, 1.03],
+  });
 
-  render() {
-    const { spinAnim, yValueTitle, xValueSubtitle } = this.state;
-    const spinSubtitle = createInterpolate(
-      spinAnim,
-      [0, 1],
-      ['540deg', '360deg']
-    );
-    const spinTitle = createInterpolate(spinAnim, [0, 1], ['0deg', '352deg']);
-    const yTitleFall = createInterpolate(yValueTitle, [0, 1], ['-65%', '0%']);
-    const xSubtitleFall = createInterpolate(
-      xValueSubtitle,
-      [0, 1],
-      ['65%', '0%']
-    );
-    return (
-      <LinearGradient start={{ x: 0, y: .01 }} end={{ x: .35, y: .37 }} colors={[Colors.off_white, Colors.orange]} style={styles.linearGradient}>
-        <Animated.View style={[styles.container, { opacity: this.state.opacity }]} >
-          <Animated.View style={[{ alignItems: 'center', top: yTitleFall, transform: [{ rotate: spinTitle }] }, { zIndex: 2 }]} >
-            <Image
-              style={{ width: 100, height: 100 }}
-              source={require('../../images/newspaper.png')}
-            />
-            <Text style={styles.title}>News Cards</Text>
-          </Animated.View>
-          <Animated.View style={[{ left: xSubtitleFall, transform: [{ rotate: spinSubtitle }] }, { zIndex: 2 }]} >
-            <Text style={[styles.subtitle]}>Top Stories</Text>
-          </Animated.View>
-        </Animated.View>
-      </LinearGradient>
-    );
-  }
-}
+  const translateY = float.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -10],
+  });
+
+  return (
+    <LinearGradient
+      colors={['#09111f', '#0b1220', Colors.primary_strong]}
+      start={{ x: 0.2, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.container}
+    >
+      <Animated.View
+        style={[
+          styles.glow,
+          {
+            transform: [{ scale: scale }, { translateY }],
+          },
+        ]}
+      />
+
+      <View style={styles.card}>
+        <View style={styles.logoFrame}>
+          <Image
+            style={styles.logo}
+            source={require('../../images/newspaper.png')}
+          />
+        </View>
+
+        <Text style={styles.title}>Global News</Text>
+        <Text style={styles.subtitle}>
+          Fresh stories, saved reads, and alerts in one place.
+        </Text>
+      </View>
+    </LinearGradient>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    overflow: 'hidden',
+  },
+  glow: {
+    position: 'absolute',
+    width: 420,
+    height: 420,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    top: -120,
+    right: -120,
+  },
+  card: {
+    width: '100%',
+    maxWidth: 360,
+    paddingVertical: 32,
+    paddingHorizontal: 24,
+    borderRadius: 32,
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.14)',
+  },
+  logoFrame: {
+    width: 92,
+    height: 92,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginBottom: 18,
+  },
+  logo: {
+    width: 52,
+    height: 52,
+  },
+  title: {
+    color: '#fff',
+    fontSize: 34,
+    fontWeight: '900',
+    letterSpacing: -0.5,
+    textAlign: 'center',
+  },
+  subtitle: {
+    marginTop: 10,
+    color: 'rgba(255,255,255,0.84)',
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: 'center',
+    maxWidth: 260,
+    fontWeight: '500',
+  },
+});
+
+export default Splash;

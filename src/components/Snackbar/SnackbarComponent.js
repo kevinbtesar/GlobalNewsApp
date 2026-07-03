@@ -21,7 +21,7 @@ export function showSnackbar(message, length) {
     action: {
       text: 'OK',
       textColor: 'blue',
-      onPress: hideSnackbar(),
+      onPress: hideSnackbar,
     },
   })
 }

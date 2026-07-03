@@ -1,5 +1,6 @@
 package com.rtddigitalmedia.globalnews
 
+import android.os.Bundle
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
@@ -12,6 +13,11 @@ class MainActivity : ReactActivity() {
      * rendering of the component.
      */
     override fun getMainComponentName(): String = "Global News"
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        // react-native-screens fragments must not be restored after process recreation.
+        super.onCreate(null)
+    }
 
     /**
      * Returns the instance of the [ReactActivityDelegate]. We use [DefaultReactActivityDelegate]

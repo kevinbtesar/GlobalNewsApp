@@ -3,6 +3,5 @@ module.exports = {
   extends: '@react-native',
   rules: {
     'prettier/prettier': 0,
-    'trailingComma': 'none',
   },
 };

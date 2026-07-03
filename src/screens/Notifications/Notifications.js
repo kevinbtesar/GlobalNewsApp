@@ -1,109 +1,119 @@
-import React from 'react'
-import { TouchableOpacity, StyleSheet, View, Text, TouchableWithoutFeedback } from "react-native";
+import React from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button } from 'react-native-paper';
+import { Button, Surface, useTheme } from 'react-native-paper';
 
 import { removeAllNotifications } from '../../store/newsStore/newsStore.actions';
 import { notificationsSelector } from '../../store/newsStore/newsStore.selectors';
 import { NewsCardList, NoResults } from '../../components';
 import Colors from '../../utils/Colors';
-import Fonts from '../../utils/Fonts';
-import LinearGradient from 'react-native-linear-gradient';
-import { TEXT_STRINGS } from '../../data/Enums';
 
 const Notifications = (props) => {
-    const dispatch = useDispatch();
-    const notifications = useSelector(notificationsSelector);
-    console.log("props: " + JSON.stringify(props))
-    console.log("notifications: " + JSON.stringify(notifications))
-    const onClickDeleteAll = async () => {
-        // console.log("route2: " + JSON.stringify(route))
-        // console.log("props.article: " + JSON.stringify(props.article))
-        dispatch(removeAllNotifications())
-    }
+  const dispatch = useDispatch();
+  const theme = useTheme();
+  const notifications = useSelector(notificationsSelector);
 
-    return (
-        <>
-            <LinearGradient start={{ x: 1, y: 1 }} end={{ x: 1, y: .7 }} colors={[Colors.off_white, Colors.yellow]} style={styles.toolBarLine}>
-                {/* <View style={styles.toolBarTextContainer} >
-                    <Text style={styles.toolBarText}>{`You saved ${notifications.length ? notifications.length : 0} articles`}</Text>
-                </View> */}
-                <TouchableOpacity style={[styles.toolBarButton, !notifications.length && { backgroundColor: Colors.black_opacity }]} onPress={() => onClickDeleteAll()} disabled={!notifications.length}>
-                    <Text style={styles.toolBarText}>{`🗑 Remove All Notifications`}</Text>
-                </TouchableOpacity>
-            </LinearGradient>
-            
-            {/* Keep as placeholder. Change to if user has not subscribed to notifications
-            
-            {!isUserConnected ?
-                <TouchableWithoutFeedback onPress={onPressSignInButton} style={{flexDirection:'row', marginTop:30, alignItems:'center', alignSelf:'center'}}>
-                    <View style={{flexDirection:'row', marginTop:30, alignItems:'center', alignSelf:'center'}}>
-                        <Button style={{width:118}} mode="contained" >{TEXT_STRINGS.FAVORITES_TEXT_FIRST}</Button>
-                        <Text >{TEXT_STRINGS.FAVORITES_TEXT_SECOND}</Text>
-                    </View>
-            </TouchableWithoutFeedback> 
+  const onClickDeleteAll = React.useCallback(() => {
+    dispatch(removeAllNotifications());
+  }, [dispatch]);
 
-            :*/}{ notifications.length > 0  ?
+  return (
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <Surface style={[styles.heroCard, { backgroundColor: theme.colors.card }]}>
+        <View style={[styles.heroAccent, { backgroundColor: theme.colors.primary }]} />
+        <View style={styles.heroCopy}>
+          <Text style={[styles.heroTitle, { color: theme.colors.text }]}>
+            Alerts
+          </Text>
+          <Text style={[styles.heroSubtitle, { color: theme.colors.onSurfaceVariant }]}>
+            {notifications.length
+              ? `${notifications.length} notifications are waiting for you.`
+              : 'You are all caught up for now.'}
+          </Text>
+        </View>
 
-                <NewsCardList notifications={notifications} navigation={props.navigation} />
-            :
-                <NoResults text={'You have no new notifications'} fontSize={26} color={Colors.yellow}>
-                    <TouchableOpacity style={styles.navigateButton} onPress={() => props.navigation.navigate('Home')} >
-                        <Text style={styles.navigateButtonText}>{'Go to Home Screen'}</Text>
-                    </TouchableOpacity>
-                </NoResults>
-            }
-       
-        </>
-    )
+        <Button
+          mode="outlined"
+          icon="delete-sweep"
+          style={styles.heroAction}
+          onPress={onClickDeleteAll}
+          disabled={!notifications.length}
+        >
+          Clear all
+        </Button>
+      </Surface>
+
+      {notifications.length > 0 ? (
+        <View style={styles.feedShell}>
+          <NewsCardList notifications={notifications} navigation={props.navigation} />
+        </View>
+      ) : (
+        <View style={styles.emptyWrap}>
+          <NoResults text="You have no new notifications" fontSize={24} color={theme.colors.text} />
+          <Button mode="contained" icon="home" onPress={() => props.navigation.navigate('Home')}>
+            Go to Home
+          </Button>
+        </View>
+      )}
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    toolBarLine: {
-        backgroundColor: Colors.yellow,
-        paddingTop: 10,
-        paddingBottom: 8,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-around'
-    },
-    toolBarButton: {
-        flex: 0.42,
-        borderColor: Colors.black_opacity,
-        backgroundColor: Colors.off_white,
-        borderWidth: 1,
-        borderBottomWidth: 2,
-        borderRightWidth: 2,
-        borderRadius: 4,
-        paddingVertical: 5,
-    },
-    toolBarTextContainer: {
-        flex: 0.42,
-        paddingVertical: 5,
-    },
-    toolBarText: {
-        fontSize: 16,
-        fontFamily: Fonts.KBWriterThin,
-        textAlign: 'center',
-        
-    },
-    navigateButton: {
-        marginTop: 20,
-        alignSelf: 'center',
-        width: '50%',
-        borderColor: Colors.black_opacity,
-        backgroundColor: Colors.yellow,
-        borderWidth: 1,
-        borderBottomWidth: 4,
-        borderRightWidth: 3,
-        borderRadius: 4,
-        padding: 7,
-    },
-    navigateButtonText: {
-        fontSize: 20,
-        textAlign: 'center',
-        color: Colors.white
-    },
+  container: {
+    flex: 1,
+    padding: 16,
+    gap: 14,
+  },
+  heroCard: {
+    borderRadius: 28,
+    padding: 18,
+    overflow: 'hidden',
+    gap: 14,
+    shadowColor: Colors.shadow,
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 3,
+  },
+  heroAccent: {
+    position: 'absolute',
+    top: 0,
+    right: -20,
+    width: 92,
+    height: 92,
+    borderRadius: 999,
+    opacity: 0.18,
+  },
+  heroCopy: {
+    gap: 8,
+  },
+  heroTitle: {
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: '900',
+    letterSpacing: -0.3,
+  },
+  heroSubtitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '500',
+  },
+  heroAction: {
+    alignSelf: 'flex-start',
+    borderRadius: 16,
+  },
+  feedShell: {
+    flex: 1,
+  },
+  emptyWrap: {
+    flex: 1,
+    gap: 12,
+  },
 });
 
-export default Notifications
+export default Notifications;

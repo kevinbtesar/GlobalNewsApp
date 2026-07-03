@@ -14,6 +14,8 @@ export const FAVORITES = 'favorites'
 
 export const SCREENS = {
     HOME: 'Home',
+    CATEGORIES: 'Categories',
+    NEWS_BY_CATEGORY: 'NewsByCategory',
     SETTINGS: 'Settings',
     FAVORITES: 'Favorites',
     NOTIFICATIONS: 'Notifications',

@@ -79,9 +79,6 @@
   "overrides": {
     "fast-xml-parser": "^5.7.0"
   },
-  "jest": {
-    "preset": "react-native"
-  },
   "rnpm": {
     "assets": [
       "./assets/fonts/"

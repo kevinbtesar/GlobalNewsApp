@@ -15,24 +15,16 @@ const OverflowMenu = (props) => {
   const [open, setOpen] = useState(false);
 
   const handleClick = (index) => {
-    // console.log("index: " + index)
-    let options = props.options;
-    for (var i = 0; i < options.length; i++) {
-      if (index === i) {
-
-        // if condition handles if nothing was selected from overflow menu
-        if (index === options.length) {
-          // if ( index === options.length-1 ) { // this is how it originally was, but didn't work when hitting second option in overflow menu
-          const open = false;
-          setOpen(open);
-        } else {
-          // run action that was selected
-          if (props.actions[i] !== null) {
-            props.actions[i]();
-          }
-        }
-      }
+    if (index === props.options.length) {
+      setOpen(false);
+      return;
     }
+
+    const action = props.actions[index];
+    if (action) {
+      action();
+    }
+    setOpen(false);
   }
 
   const handlePressWeb = () => {
@@ -50,11 +42,12 @@ const OverflowMenu = (props) => {
       ) {
         destructiveIndex = props.destructiveIndex;
       }
+      const actionSheetOptions = [...options, 'Cancel'];
       ActionSheetIOS.showActionSheetWithOptions(
         {
-          options: options,
+          options: actionSheetOptions,
           destructiveButtonIndex: destructiveIndex,
-          cancelButtonIndex: options.length - 1
+          cancelButtonIndex: actionSheetOptions.length - 1
         },
         buttonIndex => {
           handleClick(buttonIndex);

@@ -1,255 +1,127 @@
-import React, { Component } from 'react'
-import { StyleSheet, Alert/*FlatList, View, TouchableOpacity, Text,*/ } from "react-native";
-import { connect, mapStateToProps } from 'react-redux';
-// import Modal from 'react-native-modal';
-import NetInfo from "@react-native-community/netinfo";
+import React from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { Button, Surface, useTheme } from 'react-native-paper';
 
-
-import { Loader, NewsCardList, LoginModal } from '../../components';
-// import { NEWS_PICKER_TYPE } from '../../utils/Enums';
+import { Loader, LoginModal, NewsCardList } from '../../components';
+import { SCREENS, TEXT_STRINGS } from '../../data/Enums';
 import Colors from '../../utils/Colors';
-// import { NewsCountriesData, NewsSortTypesData } from '../../data';
-import Fonts from '../../utils/Fonts';
-import { TEXT_STRINGS } from '../../data/Enums';
-import { is } from 'immer/dist/internal';
-import { hideModal, showModal } from '../../components/Modal/Modal';
-import GLOBAL from '../../store/globalStore';
+import { getArticlesHelper } from '../../utils/Api';
 
-class NewsByCategory extends Component {
-    constructor(props) {
-        super(props);
-        // console.log('props: ' + JSON.stringify(props))
-        // console.log('navigation: ' + JSON.stringify(props.navigation.getState()))
-        // console.log('route.name: ' + this.props.route.name)
+const NewsByCategory = (props) => {
+  const theme = useTheme();
+  const categoryName = props.route?.params?.category || 'All';
+  const [loading, setLoading] = React.useState(true);
 
-        this.state = {
-            news: [],
-            categories: [],
-            favorites: [],
-            isLoading: true,
-            error: false,
-            isConnectedAndReachable: true,
-            isModalVisible: false,
-            modalId: '',
-            // country: NewsCountriesData[0],
-            // sortType: NewsSortTypesData[0],
-        };
-        actions = props;
-
-
-       
-    }
- 
-    componentDidMount() {
-
-        // this.getNewsByCategory();
-        this.setState({ isLoading: false })
-
-        this._unsubscribeFocus = this.props.navigation.addListener('focus', () => {
-        //     console.log('NewsByCategory this.props.route.name HERE: ' + this.props.route.name) 
-            console.log('NewsByCategory this.props.route.name: ' + this.props.route.name) 
-            this.setState({ isLoading: false })
-        });
-
-        this._unsubscribeNetinfo = NetInfo.addEventListener(state => {
-           
-            // console.log(JSON.stringify(state))
-
-            this.setState({ isConnectedAndReachable: (state.isConnected ?? state.isInternetReachable) })
-
-            if(!this.state.isConnectedAndReachable)
-            {
-                this.setState({modalId: showModal("Sorry, there was an issue finding an Internet connection", "Okay")})
-                GLOBAL.noInternetModalId = this.state.modalId
-            } else {
-                hideModal(this.state.modalId)
-            }
-      
-        });
-
-
+  const onBack = React.useCallback(() => {
+    if (props.navigation.canGoBack?.()) {
+      props.navigation.goBack();
+      return;
     }
 
-    componentWillUnmount() {
-        this._unsubscribeFocus();
-        this._unsubscribeNetinfo()
-    }
+    props.navigation.navigate('BottomTabs', { screen: SCREENS.HOME });
+  }, [props.navigation]);
 
-    componentDidUpdate(prevProps) {
-        console.log("componentDidUpdate prevProps: " + JSON.stringify(prevProps))
-    }
+  React.useEffect(() => {
+    let mounted = true;
 
-    async getNewsByCategory() {
-        // try {
-        // const { route, navigation } = this.props;
-        // const { name } = route;
-        // const { country, sortType } = this.state;
-        // console.log('navigation.getState(): ' + navigation.getState().history.length)
-        // console.log('name: ' + name)
+    const loadArticles = async () => {
+      try {
+        await getArticlesHelper();
+      } catch (error) {
+        console.error('Unable to load category feed', error);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
 
-        // if(navigation.getState().history.length==1){
-        // const news = await getArticlesHelper();
+    loadArticles();
 
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
-        // const news = await getArticlesHelper(name);
-        // console.log(JSON.stringify(news));
-        // console.log(news.articles);
-        // console.log("name: " + name && name != 'Loading' ? name : 'Home');
-        // console.log(JSON.stringify(news['categories']));
-        //     // console.log(JSON.stringify(news));
-        //     if (news && news['articles']) {
+  if (loading) {
+    return <Loader label={`Loading ${categoryName}`} />;
+  }
 
-        //         categoriesArray = Object.keys(news['categories']).map(k => news['categories'][k]),
-        //             this.setState({ categories: categoriesArray, isLoading: false, error: false });
-        //         newsArray = Object.keys(news['articles']).map(k => news['articles'][k]),
-        //             this.setState({ news: newsArray, isLoading: false, error: false });
+  return (
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <Surface style={[styles.heroCard, { backgroundColor: theme.colors.card }]}>
+        <View style={[styles.heroAccent, { backgroundColor: theme.colors.primary }]} />
+        <Text style={[styles.heroTitle, { color: theme.colors.text }]}>
+          {categoryName}
+        </Text>
+        <Text style={[styles.heroSubtitle, { color: theme.colors.onSurfaceVariant }]}>
+          Focused feed for this category.
+        </Text>
+        <Button mode="outlined" onPress={onBack} style={styles.heroAction}>
+          Back
+        </Button>
+      </Surface>
 
-        //         // console.log("categoriesArray: " + JSON.stringify(categoriesArray));
-        //         this.setState({ isLoading: false, error: false });
+      <View style={styles.feedShell}>
+        <NewsCardList
+          navigation={props.navigation}
+          route={categoryName === 'All' ? undefined : { name: categoryName }}
+        />
+      </View>
 
-        //     } else if (news && news.error) {
-        //         throw new Error(news.error);
-        //     } else {
-        //         throw new Error("There was an issue getting article data");
-        //     }
-        // }
-
-
-
-        // this.setState({ isLoading: false, error: false });
-
-
-        // }
-        // catch (e) {
-        //     this.setState({ news: [], isLoading: false, error: JSON.stringify(e) });
-        // }
-    }
-
-
-
-    render() {
-        const { news, categories, isLoading, isModalVisible, country, sortType, error } = this.state
-        const { route, navigation } = this.props;
-        return (
-            <>
-
-
-                {/* {!isLoading ? Object.keys(news).length ?
-                    <NewsCardList categories={categories} news={news} state={this.state} navigation={navigation} route={route} />
-                    :
-                    <NoResults text={error || null} />
-                    : <Loader />
-                } */}
-
-                {!isLoading ?
-                    <NewsCardList state={this.state} navigation={navigation} route={route} />
-                    :
-                    <Loader />
-                }
-               
-
-
-                <LoginModal message={TEXT_STRINGS.LOGIN_FOR_FAVORITES} />
-
-
-            </>
-        )
-    }
-}
-
-
-
-// const mapStateToProps = (state) => ({
-//     news: state.news,
-//     categories: state.categories
-// });
-
-
-export default connect(mapStateToProps)(NewsByCategory);
-// export default (NewsByCategory);
+      <LoginModal message={TEXT_STRINGS.LOGIN_FOR_FAVORITES} />
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-    pickersLine: {
-        paddingTop: 10,
-        paddingBottom: 8,
-        borderBottomWidth: .3,
-        borderBottomColor: Colors.grey_green,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-around'
-    },
-    pickerButton: {
-        flex: 0.42,
-        borderColor: Colors.black_opacity,
-        backgroundColor: Colors.off_white,
-        borderWidth: 1,
-        borderBottomWidth: 2,
-        borderRightWidth: 2,
-        borderRadius: 4,
-        paddingVertical: 5,
-    },
-    pickerText: {
-        fontSize: 16,
-        fontFamily: Fonts.KBWriterThin,
-        textAlign: 'center'
-    },
-    modalHolder: {
-        backgroundColor: Colors.off_white,
-        borderRadius: 5,
-        overflow: 'hidden',
-        paddingTop: 10
-    },
-    modalHolderHeader: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: Colors.grey_green,
-        paddingVertical: 15,
-    },
-    modalHeaderTitle: {
-        fontWeight: '500',
-        color: Colors.black,
-        fontSize: 22,
-        lineHeight: 26,
-        fontFamily: Fonts.KBWriter,
-    },
-    modalCloseButton: {
-        position: 'absolute',
-        alignItems: 'center',
-        borderRadius: 4,
-        top: 10,
-        left: 0,
-        width: 42,
-        height: 42,
-        backgroundColor: Colors.off_white,
-        zIndex: 9
-    },
-    modalCloseIcon: {
-        color: Colors.grey_green,
-        fontSize: 24
-    },
-    filtersListHolder: {
-        flex: 0,
-        backgroundColor: Colors.off_white
-    },
-    optionContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        height: 46,
-        paddingHorizontal: 8,
-        backgroundColor: Colors.off_white,
-        borderBottomWidth: 1,
-        borderBottomColor: Colors.grey_green,
-        // marginBottom: 10,
-    },
-    optionIcon: {
-        color: Colors.black,
-        fontSize: 28,
-        paddingHorizontal: 10,
-    },
-    optionText: {
-        color: Colors.black,
-        fontSize: 22,
-        fontFamily: Fonts.KBWriterThin
-    },
+  container: {
+    flex: 1,
+    padding: 16,
+    gap: 14,
+  },
+  heroCard: {
+    borderRadius: 28,
+    padding: 18,
+    overflow: 'hidden',
+    gap: 12,
+    shadowColor: Colors.shadow,
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 3,
+  },
+  heroAccent: {
+    position: 'absolute',
+    top: 0,
+    right: -20,
+    width: 92,
+    height: 92,
+    borderRadius: 999,
+    opacity: 0.18,
+  },
+  heroTitle: {
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: '900',
+    letterSpacing: -0.3,
+  },
+  heroSubtitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '500',
+  },
+  heroAction: {
+    alignSelf: 'flex-start',
+    borderRadius: 16,
+  },
+  feedShell: {
+    flex: 1,
+  },
 });
+
+export default NewsByCategory;

@@ -1,116 +1,147 @@
-import React, { useState, useCallback, useMemo } from 'react'
-import { RefreshControl, FlatList, View } from "react-native";
+import React from 'react';
+import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { useSelector } from 'react-redux';
+import { useTheme } from 'react-native-paper';
 
-import { NewsCard } from '..';
+import { NewsCard, NoResults } from '..';
 import { getArticlesHelper } from '../../utils/Api';
 import { favoritesSelector, articlesSelector } from '../../store/newsStore/newsStore.selectors';
 
-const NewsCardList = (props) => 
-{
-    // console.log('NewsCardList props: ' + JSON.stringify(props))
-    // const { navigation } = props;
-    // console.log('navigation: ' + JSON.stringify(navigation.getState()))
-    // console.log("HERE props.news: " + JSON.stringify(props.news))
+const EMPTY_ARRAY = [];
 
-    const renderNewsCardItem = ({ item, index }) => 
-        ( props.notifications ? (<NewsCard notifications={props.notifications} article={item} {...props} />) : (<NewsCard article={item} {...props} />) )
-    const [refreshing, setRefreshing] = useState(false);
-    const favorites = useSelector(favoritesSelector);
-    const storeArticles = useSelector(articlesSelector) ?? [];
-    const articles = useMemo(() => filterArticles(storeArticles), [storeArticles, props.favorites, props.notifications, props.route]);
+const NewsCardList = (props) => {
+  const theme = useTheme();
+  const [refreshing, setRefreshing] = React.useState(false);
+  const favoritesData = props.favorites;
+  const notificationsData = props.notifications;
+  const routeData = props.route;
+  const favorites = useSelector(favoritesSelector);
+  const storeArticles = useSelector(articlesSelector) ?? EMPTY_ARRAY;
+  const articles = React.useMemo(
+    () =>
+      filterArticles(storeArticles, {
+        favorites: favoritesData,
+        notifications: notificationsData,
+        route: routeData,
+      }),
+    [storeArticles, favoritesData, notificationsData, routeData]
+  );
 
-    const onRefresh = useCallback(async () => {
-
-        try {
-            setRefreshing(true);
-            const news = await getArticlesHelper();
-
-            if (news && news.error) {
-                throw new Error(news.error);
-            } else if (!news) {
-                throw new Error("There was an issue getting article data");
-            }
-            setRefreshing(false)
-
-        } catch (e) {
-            console.error('NewsCardList onRefresh Error', JSON.stringify(e));
-            setRefreshing(false)
-        }
-
-    }, []);
-
-
-    // TODO: Remove. There's no purpose for having block
-    // useFocusEffect(
-    //     React.useCallback(() => 
-    //     {
-    //         let articlesArray = Object.keys(articles).map(k => articles[k]) ?? []
-    //         setArticlesState(filterArticles(articlesArray))
-    //     }, [])
-    // );
-
-    function filterArticles(articlesArray)
-    {
-        const sourceArticles = Array.isArray(articlesArray) ? articlesArray : [];
-
-        if(props.favorites){
-
-            return props.favorites
-        
-        } else if(props.notifications){
-
-            return props.notifications
-        
-        }else if(props.route)
-        {
-            let returnArray = []
-    
-            // console.log('newscarelist articlesArray: ' + JSON.stringify(articlesArray))
-            // console.log("newscarelist appCategory: " + props.route.name)
-            for (let i = 0; i < sourceArticles.length; i++) {
-        
-                // console.log(' props.route.name: ' +  props.route.name)
-                if (sourceArticles[i] && sourceArticles[i].app_category && sourceArticles[i].app_category == props.route.name) {
-        
-                    // console.log('newscarelist val: ' + articlesArray[i].app_category)
-                    returnArray.push(sourceArticles[i])
-                    // console.log('returnArray : ' + JSON.stringify(returnArray))
-                }
-            }
-        
-            return returnArray
-            
-        } else {
-            return sourceArticles
-        }   
+  const onRefresh = React.useCallback(async () => {
+    if (refreshing) {
+      return;
     }
 
-    return (
+    try {
+      setRefreshing(true);
+      const news = await getArticlesHelper();
 
-        <View style={{ flex: 1 }}>
+      if (news && news.error) {
+        throw new Error(news.error);
+      }
+    } catch (error) {
+      console.error('NewsCardList refresh failed', error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshing]);
 
-            <FlatList
-                horizontal={false}
-                style={{ paddingTop: 10 }}
-                data={articles}
-                extraData={favorites}
-                initialNumToRender={5}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={renderNewsCardItem}
-                removeClippedSubviews={true}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
-                    />
-                }
-            />
+  const renderNewsCardItem = React.useCallback(
+    ({ item }) => {
+      if (!item) {
+        return null;
+      }
 
-        </View>
-    )
+      return (
+        <NewsCard
+          {...props}
+          article={item}
+          notifications={Boolean(props.notifications)}
+        />
+      );
+    },
+    [props]
+  );
+
+  return (
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <FlatList
+        data={articles}
+        renderItem={renderNewsCardItem}
+        keyExtractor={(item, index) => String(item?.id ?? index)}
+        initialNumToRender={6}
+        contentContainerStyle={styles.contentContainer}
+        refreshControl={(
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.colors.primary}
+            colors={[theme.colors.primary]}
+          />
+        )}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ListEmptyComponent={(
+          <NoResults
+            text={getEmptyStateText(props)}
+            fontSize={24}
+            color={theme.colors.text}
+          />
+        )}
+        showsVerticalScrollIndicator={false}
+        extraData={favorites}
+      />
+    </View>
+  );
 };
 
-export default NewsCardList
+function getEmptyStateText(props) {
+  if (props.favorites) {
+    return 'No saved stories yet';
+  }
 
+  if (props.notifications) {
+    return 'No notifications right now';
+  }
 
+  if (props.route?.name) {
+    return `No stories in ${props.route.name}`;
+  }
+
+  return 'No stories available';
+}
+
+function filterArticles(articlesArray, props) {
+  const sourceArticles = Array.isArray(articlesArray) ? articlesArray : [];
+
+  if (props.favorites) {
+    return props.favorites;
+  }
+
+  if (props.notifications) {
+    return props.notifications;
+  }
+
+  if (props.route?.name) {
+    return sourceArticles.filter(
+      (article) => article?.app_category && article.app_category === props.route.name
+    );
+  }
+
+  return sourceArticles;
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  contentContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 4,
+    paddingBottom: 24,
+  },
+  separator: {
+    height: 14,
+  },
+});
+
+export default NewsCardList;
