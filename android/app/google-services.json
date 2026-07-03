@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "260894939219",
     "project_id": "global-news-b53dd",
-    "storage_bucket": "global-news-b53dd.appspot.com"
+    "storage_bucket": "global-news-b53dd.firebasestorage.app"
   },
   "client": [
     {
@@ -12,12 +12,7 @@
           "package_name": "com.rtddigitalmedia.globalnews"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "260894939219-623mta5qv66n16kde1gf77pqpofs3906.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
           "current_key": "AIzaSyDlMOIW4MDQot3-pQfN-PSJMDdP_qyFb1c"
@@ -25,12 +20,7 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "260894939219-623mta5qv66n16kde1gf77pqpofs3906.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
