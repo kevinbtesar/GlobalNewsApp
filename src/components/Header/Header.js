@@ -81,7 +81,7 @@ const Header = (props) => {
         ) : (
           <View style={[styles.avatarFallback, { backgroundColor: theme.colors.primaryContainer }]}>
             <MaterialCommunityIcons
-              name={isUserConnected ? 'account' : 'login'}
+              name={isUserConnected ? 'account' : 'account-outline'}
               color={theme.colors.onPrimaryContainer}
               size={18}
             />

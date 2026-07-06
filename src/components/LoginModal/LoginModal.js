@@ -43,10 +43,15 @@ import { userAuth } from '../../utils/Api';
 import { KEYS } from '../../data/Enums';
 
 // Configure the native client once so sign-in is ready before the first tap.
-GoogleSignin.configure({
+const googleSigninConfig = {
   webClientId: KEYS.GOOGLE_SIGN_IN_WEB_CLIENT_ID,
-  iosClientId: KEYS.GOOGLE_SIGN_IN_IOS_CLIENT_ID,
-});
+};
+
+if (KEYS.GOOGLE_SIGN_IN_IOS_CLIENT_ID) {
+  googleSigninConfig.iosClientId = KEYS.GOOGLE_SIGN_IN_IOS_CLIENT_ID;
+}
+
+GoogleSignin.configure(googleSigninConfig);
 
 const getLoginErrorMessage = (error) => {
   const code = String(error?.code ?? '');
